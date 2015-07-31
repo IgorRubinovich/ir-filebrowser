@@ -1,0 +1,17 @@
+{
+  "name": "iron-filebrowser",
+  "version": "0.1.0",
+  "authors": [
+    "Igor Rubinovich <igor.rubinovih@gmail.com>"
+  ],
+  "description": "explorer-style file browser web component",
+  "main": "iron-filebrowser",
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

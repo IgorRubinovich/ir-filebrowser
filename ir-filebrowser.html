@@ -1,0 +1,176 @@
+<!--
+@license
+Copyright (c) 2015 Igor Rubinovich. All rights reserved.
+This code may only be used under the MIT license found at http://opensource.org/licenses/MIT
+File browser and uploader. 
+Works with arrays of (node fs.Stats)[https://nodejs.org/api/fs.html#fs_class_fs_stats] objects.
+Example:
+<ir-file-browser>DEMO HERE</ir-file-browser>
+@demo
+-->
+
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../iron-input/iron-input.html">	
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../iron-image/iron-image.html">
+<link rel="import" href="../file-upload/file-upload.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
+<!-- link rel="import" href="../fu-area/fu-area.html" -->
+<!-- link rel="import" href="./iron-select-item.html" -->
+
+
+<dom-module id="ir-filebrowser">
+  <style>
+    :host {	
+      display: block;
+    }
+
+    @media (max-width: 600px) {
+      h1.paper-font-display1 {
+        font-size: 24px;
+      }
+    }
+	
+	ir-filebrowser-item {
+		position : relative;
+		width  : 150px;
+		display : inline-block;
+		overflow : hidden;
+		text-align : center;
+		padding : 0;
+	}
+		
+	.browserDialog {
+		position: absolute;
+		width : 50%;
+		background : white;
+		z-index : 10000;
+    }
+	
+	file-upload {
+		--button-content-align : left;
+	}
+	
+	#uploaderContainer {
+		text-align : left;
+	}
+  </style>
+  <template>
+	<template is="dom-repeat" items="{{selected}}">
+		<ir-filebrowser-item on-item-click="toggleView" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
+	</template>
+	<paper-item elevation="0">
+		<paper-button raised on-click="showDialog">Browse...</paper-button>
+	</paper-item>
+	<paper-dialog id="dialog" class="browserDialog"> <!--  on-iron-overlay-closed="closed" -->
+		<div>
+			<h2>{{ relPath }}</h2>
+			<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
+			<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
+		</div>
+		<paper-dialog-scrollable>
+			<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
+				<div id="uploaderContainer">
+					<template is="dom-if" if="{{showDirectories}}">
+						<template is="dom-repeat" items="{{directories}}">
+							<ir-filebrowser-item 
+								on-item-dblclick="dblclickFile" 
+								on-item-click="clickDirectory" 
+								index="{{ index }}" 
+								item="{{ item }}">
+							</ir-filebrowser-item>
+						</template>
+					</template>
+					<template is="dom-if" if="{{showFiles}}">
+						<template is="dom-repeat" items="{{files}}">
+							<ir-filebrowser-item 
+								on-item-click="clickFile" 
+								on-dblclick="dblclickFile" 
+								index="{{ index }}" 
+								item="{{ item }}">
+							</ir-filebrowser-item>
+						</template>
+					</template>
+				</div>
+			</file-upload>
+		</paper-dialog-scrollable>
+		<div class="buttons">
+			<paper-button raised on-click="hideDialog">Close</paper-button>
+		</div>
+	</paper-dialog>
+	<iron-ajax
+		id="loader"
+		method="GET"
+		handle-as="json"
+		debounce-duration="300"
+		last-response="{{ loadedData }}"
+		on-response="displayLoadedFiles"
+		last-error="{{ lastError }}"
+		verbose=true
+		>
+	</iron-ajax>
+
+  </template>
+</dom-module>
+
+<dom-module id="ir-filebrowser-item">
+  <style>
+	iron-image {
+		width : 150px;
+		height : 150px;
+		background: white;
+		background-size : 32px;
+	}
+	paper-material {	
+		overflow : hidden;
+		margin : 2px;
+		transition : .3s;
+	}
+	.ext {
+		text-transform : none;
+		cursor : pointer;
+		-webkit-user-select: none;
+		user-select: none;
+		font-size : 1.5em;
+		line-height : 3em;
+		text-align : center;
+		display : block;
+		height : 150px;
+		color : #aaa;
+		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAElBMVEX////v7+/v7+/v7+/v7+/v7+9mq1VzAAAABnRSTlMAPFTN4++SiZA2AAAAGUlEQVR4AWOAAUZWBIsZzmKiAouBhRnGAgARGwBPNJN0/gAAAABJRU5ErkJggg==);
+		background-repeat : no-repeat;
+		/* background-color : #efefef; */
+		border-top-left-radius : 5px;
+	}
+	span {
+		white-space : nowrap;
+	}
+	.selected {
+		/*opacity : .5;
+		background : #fafafa;
+		box-shadow : 0px 0px 4px black inset;*/
+		transform : translate(1px, 1px);
+	}
+  </style>
+  <template>
+		<paper-material elevation="2" id="container" on-click="click" on-dblclick="dblclick">
+			<paper-ripple></paper-ripple>
+			<template is="dom-if" if="{{item.isImage}}">
+				<iron-image title="{{item.url}}" preload fade id="imgthumb" sizing="contain" src="{{item.url}}"></iron-image>
+			</template>
+			<template is="dom-if" if="{{!item.isImage}}">
+				<span class="ext">{{ item.ext }}</span>
+			</template>
+			<span title="{{item.name}}">{{item.name}}</span>
+		</paper-material>
+
+  </template>
+</dom-module>
+
+
+<script src="ir-filebrowser.js"></script>

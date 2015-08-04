@@ -20,6 +20,8 @@ Example:
 <link rel="import" href="../paper-ripple/paper-ripple.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../ir-reflect-to-native-behavior/ir-reflect-to-native-behavior.html">
+
 <!-- link rel="import" href="../fu-area/fu-area.html" -->
 <!-- link rel="import" href="./iron-select-item.html" -->
 
@@ -27,24 +29,16 @@ Example:
 <dom-module id="ir-filebrowser">
   <style>
     :host {	
-      display: block;
+      display: flex;
+	  align-items : flex-end;
+	  flex-wrap : wrap;
     }
-
     @media (max-width: 600px) {
       h1.paper-font-display1 {
         font-size: 24px;
       }
     }
 	
-	ir-filebrowser-item {
-		position : relative;
-		width  : 150px;
-		display : inline-block;
-		overflow : hidden;
-		text-align : center;
-		padding : 0;
-	}
-		
 	.browserDialog {
 		position: absolute;
 		width : 50%;
@@ -59,14 +53,22 @@ Example:
 	#uploaderContainer {
 		text-align : left;
 	}
+	
+	#browseButton {
+	}
   </style>
   <template>
-	<template is="dom-repeat" items="{{selected}}">
-		<ir-filebrowser-item on-item-click="toggleView" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
+	<!-- template is="dom-repeat" items="{{selected}}">
+		<ir-filebrowser-item on-item-click="showDialog" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
+	</template -->
+
+	<content select="ir-filebrowser-item">
+	</content>
+	<template is="dom-if" if="{{value}}">
+		<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
 	</template>
-	<paper-item elevation="0">
-		<paper-button raised on-click="showDialog">Browse...</paper-button>
-	</paper-item>
+	<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+
 	<paper-dialog id="dialog" class="browserDialog"> <!--  on-iron-overlay-closed="closed" -->
 		<div>
 			<h2>{{ relPath }}</h2>
@@ -79,8 +81,7 @@ Example:
 					<template is="dom-if" if="{{showDirectories}}">
 						<template is="dom-repeat" items="{{directories}}">
 							<ir-filebrowser-item 
-								on-item-dblclick="dblclickFile" 
-								on-item-click="clickDirectory" 
+								on-item-dblclick="dblclickDirectory" 
 								index="{{ index }}" 
 								item="{{ item }}">
 							</ir-filebrowser-item>
@@ -90,7 +91,6 @@ Example:
 						<template is="dom-repeat" items="{{files}}">
 							<ir-filebrowser-item 
 								on-item-click="clickFile" 
-								on-dblclick="dblclickFile" 
 								index="{{ index }}" 
 								item="{{ item }}">
 							</ir-filebrowser-item>
@@ -100,6 +100,7 @@ Example:
 			</file-upload>
 		</paper-dialog-scrollable>
 		<div class="buttons">
+			Drag and drop files into this dialog to upload to the current directory.
 			<paper-button raised on-click="hideDialog">Close</paper-button>
 		</div>
 	</paper-dialog>
@@ -120,6 +121,14 @@ Example:
 
 <dom-module id="ir-filebrowser-item">
   <style>
+	:host
+	{
+		width  : 150px;
+		display : inline-block;
+		overflow : hidden;
+		text-align : center;
+		padding : 0;
+	}
 	iron-image {
 		width : 150px;
 		height : 150px;
@@ -160,13 +169,13 @@ Example:
   <template>
 		<paper-material elevation="2" id="container" on-click="click" on-dblclick="dblclick">
 			<paper-ripple></paper-ripple>
-			<template is="dom-if" if="{{item.isImage}}">
-				<iron-image title="{{item.url}}" preload fade id="imgthumb" sizing="contain" src="{{item.url}}"></iron-image>
+			<template is="dom-if" if="{{_item.isImage}}">
+				<iron-image title="{{_item.url}}" preload fade id="imgthumb" sizing="contain" src="{{_item.url}}"></iron-image>
 			</template>
-			<template is="dom-if" if="{{!item.isImage}}">
-				<span class="ext">{{ item.ext }}</span>
+			<template is="dom-if" if="{{!_item.isImage}}">
+				<span class="ext">{{ _item.ext }}</span>
 			</template>
-			<span title="{{item.name}}">{{item.name}}</span>
+			<span title="{{_item.name}}">{{_item.name}}</span>
 		</paper-material>
 
   </template>

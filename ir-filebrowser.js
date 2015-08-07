@@ -86,7 +86,7 @@
 		},
 		
 		/**
-		  * displaysLoadedFiles
+		  * Displays files loaded as a result of calling ls
 		  *
 		  * @method displayLoadedFiles
 		*/
@@ -110,6 +110,8 @@
 				// fstat.lsRootUrlPath = this.lsRootUrlPath;
 				fstat.url = path.join(rootUrl, encodeURIComponent(fstat.name));
 				fstat.relPath = this.relPath;
+				
+				// look for items with same url as in selection and select them in the filebrowser dialog
 				this.getContentChildren()
 					.filter(function(el) { return el.is == 'ir-filebrowser-item' && (el.item.url == fstat.url) })
 					.forEach(function(el) { fstat.isSelected = true });
@@ -120,14 +122,37 @@
 				else
 					files.push(fstat);								
 			}
-			if(this.relPath)
-				directories.unshift({ name : '..', ext : '..', isDirectory : true});
+			if(this.relPath) // create an '..' directory entry
+				directories.unshift({ 
+					name : '..', 
+					ext : '..', 
+					isDirectory : 
+					true, 
+					relPath : this.relPath,
+					rootUrl : fstat.rootUrl
+				});
 			
 			this.directories = directories;
 			this.files = files;
 			
-			console.log(this.files)
+			//this.addEventListener('item-attached', this.refitDialog);
+			
+			Polymer.dom.flush();
+
 			//this.files = res;
+		},
+		
+		refitDialog : function() {
+			console.log('refitting');
+			this.$.dialog.refit();
+			this.async(function() {
+				this.$.dialog.refit();
+				this.$.dialog.center();
+				this.$.dialog.constrain()
+				
+				//this.$.scrollableDialog.center();
+				Polymer.dom.flush();				
+			});
 		},
 		
 		clickDirectory : function(e) {
@@ -135,7 +160,11 @@
 			e.stopPropagation();
 			e.preventDefault();
 		},
-				
+
+/** 
+Adds object to selection.
+@param (Object|String) url string or nodejs fstat-like object.
+ */		
 		addSelection : function(fstat) {
 			var newEl, that = this;
 			var selectedElements = this._getSelectionElements();
@@ -172,24 +201,66 @@
 
 			this._updateValue();
 		},
+
+/** 
+Open dialog in prompt mode - i. e. Select and Cancel buttons are shown instead of Close.
+@param (Function) callback(value, extraData)
+*/
+		prompt : function(callback) {
+			if(!this.promptMode)
+				throw new Error('ir-filebrowser is not in prompt mode. Set the prompt-mode attribute to enable it.');
+
+			this.promptCallback = callback;
+			this.showDialog();
+		},
+
+/** 
+Close dialog, call the callback with `this.value` and forget the callback.
+*/
+		promptSelect : function() {
+			console.log('prompt selected!')
+			this.hideDialog();
+			this.promptCallback(this.value);
+			this.clearSelection();
+			this.promptCallback = null;
+		},
 		
-		removeSelection : function(fstat) {
+/** 
+Close dialog and forget the callback.
+*/
+		promptCancel : function() {
+			this.hideDialog();
+			delete this.promptCallback;
+		},
+		
+/** 
+Remove specific item from selection. Note: all selected items matching the url will be removed, in case there are duplicates.
+@param (Object|String) url or object with .url property
+*/
+		removeSelection : function(url) {
 			var that = this;
-			if(typeof fstat == 'string')
-				fstat = { url : fstat };
-			
-			//this.selectedItems
+			if(typeof url == 'string')
+				url = { url : url };
+
+			// unselect in selection
 			this._getSelectionElements()
 				.forEach(function(el, i) {
-						if(el.item.url != fstat.url)
-							return;
-						
+					if(el.item.url == url.url)				
 						Polymer.dom(that).removeChild(el);
-					});
-						
+				});
+			
+			// unselect in file browser dialog
+			Polymer.dom(this.$.uploaderContainer).childNodes
+				.forEach(function(el) { 
+					if (el.is == 'ir-filebrowser-item' && el.item.url == url.url) 
+						el.unselect();
+			});
+
+				
 			this._updateValue();
 		},
 
+		/** Get ir-filebrowser-item content children */
 		_getSelectionElements : function() {
 			return this.getContentChildren()
 					.filter(function(el) { return el.is == 'ir-filebrowser-item'});
@@ -200,37 +271,53 @@
 			var that = this;
 			this._getSelectionElements()
 				.forEach(function(el) { that.removeSelection(el.item); });
+				
+			this.value = '';
 		},
 		
+		/** Toggles clicked file */
 		clickFile : function (e) {
-			var that = this, newNode;
+			var that = this;
 
 			if(!e.detail.isSelected)
 			{
-				e.detail.select();
 				this.addSelection(e.detail.item);
+				e.detail.select();
 			}
 			else
 			{
-				e.detail.unselect();
 				this.removeSelection(e.detail.item);
+				e.detail.unselect();
 			}
 			if(this.autoPreview)
-				this.toggleView();
+				this.hideDialog();
 			
-			// update content children, match by url
+			this._updateValue();
 			Polymer.dom.flush();
 		},
 		
 		/** Updates .value for ir-reflect-to-native-behavior */
 		_updateValue : function() {
 			var that = this;
+			
 			this.async(function() {
 				that.value = this._getSelectionElements().map(function(s) { return s.item.url }).join(',');
-				console.log('value updated to:', that.value);
+				if(this.hideAfterUpdate)
+				{
+					this.hideAfterUpdate = false;
+					this.promptSelect();
+				}
 			});
 		},
 	
+		dblclickFile : function (e) {
+			// the following is problematic because single click handler unselects the file, look into it.
+			if(this.promptMode)
+			{
+				this.hideAfterUpdate = true;
+				this.clickFile(e);
+			}
+		},
 		dblclickDirectory : function (e) {
 			this.ls(e.detail.item.name);
 		},
@@ -248,18 +335,26 @@
 		},
 
 		showDialog : function(relPath) {
-			this.$.dialog.open();
 			this.ls(relPath);
-			Polymer.dom.flush();			
+			Polymer.dom.flush();
+			this.$.dialog.open();
+			this.refitDialog()
 		},
 		
 		hideDialog : function (e) {
-			e.stopPropagation();
 			this.$.dialog.close();
 		},
 
 		ready: function() {
 			var that = this;
+			
+			if(this.promptMode)
+			{
+				this.$.dialog.modal = true;			
+				this.$.selectionPreview.style.display = "none";			
+				this.maxItems = 1;
+				this.autoPreview = false; // until there's a better way
+			}
 			
 			this._urlsChanged();
 			this.setupBrowser();
@@ -268,12 +363,14 @@
 				// collect values, remove and add again
 				var preselection = [];
 				that.getContentChildren()
-					.filter(function(el) { return el.is == 'ir-filebrowser-item' })
 					.forEach(function(el) { 
-						//el.addEventListener('item-click', function () { that.showDialog() } ); 
+						if(el.is != 'ir-filebrowser-item')
+							return;
+						
 						preselection.push(el.item);
-						that.removeSelection(el);
 					});
+
+				that.clearSelection();
 					
 				that.async(function() {
 					preselection.forEach(function(item) {
@@ -313,8 +410,11 @@
 			cloneToNative :		{ type : Boolean,	value : true },
 			name :				{ type : String, value : "" },
 
-			showDirectories :	{ type : Boolean, value : "true" },
-			showFiles :			{ type : Boolean, value : "true" }
+			showDirectories :	{ type : Boolean, value : true },
+			showFiles :			{ type : Boolean, value : true },
+			
+			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
+			promptMode :			{ type : Boolean, value : false }
 		},
 		
 		observers: [
@@ -326,7 +426,6 @@
 		
 	});
 
-	var count = 0;
 	Polymer(
 	{
 		is : 'ir-filebrowser-item',
@@ -373,13 +472,18 @@ Fired when an item is doubleclicked.
 			var item = this.item;
 			
 			if(this.url)
-			{
 				item.url = this.url;
-				if(!item.name)
-					item.name = item.url.match(/([^/]+)$/)[1];
+			
+			if(item.url && !item.name)
+				item.name = decodeURIComponent(item.url.match(/([^/]+)$/)[1]);
+			else if(!item.url && item.name && item.relPath) // if(!item.url) 
+			{
+				item.url = item.rootUrl + item.relPath + encodeURIComponent(item.name);
+				console.log('decoded (name) %s -> (url) %s', item.name, item.url);
 			}
-			if(!item.url) 
-				item.url = item.rootUrl + encodeURIComponent(item.name);
+			
+			if(!item.url) // should have been provided or constructed by this point
+				throw new Error("To initialize an ir-filebrowser-item at least one of either url or (rootUrl and name) must be set.");
 
 			if(!item.ext)
 				item.ext = item.isDirectory ? "<dir>" : item.url.match(/([^.]+)$/)[1];
@@ -397,12 +501,8 @@ Fired when an item is doubleclicked.
 			this.async(function() { 
 				Polymer.dom.flush();
 			});
-			
 		},
 		ready : function() {
-			count++;
-			this.count = count;
-			console.log('ir-fb-item ready, url: ', this.url);
 			if(this.url)
 			{
 				var item = {
@@ -413,6 +513,10 @@ Fired when an item is doubleclicked.
 				
 				this.item = item;
 			}
+		},
+		
+		attached : function() {
+			this.fire('item-attached');
 		}
 	});	
 

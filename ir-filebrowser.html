@@ -29,9 +29,6 @@ Example:
 <dom-module id="ir-filebrowser">
   <style>
     :host {	
-      display: flex;
-	  align-items : flex-end;
-	  flex-wrap : wrap;
     }
     @media (max-width: 600px) {
       h1.paper-font-display1 {
@@ -39,13 +36,17 @@ Example:
       }
     }
 	
-	.browserDialog {
-		position: absolute;
-		width : 50%;
-		background : white;
-		z-index : 10000;
-    }
+	#selectionPreview
+	{
+      display: flex;
+	  align-items : flex-end;
+	  flex-wrap : wrap;
+	}
 	
+	.browserDialog {
+
+    }
+
 	file-upload {
 		--button-content-align : left;
 	}
@@ -62,20 +63,23 @@ Example:
 		<ir-filebrowser-item on-item-click="showDialog" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
 	</template -->
 
-	<content select="ir-filebrowser-item">
-	</content>
-	<template is="dom-if" if="{{value}}">
-		<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
-	</template>
-	<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+	<div id="selectionPreview">
+		<content select="ir-filebrowser-item">
+		</content>
+		<template is="dom-if" if="{{value}}">
+			<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
+		</template>
+		<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+	</div>
 
-	<paper-dialog id="dialog" class="browserDialog"> <!--  on-iron-overlay-closed="closed" -->
+	<paper-dialog on-dom-changed="refitDialog" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
 		<div>
 			<h2>{{ relPath }}</h2>
 			<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
 			<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
+			<paper-button on-click="refitDialog">refitDialog</paper-button>
 		</div>
-		<paper-dialog-scrollable>
+		<paper-dialog-scrollable id="scrollableDialog">
 			<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
 				<div id="uploaderContainer">
 					<template is="dom-if" if="{{showDirectories}}">
@@ -90,6 +94,7 @@ Example:
 					<template is="dom-if" if="{{showFiles}}">
 						<template is="dom-repeat" items="{{files}}">
 							<ir-filebrowser-item 
+								on-item-dblclick="dblclickFile" 
 								on-item-click="clickFile" 
 								index="{{ index }}" 
 								item="{{ item }}">
@@ -101,7 +106,13 @@ Example:
 		</paper-dialog-scrollable>
 		<div class="buttons">
 			Drag and drop files into this dialog to upload to the current directory.
-			<paper-button raised on-click="hideDialog">Close</paper-button>
+			<template is="dom-if" if="{{promptMode}}">
+				<paper-button raised on-click="hideDialog">Cancel</paper-button>
+				<paper-button raised on-click="promptSelect">Select</paper-button>
+			</template>
+			<template is="dom-if" if="{{!promptMode}}">
+				<paper-button raised on-click="hideDialog">Close</paper-button>
+			</template>
 		</div>
 	</paper-dialog>
 	<iron-ajax

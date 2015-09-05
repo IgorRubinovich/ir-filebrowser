@@ -1,0 +1,38 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 Igor Rubinovich <igor.rubinovich@gmail.com>. All rights reserved.
+This code may only be used under the MIT license found at http://opensource.org/licenses/MIT
+-->
+<html>
+<head>
+
+  <title>iron-image</title>
+  <script src="../components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../components/polymer/polymer.html">
+  <link rel="import" href="../ir-filebrowser.html">
+
+</head>
+<body>
+	<template is="dom-bind">
+		<section>
+
+	<ir-filebrowser
+		host="http://localhost:5000"
+		ls-url="/medialib/json/ls/[path]"
+		
+		ls-root-url-path="rootUrl"
+		ls-stats-path="ls"
+
+		post-url="/medialib/json/upload"
+		post-path-field="path"
+		list-property="ls"
+		
+		reflect-to-native
+		name="coverImage"
+	>
+			<ir-filebrowser-item url="/media/uploads/coin.jpg"></ir-filebrowser-item>
+	</ir-filebrowser>
+	</template>
+</body>
+</html>

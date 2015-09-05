@@ -1,5 +1,11 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 bower_components
+=======
+node_modules
+bower_components
+_bower_components
+>>>>>>> temp
 =======
 node_modules
 bower_components

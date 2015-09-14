@@ -511,7 +511,7 @@ Fired when an item is doubleclicked.
 				lead = '', 
 				trail = '';
 			
-			protocol = arguments[0].match(/^[^:]+:\/\//);
+			protocol = arguments[0].match(/^[^:]+:(\d)*\/\//);
 			
 			if(protocol)
 			{

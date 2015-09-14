@@ -11,41 +11,6 @@
  */
 
 (function () {
-	
-	// simulate nodejs path for urls
-	var path = {
-		join : function() {
-			var protocol,
-				lead = '', 
-				trail = '';
-			
-			protocol = arguments[0].match(/^[^:]+:\/\//);
-			
-			if(protocol)
-			{
-				protocol = protocol[0];
-				arguments[0] = arguments[0].replace(/^[^:]+:\/\//, '');
-			}
-			else
-			{
-				protocol = '';
-				lead = arguments[0].match(/^\//) ? '/' : '';
-			}
-
-			trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
-
-			var join, split = [].map.call(arguments, function(p) {
-					return p.split('/');
-				});
-				
-			join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
-
-			
-			return protocol + lead + join + trail;
-		}
-	};
-	
-
 	Polymer({
 		is : 'ir-filebrowser',
 		
@@ -93,11 +58,11 @@
 			this.postFields = { path : this.relPath };
 		},
 		
-		/**
-		  * Displays files loaded as a result of calling ls
-		  *
-		  * @method displayLoadedFiles
-		*/
+/**
+  * Displays files loaded as a result of calling ls
+  *
+  * @method displayLoadedFiles
+*/
 		displayLoadedFiles : function () {
 			var name, ext, t, fstat, sorted,
 				directories = [], files = [], that = this;
@@ -389,7 +354,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		_urlsChanged : function() {
-			this._lsUrl = path.join(this.host, this.lsUrl);
+			this._lsUrl = path.join(this.host, this.lsUrl this.lsUrl);
 			this._postUrl = path.join(this.host, this.postUrl);
 		},
 
@@ -434,6 +399,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		]
 		
 	});
+	
 
 	Polymer(
 	{
@@ -535,6 +501,52 @@ Fired when an item is doubleclicked.
 			return ""
 		return q.split("&").map(function(pair) { var res = pair.split("="); return [res[0], encodeURIComponent(res[1])].join("=") }).join('&');
 	}
+	
+	
+	
+	// simulate nodejs path for urls
+	var path = {
+		join : function() {
+			var protocol,
+				lead = '', 
+				trail = '';
+			
+			protocol = arguments[0].match(/^[^:]+:\/\//);
+			
+			if(protocol)
+			{
+				protocol = protocol[0];
+				arguments[0] = arguments[0].replace(/^[^:]+:\/\//, '');
+			}
+			else
+			{
+				protocol = '';
+				lead = arguments[0].match(/^\//) ? '/' : '';
+			}
+
+			trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
+
+			var join, split;
+
+			split = [].filter.call(arguments, function(p) {
+				return p;
+			});
+			
+			// if there was no protocol now is the time to check if first non-empty argument is an absolute path
+			if(!lead && !protocol)
+				lead = split[0].match(/^\//) ? '/' : '';
+			
+			split = split.map(function(p) {
+				return p.split('/');
+			});
+					
+			join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
+
+			
+			return (protocol ? protocol + "://" : '' ) + lead + join + trail;
+		}
+	};
+		
 })();
 
 

@@ -50,11 +50,7 @@
 		is : 'ir-filebrowser',
 		
 		/**
-<<<<<<< HEAD
-		  * Loads list of files at location
-=======
 		  * Loads list of files at location relative to the this.relPath
->>>>>>> temp
 		  *
 		  * @method ls
 		*/
@@ -63,18 +59,6 @@
 			if(typeof relPath !== 'string')
 				relPath  = "";
 			
-<<<<<<< HEAD
-			var split = this.relPath.split('/');
-				
-			if(split.length && !split[split.length-1])
-				split.pop();
-
-			if(relPath == '..')
-				split.pop();
-			else
-			if(relPath)
-				split.push(relPath);
-=======
 			var p, split, newSplit;			
 			split = this.relPath.split('/');
 			newSplit = relPath.split('/');
@@ -93,7 +77,6 @@
 				if(p)
 					split.push(relPath);
 			}
->>>>>>> temp
 			
 			this.relPath = split.join('/');
 			if(this.relPath)
@@ -419,10 +402,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			
 			postFields :		{ type : Object, value : { path : "" } },
 
-<<<<<<< HEAD
-=======
 /* currently browsed path, relative to lsRootUrlPath */
->>>>>>> temp
 			relPath : 			{ type : String, value : "/" },
 			loadedData	:		{ type : Object },
 			listProperty	:	{ type : String, notify : true },

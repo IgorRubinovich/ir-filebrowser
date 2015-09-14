@@ -354,7 +354,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		_urlsChanged : function() {
-			this._lsUrl = path.join(this.host, this.lsUrl, this.lsUrl);
+			this._lsUrl = path.join(this.host, this.lsUrl);
 			this._postUrl = path.join(this.host, this.postUrl);
 		},
 

@@ -64,14 +64,26 @@
   * @method displayLoadedFiles
 */
 		displayLoadedFiles : function () {
-			var name, ext, t, fstat, sorted,
-				directories = [], files = [], that = this;
+			var t, 
+				i,
+				ext, 
+				name, 
+				fstat, 
+				sorted,
+				rootUrl, 
+				statsData, 
+				files = [],
+				that = this, 
+				directories = [];
 
-			this.directories = [];
+			if(!this.loadedData)
+				return;
+				
 			this.files = [];
+			this.directories = [];
 
-			var rootUrl = this.get(this.lsRootUrlPath, this.loadedData);
-			var statsData = this.get(this.lsStatsPath, this.loadedData);
+			rootUrl = this.get(this.lsRootUrlPath, this.loadedData);
+			statsData = this.get(this.lsStatsPath, this.loadedData);
 
 			sorted = statsData.sort(function(x,y) { return new Date(x.mtime) > new Date(y.mtime) });
 
@@ -105,8 +117,8 @@
 					rootUrl : fstat.rootUrl
 				});
 			
-			this.directories = directories;
-			this.files = files;
+			this.set("directories", directories);
+			this.set("files", files);
 			
 			//this.addEventListener('item-attached', this.refitDialog);
 			
@@ -121,10 +133,10 @@
 			this.async(function() {
 				this.$.dialog.refit();
 				this.$.dialog.center();
-				this.$.dialog.constrain()
+				this.$.dialog.constrain();
 				
 				//this.$.scrollableDialog.center();
-				Polymer.dom.flush();				
+				Polymer.dom.flush();
 			});
 		},
 		
@@ -262,7 +274,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.removeSelection(e.detail.item);
 				e.detail.unselect();
 			}
-			if(this.autoPreview)
+			if(this.autoPreview && !this.promptMode)
 				this.hideDialog();
 			
 			this._updateValue();
@@ -308,10 +320,12 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		showDialog : function(relPath) {
-			this.ls(relPath);
-			Polymer.dom.flush();
+			// Polymer.dom.flush();
 			this.$.dialog.open();
-			this.refitDialog()
+			this.ls(relPath);
+			this.async(function() {
+				this.refitDialog()
+			});
 		},
 		
 		hideDialog : function (e) {
@@ -324,7 +338,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(this.promptMode)
 			{
 				this.$.dialog.modal = true;			
-				this.$.selectionPreview.style.display = "none";			
 				this.maxItems = 1;
 				this.autoPreview = false; // until there's a better way
 			}
@@ -543,7 +556,7 @@ Fired when an item is doubleclicked.
 			join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
 
 			
-			return (protocol ? protocol + "://" : '' ) + lead + join + trail;
+			return protocol + lead + join + trail; // note that `protocol` includes :// in the regex
 		}
 	};
 		

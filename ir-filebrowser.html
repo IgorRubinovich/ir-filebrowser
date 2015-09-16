@@ -25,7 +25,6 @@ Example:
 <!-- link rel="import" href="../fu-area/fu-area.html" -->
 <!-- link rel="import" href="./iron-select-item.html" -->
 
-
 <dom-module id="ir-filebrowser">
   <style>
     :host {	
@@ -63,13 +62,13 @@ Example:
 		<ir-filebrowser-item on-item-click="showDialog" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
 	</template -->
 
-	<div id="selectionPreview">
+	<div id="selectionPreview" hidden$="{{ promptMode }}">
 		<content select="ir-filebrowser-item">
 		</content>
 		<template is="dom-if" if="{{value}}">
 			<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
+			<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
 		</template>
-		<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
 	</div>
 
 	<paper-dialog on-dom-changed="refitDialog" id="dialog"> <!--  on-iron-overlay-closed="closed" -->

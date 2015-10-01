@@ -41,7 +41,11 @@ Example:
 	  align-items : flex-end;
 	  flex-wrap : wrap;
 	}
+<<<<<<< HEAD
 	
+=======
+ 	
+>>>>>>> temp
 	.browserDialog {
 
     }
@@ -67,8 +71,13 @@ Example:
 		</content>
 		<template is="dom-if" if="{{value}}">
 			<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
+<<<<<<< HEAD
+			<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+		</template>
+=======
 		</template>
 		<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+>>>>>>> temp
 	</div>
 
 	<paper-dialog on-dom-changed="refitDialog" id="dialog"> <!--  on-iron-overlay-closed="closed" -->

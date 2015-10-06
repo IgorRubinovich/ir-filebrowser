@@ -21,6 +21,21 @@ Example:
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../ir-reflect-to-native-behavior/ir-reflect-to-native-behavior.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-tabs/paper-tab.html">
+<link rel="import" href="../paper-tabs/paper-tabs-icons.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../iron-menu-behavior/iron-menu-behavior.html">
+<link rel="import" href="../iron-menu-behavior/iron-menubar-behavior.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-input/paper-input-addon-behavior.html">
+<link rel="import" href="../paper-input/paper-input-behavior.html">
+<link rel="import" href="../paper-input/paper-input-char-counter.html">
+<link rel="import" href="../paper-input/paper-input-container.html">
+<link rel="import" href="../paper-input/paper-input-error.html">
+<link rel="import" href="../paper-input/paper-textarea.html">
+<link rel="import" href="../iron-autogrow-textarea/iron-autogrow-textarea.html">
+
 
 <!-- link rel="import" href="../fu-area/fu-area.html" -->
 <!-- link rel="import" href="./iron-select-item.html" -->
@@ -40,6 +55,12 @@ Example:
       display: flex;
 	  align-items : flex-end;
 	  flex-wrap : wrap;
+	}
+
+	#scrollableDialog
+	{
+		min-width : 400px;
+		min-height: 400px;
 	}
 	
 	.browserDialog {
@@ -72,47 +93,77 @@ Example:
 	</div>
  
 	<paper-dialog on-dom-changed="refitDialog" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
-		<div>
-			<h2>{{ relPath }}</h2>
-			<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
-			<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
-			<paper-button on-click="refitDialog">refitDialog</paper-button>
-		</div>
-		<paper-dialog-scrollable id="scrollableDialog">
-			<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
-				<div id="uploaderContainer">
-					<template is="dom-if" if="{{showDirectories}}">
-						<template is="dom-repeat" items="{{directories}}">
-							<ir-filebrowser-item 
-								on-item-dblclick="dblclickDirectory" 
-								index="{{ index }}" 
-								item="{{ item }}">
-							</ir-filebrowser-item>
-						</template>
+		<paper-tabs selected="{{tableselected}}" on-click="refitDialog">
+			<paper-tab>FOLDERS</paper-tab>
+			<paper-tab>SEARCH</paper-tab>
+		</paper-tabs>
+
+		<iron-pages selected="{{tableselected}}">
+			<div>
+				<div>
+					<h2>{{ relPath }}</h2>
+					<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
+					<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
+					<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
+					<paper-button raised on-click="makeDir">add directory</paper-button>
+					<paper-button raised toggles on-click="renameFile">rename file</paper-button>
+				</div>
+				<paper-dialog-scrollable id="scrollableDialog">
+					<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
+						<div id="uploaderContainer">
+							<template is="dom-if" if="{{showDirectories}}">
+								<template is="dom-repeat" items="{{directories}}">
+									<ir-filebrowser-item
+											on-item-dblclick="dblclickDirectory"
+											index="{{ index }}"
+											item="{{ item }}">
+									</ir-filebrowser-item>
+								</template>
+							</template>
+							<template is="dom-if" if="{{showFiles}}">
+								<template is="dom-repeat" items="{{files}}">
+									<ir-filebrowser-item
+											on-item-dblclick="dblclickFile"
+											on-item-click="clickFile"
+											index="{{ index }}"
+											item="{{ item }}">
+									</ir-filebrowser-item>
+								</template>
+							</template>
+						</div>
+					</file-upload>
+				</paper-dialog-scrollable>
+				<div class="buttons">
+					Drag and drop files into this dialog to upload to the current directory.
+					<template is="dom-if" if="{{promptMode}}">
+						<paper-button raised on-click="hideDialog">Cancel</paper-button>
+						<paper-button raised on-click="promptSelect">Select</paper-button>
 					</template>
-					<template is="dom-if" if="{{showFiles}}">
-						<template is="dom-repeat" items="{{files}}">
-							<ir-filebrowser-item 
-								on-item-dblclick="dblclickFile" 
-								on-item-click="clickFile" 
-								index="{{ index }}" 
-								item="{{ item }}">
-							</ir-filebrowser-item>
-						</template>
+					<template is="dom-if" if="{{!promptMode}}">
+						<paper-button raised on-click="hideDialog">Close</paper-button>
 					</template>
 				</div>
-			</file-upload>
-		</paper-dialog-scrollable>
-		<div class="buttons">
-			Drag and drop files into this dialog to upload to the current directory.
-			<template is="dom-if" if="{{promptMode}}">
-				<paper-button raised on-click="hideDialog">Cancel</paper-button>
-				<paper-button raised on-click="promptSelect">Select</paper-button>
-			</template>
-			<template is="dom-if" if="{{!promptMode}}">
-				<paper-button raised on-click="hideDialog">Close</paper-button>
-			</template>
-		</div>
+			</div>
+			<div>
+				<div>
+					<h2>{{ relPath }}</h2>
+					<paper-input placeholder="Search..." value="{{inputValue}}"></paper-input>
+					<paper-button raised on-click="findFile">Search</paper-button>
+				</div>
+				<paper-dialog-scrollable id="scrollableDialog">
+					<div id="uploaderContainer">
+						<template is="dom-repeat" items="{{findedList}}">
+							<div><span on-click="jumptofilePath">{{item.path}}</span></div>
+						</template>
+					</div>
+				</paper-dialog-scrollable>
+				<div class="buttons">
+					<template is="dom-if" if="{{!promptMode}}">
+						<paper-button raised on-click="hideDialog">Close</paper-button>
+					</template>
+				</div>
+			</div>
+		</iron-pages>
 	</paper-dialog>
 	<iron-ajax
 		id="loader"
@@ -125,6 +176,41 @@ Example:
 		verbose=true
 		>
 	</iron-ajax>
+
+	<iron-ajax
+		id="makedirloader"
+		method="POST"
+		handle-as="json"
+		debounce-duration="300"
+		on-response="updateVal"
+		last-error="{{ lastError }}"
+		verbose=true
+		>
+	</iron-ajax>
+
+	<iron-ajax
+		id="findfileloader"
+		method="GET"
+		handle-as="json"
+		debounce-duration="300"
+		last-response="{{ findedFile }}"
+		on-response="showfindedFiles"
+		last-error="{{ lastError }}"
+		verbose=true
+		>
+	</iron-ajax>
+
+	<iron-ajax
+		id="renamefileloader"
+		method="POST"
+		handle-as="json"
+		debounce-duration="300"
+		on-response="updateVal"
+		last-error="{{ lastError }}"
+		verbose=true
+		>
+	</iron-ajax>
+
 
   </template>
 </dom-module>

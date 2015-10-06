@@ -19,38 +19,54 @@
 		  *
 		  * @method ls
 		*/
-		ls : function(relPath)
+		ls : function(relPath, abs)
 		{	
 			if(typeof relPath !== 'string')
 				relPath  = "";
-			
-			var p, split, newSplit;			
-			split = this.relPath.split('/');
-			newSplit = relPath.split('/');
-				
-			if(split.length && !split[split.length-1]) // chop last if empty
-				split.pop();
-			if(newSplit.length && !newSplit[newSplit.length-1])
-				newSplit.pop();
 
-			while(newSplit.length) // just like node's path.resolve(this.relPath, relPath)
-			{	
-				p = newSplit.pop();
-				if(p == '..')
+			if(!abs) {
+				var p, split, newSplit;
+				split = this.relPath.split('/');
+				newSplit = relPath.split('/');
+
+				if (split.length && !split[split.length - 1]) // chop last if empty
 					split.pop();
-				else
-				if(p)
-					split.push(relPath);
+				if (newSplit.length && !newSplit[newSplit.length - 1])
+					newSplit.pop();
+
+
+				while (newSplit.length) // just like node's path.resolve(this.relPath, relPath)
+				{
+					p = newSplit.shift();
+					if (p == '..')
+						split.pop();
+					else if (p)
+						split.push(p);
+				};
+
+				this.relPath = split.join('/');
 			}
-			
-			this.relPath = split.join('/');
+			else
+			{
+				if(/\.{2,}/.test(relPath))
+				{
+					this.status = 403;
+					throw new Error("Can not use .. in path");
+
+				};
+
+				this.relPath = relPath;
+			}
+
+
+
 			if(this.relPath)
 				this.relPath += '/';
 			
 			var reqUrl = this._lsUrl.replace(/\[path\]/, this.relPath);
 			
 			if(this._lsUrl == reqUrl)
-				reqUrl += this.relPath;
+				reqUrl += this.relPath; //this.host + reqUrl; error!
 			
 			this.$.loader.url = reqUrl;
 			this.$.loader.generateRequest();
@@ -129,15 +145,74 @@
 		
 		refitDialog : function() {
 			console.log('refitting');
-			this.$.dialog.refit();
+			//this.$.dialog.refit();
 			this.async(function() {
 				this.$.dialog.refit();
-				this.$.dialog.center();
 				this.$.dialog.constrain();
-				
+				this.$.dialog.center();
+
 				//this.$.scrollableDialog.center();
 				Polymer.dom.flush();
 			});
+		},
+
+		makeDir : function(relPath) {
+			var namebyuser = prompt("Folder name", "your folder name");
+			if (namebyuser !== null) {
+				this.$.makedirloader.body = {name : namebyuser, fpath : this.relPath};
+				this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+				this.$.makedirloader.url = this._makedirUrl;
+				this.$.makedirloader.generateRequest();
+			};
+		},
+
+		updateVal : function(relPath) {
+			this.ls(relPath);
+		},
+
+		findFile : function() {
+			if (this.inputValue !== null){
+				this.$.findfileloader.url = this._findfileUrl.replace(/\[path\]/, this.inputValue);  //"/medialib/json/find/" + this.inputValue;
+				this.$.findfileloader.generateRequest();
+			};
+		},
+
+		showfindedFiles : function() {
+			this.async(function(){
+				var findedArr = this.findedFile,
+					findedList = [];
+
+				this.findedList = [];
+
+				for (var i = 0; i < findedArr.length; i++)
+					findedList.push(findedArr[i]);
+
+				this.set("findedList", findedList);
+			});
+		},
+
+		renameFile : function() {
+			if(this.renameFiles == false)
+				this.renameFiles = true;
+			else
+				this.renameFiles = false;
+		},
+
+		jumptofilePath : function(e, relPath) {
+			this.tableselected = "0";
+
+			this.refitDialog();
+
+			this.abs = true;
+
+			if(this.relPath == "") {
+				this.ls(e.model.item.shortpath);
+			}
+			else
+			{
+				this.relPath = "";
+				this.ls(e.model.item.shortpath, this.abs);
+			};
 		},
 		
 		clickDirectory : function(e) {
@@ -263,22 +338,32 @@ Remove specific item from selection. Note: all selected items matching the url w
 		/** Toggles clicked file */
 		clickFile : function (e) {
 			var that = this;
+			if (this.renameFiles == true)
+			{
+				var fname = e.detail.item.name,
+					rename = prompt("New file name", fname);
+				if ((fname && rename) !== null) {
+					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, fname);  //"/medialib/json/rename/" + fname;
+					this.$.renamefileloader.contentType = "application/x-www-form-urlencoded";
+					this.$.renamefileloader.body = {name: rename};
+					this.$.renamefileloader.generateRequest();
+				};
+			}
+			else {
+				if (!e.detail.isSelected) {
+					this.addSelection(e.detail.item);
+					e.detail.select();
+				}
+				else {
+					this.removeSelection(e.detail.item);
+					e.detail.unselect();
+				}
+				if (this.autoPreview && !this.promptMode)
+					this.hideDialog();
 
-			if(!e.detail.isSelected)
-			{
-				this.addSelection(e.detail.item);
-				e.detail.select();
-			}
-			else
-			{
-				this.removeSelection(e.detail.item);
-				e.detail.unselect();
-			}
-			if(this.autoPreview && !this.promptMode)
-				this.hideDialog();
-			
-			this._updateValue();
-			Polymer.dom.flush();
+				this._updateValue();
+				Polymer.dom.flush();
+			};
 		},
 		
 		/** Updates .value for ir-reflect-to-native-behavior */
@@ -321,6 +406,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		showDialog : function(relPath) {
 			// Polymer.dom.flush();
+			this.tableselected = "0";
 			this.$.dialog.open();
 			this.ls(relPath);
 			this.async(function() {
@@ -368,6 +454,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 		
 		_urlsChanged : function() {
 			this._lsUrl = path.join(this.host, this.lsUrl);
+			this._makedirUrl = path.join(this.host, this.makedirUrl);
+			this._findfileUrl = path.join(this.host, this.findfileUrl);
+			this._renameUrl = path.join(this.host, this.renameUrl);
 			this._postUrl = path.join(this.host, this.postUrl);
 		},
 
@@ -379,6 +468,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			postUrl :			{ type : String, value : "", notify : true },
 			
 			postFields :		{ type : Object, value : { path : "" } },
+
+			renameUrl:			{ type : String, value : "", notify : true },
+			findfileUrl:		{ type : String, value : "", notify : true },
+			makedirUrl:			{ type : String, value : "", notify : true },
 
 /* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
@@ -399,13 +492,18 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			showDirectories :	{ type : Boolean, value : true },
 			showFiles :			{ type : Boolean, value : true },
-			
+
+			renameFiles :		{ type : Boolean, value : false},
+			tableselected :		{ type : String, notify : false },
+			tempselected :		{ type : String, notify : false },
+			inputValue :		{ type : String },
+
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false }
 		},
 		
 		observers: [
-			'_urlsChanged(host, lsUrl, postUrl)'
+			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl)'
 		],
 		behaviors: [
 			ir.ReflectToNativeBehavior

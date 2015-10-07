@@ -94,7 +94,7 @@
 
 			if(!this.loadedData)
 				return;
-				
+
 			this.files = [];
 			this.directories = [];
 
@@ -106,38 +106,47 @@
 			for(var i=0; i < sorted.length; i++)
 			{
 				fstat = sorted[i];
-								
+
 				fstat.rootUrl = rootUrl;
 				// fstat.lsRootUrlPath = this.lsRootUrlPath;
 				fstat.url = path.join(rootUrl, encodeURIComponent(fstat.name));
 				fstat.relPath = this.relPath;
-				
+
 				// look for items with same url as in selection and select them in the filebrowser dialog
 				this.getContentChildren()
 					.filter(function(el) { return el.is == 'ir-filebrowser-item' && (el.item.url == fstat.url) })
 					.forEach(function(el) { fstat.isSelected = true });
 				Polymer.dom.flush();
-				
+
 				if(fstat.isDirectory)
 					directories.push(fstat);
 				else
-					files.push(fstat);								
-			}
-			if(this.relPath) // create an '..' directory entry
-				directories.unshift({ 
-					name : '..', 
-					ext : '..', 
-					isDirectory : 
-					true, 
-					relPath : this.relPath,
-					rootUrl : fstat.rootUrl
+					files.push(fstat);
+			};
+
+			if(this.relPath && (statsData.length !== 0)) // create an '..' directory entry
+				directories.unshift({
+					name: '..',
+					ext: '..',
+					isDirectory: true,
+					relPath: this.relPath,
+					rootUrl: fstat.rootUrl
 				});
-			
+			else
+				directories.push({
+					name: '..',
+					ext: '..',
+					isDirectory: true,
+					relPath: this.relPath,
+					rootUrl: rootUrl
+				});
+
+
 			this.set("directories", directories);
 			this.set("files", files);
-			
+
 			//this.addEventListener('item-attached', this.refitDialog);
-			
+
 			Polymer.dom.flush();
 
 			//this.files = res;
@@ -181,7 +190,6 @@
 			this.async(function(){
 				var findedArr = this.findedFile,
 					findedList = [];
-
 				this.findedList = [];
 
 				for (var i = 0; i < findedArr.length; i++)
@@ -205,9 +213,8 @@
 
 			this.abs = true;
 
-			if(this.relPath == "") {
-				this.ls(e.model.item.shortpath);
-			}
+			if(this.relPath == "")
+				this.ls(e.model.item.shortpath, this.abs);
 			else
 			{
 				this.relPath = "";

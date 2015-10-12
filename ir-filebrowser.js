@@ -24,6 +24,10 @@
 			if(typeof relPath !== 'string')
 				relPath  = "";
 
+			if(relPath)
+				this.set("filterValue", "");
+
+			
 			if(!abs) {
 				var p, split, newSplit;
 				split = this.relPath.split('/');
@@ -75,7 +79,7 @@
 		},
 		
 /**
-  * Displays files loaded as a result of calling ls
+  * Displays files loaded as a result of calling ls or user typing into the filter box
   *
   * @method displayLoadedFiles
 */
@@ -98,8 +102,8 @@
 			this.files = [];
 			this.directories = [];
 
-			rootUrl = this.get(this.lsRootUrlPath, this.loadedData);
-			statsData = this.get(this.lsStatsPath, this.loadedData);
+			rootUrl = path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
+			statsData = this.get(this.lsStatsPath, this.loadedData).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
 
 			sorted = statsData.sort(function(x,y) { return new Date(x.mtime) > new Date(y.mtime) });
 
@@ -124,16 +128,8 @@
 					files.push(fstat);
 			};
 
-			if(this.relPath && (statsData.length !== 0)) // create an '..' directory entry
+			if(!(/^\/?$/.test(this.relPath))) // create an '..' directory entry
 				directories.unshift({
-					name: '..',
-					ext: '..',
-					isDirectory: true,
-					relPath: this.relPath,
-					rootUrl: fstat.rootUrl
-				});
-			else
-				directories.push({
 					name: '..',
 					ext: '..',
 					isDirectory: true,
@@ -145,24 +141,50 @@
 			this.set("directories", directories);
 			this.set("files", files);
 
-			//this.addEventListener('item-attached', this.refitDialog);
+			if(!this._itemsListenerAttached)
+			{
+				this.addEventListener('item-attached', this.refitDialog, true);
+				this._itemsListenerAttached = true;
+			}
+			
+			//else
+			//	this.removeEventListener('item-attached', this.refitDialog, true);
 
+			if(!/^\//.test(this.relPath))
+				this.set("relPath", "/" + this.relPath)
+
+			this.splitRelPath = this.relPath.split('/');
+			this.splitRelPath.pop();
+			if(!(/^\/?$/.test(this.splitRelPath[0])))
+			{
+				this.set("splitRelPath.0",  '/');
+			}
+			console.log(this.splitRelPath);
+			//this.notifyPath("splitRelPath.splices");
+			
+			
 			Polymer.dom.flush();
 
 			//this.files = res;
 		},
-		
-		refitDialog : function() {
-			console.log('refitting');
-			//this.$.dialog.refit();
+
+		refitDialog : function() {			
+			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
+			if(!this._maxWidth || (this._maxWidth < currentWidth))
+				this._maxWidth = currentWidth;
+
+			this.$.dialog.refit();
+			
 			this.async(function() {
-				this.$.dialog.refit();
+				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
 				this.$.dialog.constrain();
+				this.$.dialog.style.width = this._maxWidth + "px";
 				this.$.dialog.center();
 
-				//this.$.scrollableDialog.center();
 				Polymer.dom.flush();
-			});
+	
+				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = getComputedStyle(this.$.scrollableDialog).height;
+			})
 		},
 
 		makeDir : function(relPath) {
@@ -178,6 +200,11 @@
 		updateVal : function(relPath) {
 			this.ls(relPath);
 		},
+		
+		searchBoxKeyDown(e) { 
+			if((e.which || e.keyCode) == 13)
+				this.findFile();
+		},
 
 		findFile : function() {
 			if (this.inputValue !== null){
@@ -186,40 +213,40 @@
 			};
 		},
 
-		showfindedFiles : function() {
+		showfoundFiles : function() {
 			this.async(function(){
-				var findedArr = this.findedFile,
-					findedList = [];
-				this.findedList = [];
+				var foundArr = this.foundFile,
+					foundList = [];
+				this.foundList = [];
 
-				for (var i = 0; i < findedArr.length; i++)
-					findedList.push(findedArr[i]);
+				for (var i = 0; i < foundArr.length; i++)
+					foundList.push(foundArr[i]);
 
-				this.set("findedList", findedList);
+				this.set("foundList", foundList);
 			});
 		},
 
 		renameFile : function() {
-			if(this.renameFiles == false)
-				this.renameFiles = true;
-			else
-				this.renameFiles = false;
+			this.set("renameFiles", !this.renameFiles);
+		},
+		
+		filterClear : function() {
+			this.set("filterValue", '');
+			this.ls();
 		},
 
-		jumptofilePath : function(e, relPath) {
+		jumptofilePath : function(e) {
+			var name = e.model.item.shortpath.match(/\/?([^/]+)$/)[1],
+				dir = e.model.item.shortpath.replace(/\/?([^/]+)$/,'');
+
 			this.tableselected = "0";
-
-			this.refitDialog();
-
-			this.abs = true;
-
-			if(this.relPath == "")
-				this.ls(e.model.item.shortpath, this.abs);
-			else
-			{
-				this.relPath = "";
-				this.ls(e.model.item.shortpath, this.abs);
-			};
+			this.ls(dir, true);
+			this.set("filterValue", name);
+		},
+		
+		jumpUp : function(e){
+			this.ls(e.model.item, true);
+			this.set("filterValue", "");
 		},
 		
 		clickDirectory : function(e) {
@@ -227,6 +254,7 @@
 			e.stopPropagation();
 			e.preventDefault();
 		},
+
 
 /** 
 Adds object to selection.
@@ -306,20 +334,20 @@ Remove specific item from selection. Note: all selected items matching the url w
 */
 		removeSelection : function(url) {
 			var that = this;
-			if(typeof url == 'string')
-				url = { url : url };
+			if(typeof url == 'object')
+				url = url.url;
 
-			// unselect in selection
+			// remove from selection
 			this._getSelectionElements()
 				.forEach(function(el, i) {
-					if(el.item.url == url.url)				
+					if(el.item.url == url)				
 						Polymer.dom(that).removeChild(el);
 				});
 			
-			// unselect in file browser dialog
+			// unselect in dialog
 			Polymer.dom(this.$.uploaderContainer).childNodes
-				.forEach(function(el) { 
-					if (el.is == 'ir-filebrowser-item' && el.item.url == url.url) 
+				.forEach(function(el) {
+					if (el.is == 'ir-filebrowser-item' && el.item.url == url)
 						el.unselect();
 			});
 
@@ -344,8 +372,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		
 		/** Toggles clicked file */
 		clickFile : function (e) {
-			var that = this;
-			if (this.renameFiles == true)
+			if(this.renameFiles)
 			{
 				var fname = e.detail.item.name,
 					rename = prompt("New file name", fname);
@@ -355,22 +382,27 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.$.renamefileloader.body = {name: rename};
 					this.$.renamefileloader.generateRequest();
 				};
+				
+				this.renameFiles = false;
+				
+				return
+			}
+			if(e.detail.item.isDirectory)
+				return;
+
+			if (!e.detail.isSelected) {
+				this.addSelection(e.detail.item);
+				e.detail.select();
 			}
 			else {
-				if (!e.detail.isSelected) {
-					this.addSelection(e.detail.item);
-					e.detail.select();
-				}
-				else {
-					this.removeSelection(e.detail.item);
-					e.detail.unselect();
-				}
-				if (this.autoPreview && !this.promptMode)
-					this.hideDialog();
+				this.removeSelection(e.detail.item);
+				e.detail.unselect();
+			}
+			if (this.autoPreview && !this.promptMode)
+				this.hideDialog();
 
-				this._updateValue();
-				Polymer.dom.flush();
-			};
+			this._updateValue();
+			Polymer.dom.flush();
 		},
 		
 		/** Updates .value for ir-reflect-to-native-behavior */
@@ -438,6 +470,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._urlsChanged();
 			this.setupBrowser();
 			
+			// this.$.scrollableDialog.assignParentResizeable(this.$.dialog);
+
 			this.async(function() { // wait for ir-filebrowser-items to initialize
 				// collect values, remove and add again
 				var preselection = [];
@@ -506,7 +540,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			inputValue :		{ type : String },
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
-			promptMode :			{ type : Boolean, value : false }
+			promptMode :			{ type : Boolean, value : false },
+
+			/** Open by default - precursor to inline mode. */
+			opened : { type : Boolean, value : false }
 		},
 		
 		observers: [
@@ -574,8 +611,8 @@ Fired when an item is doubleclicked.
 				item.url = item.rootUrl + item.relPath + encodeURIComponent(item.name);
 				console.log('decoded (name) %s -> (url) %s', item.name, item.url);
 			}
-			
-			if(!item.url) // should have been provided or constructed by this point
+
+			if(!item.url && item.name != '..') // should have been provided or constructed by this point
 				throw new Error("To initialize an ir-filebrowser-item at least one of either url or (rootUrl and name) must be set.");
 
 			if(!item.ext)

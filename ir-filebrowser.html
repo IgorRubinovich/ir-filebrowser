@@ -178,10 +178,10 @@ Example:
 		<div class="buttons">
 			<div class="buttons">
 				Drag and drop files into this dialog to upload to the current directory.
-				<template is="dom-if" hidden$="{{ !promptMode }}">
+				<span hidden$="{{ !promptMode }}">
 					<paper-button raised on-click="hideDialog">Cancel</paper-button>
 					<paper-button raised on-click="promptSelect">Select</paper-button>
-				</template>
+				</span>
 				<paper-button hidden$="{{ promptMode }}" raised on-click="hideDialog">Close</paper-button>
 			</div>
 		</div>

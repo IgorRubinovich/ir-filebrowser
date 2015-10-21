@@ -580,12 +580,16 @@ Fired when an item is doubleclicked.
 		select : function() {
 			this.$.container.classList.add('selected');
 			this.$.container.elevation = "0";
+			this.$.container.style.color = "#3f51b5";
+			this.$.container.style.fontWeight = "bolder";
 			this._setIsSelected(true);
 		},
 		/** Unselect this ir-filebrowser-item */
 		unselect : function() {
 			this.$.container.classList.remove('selected');
 			this.$.container.elevation = "2";
+			this.$.container.style.color = "";
+			this.$.container.style.fontWeight = "";
 			this._setIsSelected(false);
 		},
 		properties : {

@@ -533,6 +533,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			showDirectories :	{ type : Boolean, value : true },
 			showFiles :			{ type : Boolean, value : true },
+			resize :			{ type : Boolean, value : true },
 
 			renameFiles :		{ type : Boolean, value : false},
 			tableselected :		{ type : String, notify : false },

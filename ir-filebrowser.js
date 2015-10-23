@@ -113,7 +113,7 @@
 
 				fstat.rootUrl = rootUrl;
 				// fstat.lsRootUrlPath = this.lsRootUrlPath;
-				fstat.url = path.join(rootUrl, encodeURIComponent(fstat.name));
+				fstat.url = path.join(rootUrl, encodeURIComponent(fstat.name).replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21"));
 				fstat.relPath = this.relPath;
 
 				// look for items with same url as in selection and select them in the filebrowser dialog

@@ -228,6 +228,29 @@
 
 		renameFile : function() {
 			this.set("renameFiles", !this.renameFiles);
+			if(this.renameFiles && this.fileName)
+			{
+				var fname = this.fileName,
+					rename = prompt("New file name", fname);
+				if ((fname && rename) !== null) {
+					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, fname);  //"/medialib/json/rename/" + fname;
+					this.$.renamefileloader.contentType = "application/x-www-form-urlencoded";
+					this.$.renamefileloader.body = {name: rename, fpath : this.relPath};
+					this.$.renamefileloader.generateRequest();
+				};
+			}
+
+			this.renameFiles = false;
+		},
+
+		deleteFile : function() {
+			var askUser = confirm("Are you sure you want to delete " + this.fileName + "?");
+			if (askUser == true) {
+				this.$.deletefileloader.body = {name : this.fileName, fpath : this.relPath};
+				this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
+				this.$.deletefileloader.url = this._deletefileUrl;
+				this.$.deletefileloader.generateRequest();
+			};
 		},
 		
 		filterClear : function() {
@@ -369,35 +392,59 @@ Remove specific item from selection. Note: all selected items matching the url w
 				
 			this.value = '';
 		},
+
+		renameSelectionElement : function(relPath) {
+			var lastUrl = this.renamedFile.lastUrl,
+				fName = this.renamedFile.name,
+				fstat = this.renamedFile,
+				that = this;
+
+			this.ls(relPath);
+
+			this._getSelectionElements()
+				.forEach(function(el) {
+					if(el.item.url == lastUrl) {
+						el.item = fstat;
+						that.fileName = fName;
+					}
+				});
+		},
+
+		deleteSelectionElement : function(relPath) {
+			this.ls(relPath);
+
+			this.removeSelection(this.deletedFile);
+		},
 		
 		/** Toggles clicked file */
 		clickFile : function (e) {
-			if(this.renameFiles)
-			{
-				var fname = e.detail.item.name,
-					rename = prompt("New file name", fname);
-				if ((fname && rename) !== null) {
-					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, fname);  //"/medialib/json/rename/" + fname;
-					this.$.renamefileloader.contentType = "application/x-www-form-urlencoded";
-					this.$.renamefileloader.body = {name: rename};
-					this.$.renamefileloader.generateRequest();
-				};
-				
-				this.renameFiles = false;
-				
-				return
-			}
-			if(e.detail.item.isDirectory)
-				return;
+			this.fileName = e.detail.item.name;
 
-			if (!e.detail.isSelected) {
-				this.addSelection(e.detail.item);
-				e.detail.select();
+			if(this.selectedDirectory && (this.selectedDirectory !== e.detail))
+				this.selectedDirectory.unselect();
+
+			if(e.detail.item.isDirectory) {
+				if(!e.detail.isSelected)
+				{
+					this.selectedDirectory = e.detail;
+					e.detail.select();
+				}
+				else
+				{
+					e.detail.unselect();
+				}
+
 			}
-			else {
-				this.removeSelection(e.detail.item);
-				e.detail.unselect();
-			}
+			else
+				if (!e.detail.isSelected) {
+					this.addSelection(e.detail.item);
+					e.detail.select();
+				}
+				else {
+					this.removeSelection(e.detail.item);
+					e.detail.unselect();
+				}
+
 			if (this.autoPreview && !this.promptMode)
 				this.hideDialog();
 
@@ -498,6 +545,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._makedirUrl = path.join(this.host, this.makedirUrl);
 			this._findfileUrl = path.join(this.host, this.findfileUrl);
 			this._renameUrl = path.join(this.host, this.renameUrl);
+			this._deletefileUrl = path.join(this.host, this.deletefileUrl);
 			this._postUrl = path.join(this.host, this.postUrl);
 		},
 
@@ -513,6 +561,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			renameUrl:			{ type : String, value : "", notify : true },
 			findfileUrl:		{ type : String, value : "", notify : true },
 			makedirUrl:			{ type : String, value : "", notify : true },
+			deletefileUrl:		{ type : String, value : "", notify : true },
 
 /* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
@@ -538,6 +587,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			tableselected :		{ type : String, notify : false },
 			tempselected :		{ type : String, notify : false },
 			inputValue :		{ type : String },
+			fileName : 			{ type : String },
+			selectedDirectory : { type : Object },
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },
@@ -547,7 +598,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		observers: [
-			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl)'
+			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl)'
 		],
 		behaviors: [
 			ir.ReflectToNativeBehavior
@@ -580,6 +631,7 @@ Fired when an item is doubleclicked.
 		select : function() {
 			this.$.container.classList.add('selected');
 			this.$.container.elevation = "0";
+			this.$.container.style.backgroundColor = "#E1E5FB";
 			this.$.container.style.color = "#3f51b5";
 			this.$.container.style.fontWeight = "bolder";
 			this._setIsSelected(true);
@@ -588,6 +640,7 @@ Fired when an item is doubleclicked.
 		unselect : function() {
 			this.$.container.classList.remove('selected');
 			this.$.container.elevation = "2";
+			this.$.container.style.backgroundColor = "";
 			this.$.container.style.color = "";
 			this.$.container.style.fontWeight = "";
 			this._setIsSelected(false);

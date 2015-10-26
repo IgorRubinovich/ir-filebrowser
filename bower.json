@@ -15,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "file-upload": "~1.5.3",
+    "file-upload": "~1.3.4",
     "ir-reflect-to-native-behavior": "https://github.com/IgorRubinovich/ir-reflect-to-native-behavior.git",
     "iron-ajax": "PolymerElements/iron-ajax#~1.0.4",
     "iron-icons": "PolymerElements/iron-icons#~1.0.3",
@@ -29,8 +29,5 @@
     "paper-input": "polymerelements/paper-input#~1.0.15",
     "paper-ripple": "PolymerElements/paper-ripple#~1.0.2",
     "paper-tabs": "polymerelements/paper-tabs#~1.0.4"
-  },
-  "resolutions": {
-    "file-upload": "~1.5.3"
   }
 }

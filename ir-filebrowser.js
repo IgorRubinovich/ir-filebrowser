@@ -67,7 +67,7 @@
 			if(this.relPath)
 				this.relPath += '/';
 			
-			var reqUrl = this._lsUrl.replace(/\[path\]/, this.relPath);
+			var reqUrl = this._lsUrl.replace(/\[path\]/, this.relPath).replace(/\/\//, "/");
 			
 			if(this._lsUrl == reqUrl)
 				reqUrl += this.relPath; //this.host + reqUrl; error!

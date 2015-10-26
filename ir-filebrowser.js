@@ -74,8 +74,9 @@
 			
 			this.$.loader.url = reqUrl;
 			this.$.loader.generateRequest();
-			
-			this.postFields = { path : this.relPath };
+
+			if(this.relPath)
+				this.postFields.path = this.relPath;
 		},
 		
 /**
@@ -652,6 +653,10 @@ Fired when an item is doubleclicked.
 		
 		attached : function() {
 			this.fire('item-attached');
+		},
+		clickResizeSwitch : function(e)
+		{
+			this.postFields.resize = e.currentTarget.checked;
 		}
 	});	
 

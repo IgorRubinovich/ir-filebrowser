@@ -138,6 +138,7 @@ Example:
 						<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
 						<paper-button raised on-click="makeDir">add directory</paper-button>
 						<paper-button raised$="{{ !renameFiles }}" on-click="renameFile">rename file</paper-button>
+						<paper-button raised on-click="deleteFile">delete file</paper-button>
 					</div>
 				</div>
 			</iron-pages>
@@ -234,12 +235,24 @@ Example:
 		method="POST"
 		handle-as="json"
 		debounce-duration="300"
-		on-response="updateVal"
+		last-response="{{ renamedFile }}"
+		on-response="renameSelectionElement"
 		last-error="{{ lastError }}"
 		verbose=true
 		>
 	</iron-ajax>
 
+	<iron-ajax
+		id="deletefileloader"
+		method="POST"
+		handle-as="json"
+		debounce-duration="300"
+		last-response="{{ deletedFile }}"
+		on-response="deleteSelectionElement"
+		last-error="{{ lastError }}"
+		verbose=true
+		>
+	</iron-ajax>
 
   </template>
 </dom-module>

@@ -28,7 +28,7 @@
 				this.set("filterValue", "");
 
 			
-			if(!abs) {
+			if(abs !== true) {
 				var p, split, newSplit;
 				split = this.relPath.split('/');
 				newSplit = relPath.split('/');
@@ -75,8 +75,7 @@
 			this.$.loader.url = reqUrl;
 			this.$.loader.generateRequest();
 
-			if(this.relPath)
-				this.postFields.path = this.relPath;
+			this.postFields.path = this.relPath;
 		},
 		
 /**
@@ -557,7 +556,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			lsStatsPath :		{ type : String, value : "" },
 			postUrl :			{ type : String, value : "", notify : true },
 			
-			postFields :		{ type : Object, value : { path : "" } },
+			postFields :		{ type : Object, value : { path : "", resize : true } },
 
 			renameUrl:			{ type : String, value : "", notify : true },
 			findfileUrl:		{ type : String, value : "", notify : true },
@@ -745,7 +744,7 @@ Fired when an item is doubleclicked.
 			trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
 
 			var join, split;
-
+			
 			split = [].filter.call(arguments, function(p) {
 				return p;
 			});

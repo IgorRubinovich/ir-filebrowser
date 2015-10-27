@@ -168,23 +168,49 @@
 			//this.files = res;
 		},
 
-		refitDialog : function() {			
-			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-			if(!this._maxWidth || (this._maxWidth < currentWidth))
-				this._maxWidth = currentWidth;
+		refitDialog : function() {
+			if(this.fullView) {
 
-			this.$.dialog.refit();
-			
-			this.async(function() {
+				this.$.dialog.refit();
+
+				this.async(function() {
+					this.$.dialog.fitInto = Polymer.dom(this).parentNode;
+
+					this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
+					this.$.dialog.style.height = "auto";
+					this.$.dialog.style.position = "absolute";
+					this.$.dialog.style.zIndex = "0";
+
+					Polymer.updateStyles();
+					Polymer.dom.flush();
+
+					var currentHeight = Number(getComputedStyle(this.$.dialog).height.replace(/px/, '')),
+						topTabsHeight = Number(getComputedStyle(this.$.topTabs).height.replace(/px/, '')),
+						bottomButtonsHeight = Number(getComputedStyle(this.$.bottomButtons).height.replace(/px/, ''));
+
+					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+					this.$.scrollableDialog.style.height = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+				});
+			}
+			else {
 				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-				this.$.dialog.constrain();
-				this.$.dialog.style.width = this._maxWidth + "px";
-				this.$.dialog.center();
+				if (!this._maxWidth || (this._maxWidth < currentWidth))
+					this._maxWidth = currentWidth;
 
-				Polymer.dom.flush();
-	
-				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = getComputedStyle(this.$.scrollableDialog).height;
-			})
+				this.$.dialog.refit();
+
+				this.async(function () {
+					var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
+					this.$.dialog.constrain();
+					this.$.dialog.style.width = this._maxWidth + "px";
+					this.$.dialog.center();
+
+					Polymer.dom.flush();
+
+					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
+				})
+			}
 		},
 
 		makeDir : function(relPath) {
@@ -506,7 +532,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		ready: function() {
 			var that = this;
-			
+
+			if(this.fullView)
+			{
+				this.promptMode = "true";
+				this.fullViewMode = "true";
+				this.showDialog();
+			};
+
 			if(this.promptMode)
 			{
 				this.$.dialog.modal = true;			
@@ -514,7 +547,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.autoPreview = false; // until there's a better way
 			}
 			
-			this._urlsChanged();
+			this._urlsChanged();-
 			this.setupBrowser();
 			
 			// this.$.scrollableDialog.assignParentResizeable(this.$.dialog);
@@ -590,6 +623,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			inputValue :		{ type : String },
 			fileName : 			{ type : String },
 			selectedDirectory : { type : Object },
+			fullView :			{ type : Boolean},
+			fullViewMode :		{ type : Boolean, value : false },
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },

@@ -103,10 +103,10 @@ Example:
 		</template>
 		<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
 	</div>
- 
+
 	<paper-dialog opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
 		
-		<div>
+		<div id="topTabs">
 			<paper-tabs selected="{{tableselected}}" on-click="refitDialog">
 				<paper-tab>FOLDERS</paper-tab>
 				<paper-tab>SEARCH</paper-tab>
@@ -184,14 +184,16 @@ Example:
 				</div>
 			</iron-pages>
 		</paper-dialog-scrollable>
-		<div class="buttons">
+		<div id="bottomButtons" class="buttons">
 			<div class="buttons">
 				Drag and drop files into this dialog to upload to the current directory.
+				<div hidden$="{{ fullViewMode }}">
 				<span hidden$="{{ !promptMode }}">
 					<paper-button raised on-click="hideDialog">Cancel</paper-button>
 					<paper-button raised on-click="promptSelect">Select</paper-button>
 				</span>
 				<paper-button hidden$="{{ promptMode }}" raised on-click="hideDialog">Close</paper-button>
+				</div>
 			</div>
 		</div>
 	</paper-dialog>

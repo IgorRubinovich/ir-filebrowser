@@ -104,7 +104,7 @@ Example:
 		<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
 	</div>
 
-	<paper-dialog opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
+	<paper-dialog no-cancel-on-esc-key="[[ fullView ]]" opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
 		
 		<div id="topTabs">
 			<paper-tabs selected="{{tableselected}}" on-click="refitDialog">

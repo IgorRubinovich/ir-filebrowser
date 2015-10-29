@@ -285,12 +285,11 @@
 		},
 
 		jumptofilePath : function(e) {
-			var name = e.model.item.shortpath.match(/\/?([^/]+)$/)[1],
-				dir = e.model.item.shortpath.replace(/\/?([^/]+)$/,'');
+			var item = e.model.item;
 
 			this.tableselected = "0";
-			this.ls(dir, true);
-			this.set("filterValue", name);
+			this.ls(item.shortpath, true);
+			this.set("filterValue", item.name);
 		},
 		
 		jumpUp : function(e){

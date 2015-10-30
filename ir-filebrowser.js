@@ -227,7 +227,7 @@
 			this.ls(relPath);
 		},
 		
-		searchBoxKeyDown(e) { 
+		searchBoxKeyDown: function(e) {
 			if((e.which || e.keyCode) == 13)
 				this.findFile();
 		},
@@ -637,8 +637,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 		],
 		behaviors: [
 			ir.ReflectToNativeBehavior
-		]
-		
+		],
+		clickResizeSwitch : function(e)
+		{
+			this.postFields.resize = e.currentTarget.checked;
+		}
 	});
 	
 
@@ -739,10 +742,6 @@ Fired when an item is doubleclicked.
 		
 		attached : function() {
 			this.fire('item-attached');
-		},
-		clickResizeSwitch : function(e)
-		{
-			this.postFields.resize = e.currentTarget.checked;
 		}
 	});	
 

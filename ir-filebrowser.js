@@ -229,7 +229,10 @@
 		
 		searchBoxKeyDown: function(e) {
 			if((e.which || e.keyCode) == 13)
+			{
 				this.findFile();
+				e.preventDefault();
+			}
 		},
 
 		findFile : function() {

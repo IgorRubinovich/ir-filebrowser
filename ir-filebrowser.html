@@ -137,9 +137,9 @@ Example:
 							<paper-checkbox on-tap="clickResizeSwitch" checked="true">resize</paper-checkbox>
 						</paper-item>
 						<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
-						<paper-button raised on-click="makeDir">add directory</paper-button>
-						<paper-button raised$="{{ !renameFiles }}" on-click="renameFile">rename file</paper-button>
-						<paper-button raised on-click="deleteFile">delete file</paper-button>
+						<paper-button hidden$="{{ _makedirUrl }}" raised on-click="makeDir">add directory</paper-button>
+						<paper-button hidden$="{{ _renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename file</paper-button>
+						<paper-button hidden$="{{ _deletefileUrl }}" raised on-click="deleteFile">delete file</paper-button>
 					</div>
 				</div>
 			</iron-pages>

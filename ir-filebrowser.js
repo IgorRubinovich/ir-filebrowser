@@ -576,12 +576,16 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		_urlsChanged : function() {
+			var that = this;
+			
 			this._lsUrl = path.join(this.host, this.lsUrl);
-			this._makedirUrl = path.join(this.host, this.makedirUrl);
-			this._findfileUrl = path.join(this.host, this.findfileUrl);
-			this._renameUrl = path.join(this.host, this.renameUrl);
-			this._deletefileUrl = path.join(this.host, this.deletefileUrl);
-			this._postUrl = path.join(this.host, this.postUrl);
+			
+			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl"
+			.split(',')
+			.forEach(function(f) {
+				if(that[f])
+					that["_" + f] = path.join(that.host, that[f]);
+			});			
 		},
 
 		properties : {

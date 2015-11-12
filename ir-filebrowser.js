@@ -13,6 +13,7 @@
 (function () {
 	Polymer({
 		is : 'ir-filebrowser',
+
 		
 		/**
 		  * Loads list of files at location relative to the this.relPath
@@ -211,6 +212,8 @@
 					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
 				})
 			}
+
+			this.$.pocketDrawer.drawerWidth = 0;
 		},
 
 		makeDir : function(relPath) {
@@ -478,6 +481,36 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			this._updateValue();
 			Polymer.dom.flush();
+
+			if(e.detail.isSelected)
+				this.$.pocketDrawer.drawerWidth = "25%";
+			else
+				this.$.pocketDrawer.drawerWidth = 0;
+
+
+			this.$.getDescription.body = {name : this.fileName};
+			this.$.getDescription.contentType = "application/x-www-form-urlencoded";
+			this.$.getDescription.url = this._getdescriptionUrl;
+			this.$.getDescription.generateRequest();
+		},
+
+		showDrawer : function() {
+			this.fName = this.fileDescription.fileName;
+			this.fCaption = this.fileDescription.title;
+			this.fDescription = this.fileDescription.content;
+			this.fAlt = this.fileDescription.alt;
+			this.fileId = this.fileDescription.id;
+		},
+
+		updateDescription : function() {
+			this.$.updateFile.body = { id : this.fileId, title : this.fCaption, content : this.fDescription, alt : this.fAlt };
+			this.$.updateFile.contentType = "application/x-www-form-urlencoded";
+			this.$.updateFile.url = this._updatefileUrl;
+			this.$.updateFile.generateRequest();
+		},
+
+		closeDrawer : function() {
+			this.$.pocketDrawer.drawerWidth = 0;
 		},
 		
 		/** Updates .value for ir-reflect-to-native-behavior */
@@ -526,6 +559,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.async(function() {
 				this.refitDialog()
 			});
+			this.$.pocketDrawer.drawerWidth = 0;
 		},
 		
 		hideDialog : function (e) {
@@ -534,6 +568,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		ready: function() {
 			var that = this;
+
 
 			if(this.fullView)
 			{
@@ -580,7 +615,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			
 			this._lsUrl = path.join(this.host, this.lsUrl);
 			
-			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl"
+			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl,getdescriptionUrl,updatefileUrl"
 			.split(',')
 			.forEach(function(f) {
 				if(that[f])
@@ -601,6 +636,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			findfileUrl:		{ type : String, value : "", notify : true },
 			makedirUrl:			{ type : String, value : "", notify : true },
 			deletefileUrl:		{ type : String, value : "", notify : true },
+			getdescriptionUrl:  { type : String, value : "", notify : true },
+			updatefileUrl:		{ type : String, value : "", notify : true },
 
 /* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
@@ -631,6 +668,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			selectedDirectory : { type : Object },
 			fullView :			{ type : Boolean},
 			fullViewMode :		{ type : Boolean, value : false },
+			fileId :			{ type : Number},
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },
@@ -640,7 +678,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		observers: [
-			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl)'
+			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl)'
 		],
 		behaviors: [
 			ir.ReflectToNativeBehavior

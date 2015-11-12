@@ -24,6 +24,7 @@ Example:
 <link rel="import" href="../paper-tabs/paper-tabs.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-drawer-panel/paper-drawer-panel.html">
 
 
 
@@ -91,6 +92,11 @@ Example:
 		display: flex;
 	}
 
+	#drawPocket {
+		border-left: 1px solid #e5e5e5;
+		padding: 5px;
+	}
+
   </style>
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
@@ -145,46 +151,56 @@ Example:
 			</iron-pages>
 		</div>
 		<paper-dialog-scrollable id="scrollableDialog">
-			<iron-pages selected="{{tableselected}}">
-				<div>
-					<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
-						<div id="uploaderContainer">
-							<template is="dom-if" if="{{showDirectories}}">
-								<template hidden$="{{ showDirectories}}" is="dom-repeat" items="{{directories}}">
-									<ir-filebrowser-item
-											on-item-dblclick="dblclickDirectory"
-											on-item-click="clickFile"
-											index="{{ index }}"
-											item="{{ item }}">
-									</ir-filebrowser-item>
-								</template>
-							</template>
-							<template is="dom-if" if="{{showFiles}}">
-								<template is="dom-repeat" items="{{files}}">
-									<ir-filebrowser-item
-											on-item-dblclick="dblclickFile"
-											on-item-click="clickFile"
-											index="{{ index }}"
-											item="{{ item }}">
-									</ir-filebrowser-item>
-								</template>
-							</template>
-						</div>
-						</file-upload>
+			<paper-drawer-panel id="pocketDrawer" right-drawer>
+				<div id="drawPocket" drawer>
+					<p>{{ fName }} File Description</p>
+					<paper-input label="Caption" value="{{ fCaption }}"></paper-input>
+					<paper-input label="Description" value="{{ fDescription }}"></paper-input>
+					<paper-input label="Alt" value="{{ fAlt }}"></paper-input>
+					<paper-button on-click="updateDescription">update</paper-button>
 				</div>
-				<div>
-					<div class="layout horizontal">
-						<paper-input placeholder="Search..." value="{{inputValue}}" on-keyDown="searchBoxKeyDown" ></paper-input>
-						<paper-button raised id="searchButton" on-click="findFile">Search</paper-button>
+				<iron-pages selected="{{tableselected}}"  main>
+					<div>
+						<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
+							<div id="uploaderContainer">
+								<template is="dom-if" if="{{showDirectories}}">
+									<template hidden$="{{ showDirectories}}" is="dom-repeat" items="{{directories}}">
+										<ir-filebrowser-item
+												on-item-dblclick="dblclickDirectory"
+												on-item-click="clickFile"
+												index="{{ index }}"
+												item="{{ item }}">
+										</ir-filebrowser-item>
+									</template>
+								</template>
+								<template is="dom-if" if="{{showFiles}}">
+									<template is="dom-repeat" items="{{files}}">
+										<ir-filebrowser-item
+												on-item-dblclick="dblclickFile"
+												on-item-click="clickFile"
+												index="{{ index }}"
+												item="{{ item }}">
+										</ir-filebrowser-item>
+									</template>
+								</template>
+							</div>
+							</file-upload>
 					</div>
 					<div>
-						<template is="dom-repeat" items="{{foundList}}">
-							<paper-item elevation="1" on-tap="jumptofilePath">{{item.path}}</paper-item>
-						</template>
+						<div class="layout horizontal">
+							<paper-input placeholder="Search..." value="{{inputValue}}" on-keyDown="searchBoxKeyDown" ></paper-input>
+							<paper-button raised id="searchButton" on-click="findFile">Search</paper-button>
+						</div>
+						<div>
+							<template is="dom-repeat" items="{{foundList}}">
+								<paper-item elevation="1" on-tap="jumptofilePath">{{item.path}}</paper-item>
+							</template>
+						</div>
 					</div>
-				</div>
-			</iron-pages>
+				</iron-pages>
+			</paper-drawer-panel>
 		</paper-dialog-scrollable>
+
 		<div id="bottomButtons" class="buttons">
 			<div class="buttons">
 				Drag and drop files into this dialog to upload to the current directory.
@@ -257,6 +273,25 @@ Example:
 		>
 	</iron-ajax>
 
+	<iron-ajax
+		id="getDescription"
+		method="POST"
+		handle-as="json"
+		debounce-duration="300"
+		last-response="{{ fileDescription }}"
+		on-response="showDrawer"
+		verbose="true">
+	</iron-ajax>
+
+	<iron-ajax
+		id="updateFile"
+		method="POST"
+		handle-as="json"
+		debounce-duration="300"
+		on-response="closeDrawer"
+		verbose="true">
+	</iron-ajax>
+
   </template>
 </dom-module>
 
@@ -303,16 +338,17 @@ Example:
 
   </style>
   <template>
-		<paper-material elevation="0" id="container" on-click="click" on-dblclick="dblclick">
-			<paper-ripple></paper-ripple>
-			<template is="dom-if" if="{{_item.isImage}}">
-				<iron-image title="{{_item.url}}" preload fade id="imgthumb" sizing="contain" src="{{_item.url}}"></iron-image>
-			</template>
-			<template is="dom-if" if="{{!_item.isImage}}">
-				<span class="ext">{{ _item.ext }}</span>
-			</template>
-			<span title="{{_item.name}}">{{_item.name}}</span>
-		</paper-material>
+
+	  <paper-material elevation="0" id="container" on-click="click" on-dblclick="dblclick">
+		  <paper-ripple></paper-ripple>
+		  <template is="dom-if" if="{{_item.isImage}}">
+			  <iron-image title="{{_item.url}}" preload fade id="imgthumb" sizing="contain" src="{{_item.url}}"></iron-image>
+		  </template>
+		  <template is="dom-if" if="{{!_item.isImage}}">
+			  <span class="ext">{{ _item.ext }}</span>
+		  </template>
+		  <span title="{{_item.name}}">{{_item.name}}</span>
+	  </paper-material>
 
   </template>
 </dom-module>

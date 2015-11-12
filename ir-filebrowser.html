@@ -95,6 +95,14 @@ Example:
 	#drawPocket {
 		border-left: 1px solid #e5e5e5;
 		padding: 5px;
+		overflow: auto
+	}
+
+	iron-image {
+		width : 150px;
+		height : 150px;
+		background: white;
+		background-size : 32px;
 	}
 
   </style>
@@ -153,11 +161,17 @@ Example:
 		<paper-dialog-scrollable id="scrollableDialog">
 			<paper-drawer-panel id="pocketDrawer" right-drawer>
 				<div id="drawPocket" drawer>
-					<p>{{ fName }} File Description</p>
-					<paper-input label="Caption" value="{{ fCaption }}"></paper-input>
-					<paper-input label="Description" value="{{ fDescription }}"></paper-input>
-					<paper-input label="Alt" value="{{ fAlt }}"></paper-input>
-					<paper-button on-click="updateDescription">update</paper-button>
+					<iron-image title="{{ fUrl }}" preload fade id="imgthumb" sizing="contain" src="{{ fUrl }}"></iron-image>
+					<p>{{ fName }}</p><h2> File info </h2>
+					<div hidden$="{{ !isInfo }}">
+						<paper-input label="Caption" value="{{ fCaption }}"></paper-input>
+						<paper-input label="Description" value="{{ fDescription }}"></paper-input>
+						<paper-input label="Alt" value="{{ fAlt }}"></paper-input>
+					</div>
+					<label hidden$="{{ isInfo }}">No information</label></br>
+					<label>Size : {{ fSize }} </label></br>
+					<label>Data : {{ fDate }} </label></br>
+					<paper-button on-click="updateDescription" raised>update</paper-button>
 				</div>
 				<iron-pages selected="{{tableselected}}"  main>
 					<div>

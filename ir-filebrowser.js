@@ -470,6 +470,21 @@ Remove specific item from selection. Note: all selected items matching the url w
 				if (!e.detail.isSelected) {
 					this.addSelection(e.detail.item);
 					e.detail.select();
+					var imgSize = e.detail.item.size/1000 + "Kb";
+					this.set('fUrl', e.detail.item.url);
+					this.set('fSize', imgSize);
+
+					var date = new Date(e.detail.item.birthtime);
+					var options = {
+						year: 'numeric',
+						month: 'numeric',
+						day: 'numeric',
+						timezone: 'UTC',
+						hour: 'numeric',
+						minute: 'numeric',
+						second: 'numeric'
+					};
+					this.set('fDate', date.toLocaleString("en-Us", options));
 				}
 				else {
 					this.removeSelection(e.detail.item);
@@ -483,7 +498,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			Polymer.dom.flush();
 
 			if(e.detail.isSelected)
-				this.$.pocketDrawer.drawerWidth = "25%";
+				this.$.pocketDrawer.drawerWidth = "35%";
 			else
 				this.$.pocketDrawer.drawerWidth = 0;
 
@@ -495,11 +510,15 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		showDrawer : function() {
-			this.fName = this.fileDescription.fileName;
-			this.fCaption = this.fileDescription.title;
-			this.fDescription = this.fileDescription.content;
-			this.fAlt = this.fileDescription.alt;
-			this.fileId = this.fileDescription.id;
+			this.set("fName", this.fileDescription.fileName);
+			this.set("fCaption", this.fileDescription.title);
+			this.set("fDescription", this.fileDescription.content);
+			this.set("fAlt", this.fileDescription.alt);
+			this.set("fileId", this.fileDescription.id);
+			if((this.fCaption && this.fDescription && this.fAlt) == "")
+				this.isInfo = false;
+			else
+				this.isInfo = true;
 		},
 
 		updateDescription : function() {
@@ -669,6 +688,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			fullView :			{ type : Boolean},
 			fullViewMode :		{ type : Boolean, value : false },
 			fileId :			{ type : Number},
+			isInfo : 			{ type : Boolean},
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },

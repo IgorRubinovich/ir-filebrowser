@@ -94,8 +94,17 @@ Example:
 
 	#drawPocket {
 		border-left: 1px solid #e5e5e5;
+		border-bottom: 1px solid #e5e5e5;
 		padding: 5px;
-		overflow: auto
+		overflow: auto;
+	}
+
+	#scrollableFiles {
+		overflow: auto;
+	}
+
+	.pocketButton {
+		padding: 15px 5px;
 	}
 
 	iron-image {
@@ -171,9 +180,9 @@ Example:
 					<label hidden$="{{ isInfo }}">No information</label></br>
 					<label>Size : {{ fSize }} </label></br>
 					<label>Data : {{ fDate }} </label></br>
-					<paper-button on-click="updateDescription" raised>update</paper-button>
+					<div class="pocketButton"><paper-button on-click="updateDescription" raised>update</paper-button></div>
 				</div>
-				<iron-pages selected="{{tableselected}}"  main>
+				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
 					<div>
 						<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
 							<div id="uploaderContainer">

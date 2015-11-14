@@ -497,7 +497,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._updateValue();
 			Polymer.dom.flush();
 
-			if(e.detail.isSelected)
+			if(e.detail.isSelected && !e.detail.item.isDirectory)
 				this.$.pocketDrawer.drawerWidth = "35%";
 			else
 				this.$.pocketDrawer.drawerWidth = 0;
@@ -510,15 +510,16 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		showDrawer : function() {
-			this.set("fName", this.fileDescription.fileName);
-			this.set("fCaption", this.fileDescription.title);
-			this.set("fDescription", this.fileDescription.content);
-			this.set("fAlt", this.fileDescription.alt);
-			this.set("fileId", this.fileDescription.id);
-			if((this.fCaption && this.fDescription && this.fAlt) == "")
+			if(!this.fileDescription)
 				this.isInfo = false;
-			else
+			else {
 				this.isInfo = true;
+				this.set("fName", this.fileDescription.fileName);
+				this.set("fCaption", this.fileDescription.title);
+				this.set("fDescription", this.fileDescription.content);
+				this.set("fAlt", this.fileDescription.alt);
+				this.set("fileId", this.fileDescription.id);
+			}
 		},
 
 		updateDescription : function() {

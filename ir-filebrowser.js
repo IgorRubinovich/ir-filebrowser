@@ -372,7 +372,6 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			if((this.meta.caption && this.meta.alt) == "")
 				this.promptCallback(this.value);
 			else
-				if(this.value.match(/\.([^\.]+)$/)[1])
 				this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'" + " alt='" + this.meta.alt + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 			this.clearSelection();
 			this.promptCallback = null;

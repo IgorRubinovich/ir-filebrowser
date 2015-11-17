@@ -369,10 +369,14 @@ Close dialog, call the callback with `this.value` and forget the callback.
 		promptSelect : function() {
 			console.log('prompt selected!')
 			this.hideDialog();
+			var ext = this.value.match(/\.([^\.]+)$/)[1];
 			if((this.meta.caption && this.meta.alt) == "")
 				this.promptCallback(this.value);
 			else
-				this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'" + " alt='" + this.meta.alt + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+			if(ext.match(/\.(mp4|ogg|webm|ogv)$/i))
+				this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+			else
+				this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 			this.clearSelection();
 			this.promptCallback = null;
 		},
@@ -524,7 +528,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.isInfo = false;
 			else {
 				this.isInfo = true;
-				this.set("fName", this.fileDescription.fileName);
+				this.set("fName", this.fileName);
 				this.set("meta.caption", this.fileDescription.title);
 				this.set("meta.description", this.fileDescription.content);
 				this.set("meta.alt", this.fileDescription.alt);

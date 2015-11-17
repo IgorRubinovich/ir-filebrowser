@@ -369,7 +369,11 @@ Close dialog, call the callback with `this.value` and forget the callback.
 		promptSelect : function() {
 			console.log('prompt selected!')
 			this.hideDialog();
-			this.promptCallback(this.value);
+			if((this.meta.caption && this.meta.alt) == "")
+				this.promptCallback(this.value);
+			else
+				if(this.value.match(/\.([^\.]+)$/)[1])
+				this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'" + " alt='" + this.meta.alt + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 			this.clearSelection();
 			this.promptCallback = null;
 		},
@@ -446,6 +450,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			this.removeSelection(this.deletedFile);
 		},
+
+		metaChanged : function() {
+			this.fire('captionChanged', { caption : this.meta.caption });
+		},
 		
 		/** Toggles clicked file */
 		clickFile : function (e) {
@@ -471,7 +479,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.addSelection(e.detail.item);
 					e.detail.select();
 					var imgSize = e.detail.item.size/1000 + "Kb";
-					this.set('fUrl', e.detail.item.url);
+					if(e.detail.item.isImage)
+						this.set('fUrl', e.detail.item.url);
+					else
+						this.set('fUrl', "");
 					this.set('fSize', imgSize);
 
 					var date = new Date(e.detail.item.birthtime);
@@ -515,15 +526,16 @@ Remove specific item from selection. Note: all selected items matching the url w
 			else {
 				this.isInfo = true;
 				this.set("fName", this.fileDescription.fileName);
-				this.set("fCaption", this.fileDescription.title);
-				this.set("fDescription", this.fileDescription.content);
-				this.set("fAlt", this.fileDescription.alt);
+				this.set("meta.caption", this.fileDescription.title);
+				this.set("meta.description", this.fileDescription.content);
+				this.set("meta.alt", this.fileDescription.alt);
 				this.set("fileId", this.fileDescription.id);
+				this.fire('captionChanged', { caption : this.meta.caption });
 			}
 		},
 
 		updateDescription : function() {
-			this.$.updateFile.body = { id : this.fileId, title : this.fCaption, content : this.fDescription, alt : this.fAlt };
+			this.$.updateFile.body = { id : this.fileId, title : this.meta.caption, content : this.meta.description, alt : this.meta.alt };
 			this.$.updateFile.contentType = "application/x-www-form-urlencoded";
 			this.$.updateFile.url = this._updatefileUrl;
 			this.$.updateFile.generateRequest();
@@ -690,6 +702,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			fullViewMode :		{ type : Boolean, value : false },
 			fileId :			{ type : Number},
 			isInfo : 			{ type : Boolean},
+			meta : 				{ type : Object, value : {
+								caption : "",
+								description : "",
+								alt : ""}},
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },

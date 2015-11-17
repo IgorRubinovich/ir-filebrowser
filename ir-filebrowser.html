@@ -173,9 +173,9 @@ Example:
 					<iron-image title="{{ fUrl }}" preload fade id="imgthumb" sizing="contain" src="{{ fUrl }}"></iron-image>
 					<p>{{ fName }}</p><h2> File info </h2>
 					<div hidden$="{{ !isInfo }}">
-						<paper-input label="Caption" value="{{ fCaption }}"></paper-input>
-						<paper-input label="Description" value="{{ fDescription }}"></paper-input>
-						<paper-input label="Alt" value="{{ fAlt }}"></paper-input>
+						<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}"></paper-input>
+						<paper-input label="Description" value="{{ meta.description }}"></paper-input>
+						<paper-input label="Alt" value="{{ meta.alt }}"></paper-input>
 					</div>
 					<label hidden$="{{ isInfo }}">No information</label></br>
 					<label>Size : {{ fSize }} </label></br>

@@ -487,6 +487,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					else
 						this.set('fUrl', "");
 					this.set('fSize', imgSize);
+					this.set('fName', this.fileName);
 
 					var date = new Date(e.detail.item.birthtime);
 					var options = {
@@ -528,7 +529,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.isInfo = false;
 			else {
 				this.isInfo = true;
-				this.set("fName", this.fileName);
+				this.set("fName", this.fileDescription.fileName);
 				this.set("meta.caption", this.fileDescription.title);
 				this.set("meta.description", this.fileDescription.content);
 				this.set("meta.alt", this.fileDescription.alt);

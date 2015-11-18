@@ -194,24 +194,42 @@
 					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				});
 			}
-			else {
-				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-				if (!this._maxWidth || (this._maxWidth < currentWidth))
-					this._maxWidth = currentWidth;
+			else
+				if(this.archiveMode)
+				{
+					this.$.dialog.refit();
 
-				this.$.dialog.refit();
+					this.async(function () {
+						this.$.dialog.fitInto = Polymer.dom(this).parentNode;
 
-				this.async(function () {
+						this.$.dialog.style.position = "";
+						this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
+						this.$.dialog.style.height = "auto";
+						this.$.dialog.style.zIndex = "0";
+
+						Polymer.updateStyles();
+						Polymer.dom.flush();
+					});
+				}
+				else
+				{
 					var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-					this.$.dialog.constrain();
-					this.$.dialog.style.width = this._maxWidth + "px";
-					this.$.dialog.center();
+					if (!this._maxWidth || (this._maxWidth < currentWidth))
+						this._maxWidth = currentWidth;
 
-					Polymer.dom.flush();
+					this.$.dialog.refit();
 
-					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
-				})
-			}
+					this.async(function () {
+						var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
+						this.$.dialog.constrain();
+						this.$.dialog.style.width = this._maxWidth + "px";
+						this.$.dialog.center();
+
+						Polymer.dom.flush();
+
+						this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
+					})
+				}
 
 			this.$.pocketDrawer.drawerWidth = 0;
 		},
@@ -616,7 +634,13 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.promptMode = "true";
 				this.fullViewMode = "true";
 				this.showDialog();
-			};
+			}
+
+			if(this.archiveMode)
+			{
+				this.promptMode = true;
+				this.showDialog();
+			}
 
 			if(this.promptMode)
 			{
@@ -701,16 +725,17 @@ Remove specific item from selection. Note: all selected items matching the url w
 			showFiles :			{ type : Boolean, value : true },
 			resize :			{ type : Boolean, value : true },
 
-			renameFiles :		{ type : Boolean, value : false},
+			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },
 			tempselected :		{ type : String, notify : false },
 			inputValue :		{ type : String },
 			fileName : 			{ type : String },
 			selectedDirectory : { type : Object },
-			fullView :			{ type : Boolean},
+			fullView :			{ type : Boolean} ,
 			fullViewMode :		{ type : Boolean, value : false },
-			fileId :			{ type : Number},
-			isInfo : 			{ type : Boolean},
+			archiveMode : 		{ type : Boolean },
+			fileId :			{ type : Number },
+			isInfo : 			{ type : Boolean },
 			meta : 				{ type : Object, value : {
 								caption : "",
 								description : "",

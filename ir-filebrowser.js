@@ -487,7 +487,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 					else
 						this.set('fUrl', "");
 					this.set('fSize', imgSize);
-					this.set('fName', this.fileName);
 
 					var date = new Date(e.detail.item.birthtime);
 					var options = {
@@ -513,7 +512,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			Polymer.dom.flush();
 
 			if(e.detail.isSelected && !e.detail.item.isDirectory)
-				this.$.pocketDrawer.drawerWidth = "35%";
+				this.$.pocketDrawer.drawerWidth = "33%";
 			else
 				this.$.pocketDrawer.drawerWidth = 0;
 
@@ -525,8 +524,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		showDrawer : function() {
-			if(!this.fileDescription)
+			if(!this.fileDescription){
 				this.isInfo = false;
+				this.set("fName", this.fileName);
+				this.set("meta.caption", "");
+				this.set("meta.description", "");
+				this.set("meta.alt", "");
+				this.set("fileId", "");
+			}
 			else {
 				this.isInfo = true;
 				this.set("fName", this.fileDescription.fileName);

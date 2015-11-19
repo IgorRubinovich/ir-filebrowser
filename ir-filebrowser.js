@@ -206,7 +206,7 @@
 						this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
 						this.$.dialog.style.height = "auto";
 						this.$.dialog.style.zIndex = "0";
-
+						
 						Polymer.updateStyles();
 						Polymer.dom.flush();
 					});

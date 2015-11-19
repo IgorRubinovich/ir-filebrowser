@@ -194,24 +194,42 @@
 					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				});
 			}
-			else {
-				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-				if (!this._maxWidth || (this._maxWidth < currentWidth))
-					this._maxWidth = currentWidth;
+			else
+				if(this.archiveMode)
+				{
+					this.$.dialog.refit();
 
-				this.$.dialog.refit();
+					this.async(function () {
+						this.$.dialog.fitInto = Polymer.dom(this).parentNode;
 
-				this.async(function () {
+						this.$.dialog.style.position = "";
+						this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
+						this.$.dialog.style.height = "auto";
+						this.$.dialog.style.zIndex = "0";
+
+						Polymer.updateStyles();
+						Polymer.dom.flush();
+					});
+				}
+				else
+				{
 					var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-					this.$.dialog.constrain();
-					this.$.dialog.style.width = this._maxWidth + "px";
-					this.$.dialog.center();
+					if (!this._maxWidth || (this._maxWidth < currentWidth))
+						this._maxWidth = currentWidth;
 
-					Polymer.dom.flush();
+					this.$.dialog.refit();
 
-					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
-				})
-			}
+					this.async(function () {
+						var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
+						this.$.dialog.constrain();
+						this.$.dialog.style.width = this._maxWidth + "px";
+						this.$.dialog.center();
+
+						Polymer.dom.flush();
+
+						this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
+					})
+				}
 
 			this.$.pocketDrawer.drawerWidth = 0;
 		},
@@ -370,13 +388,26 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			console.log('prompt selected!')
 			this.hideDialog();
 			var ext = this.value.match(/\.([^\.]+)$/)[1];
-			if((this.meta.caption && this.meta.alt) == "")
-				this.promptCallback(this.value);
+			var selectedFiles = this.value.split(',');
+			var i, j;
+
+			if(selectedFiles.length > 1)
+				for(i = 0; i < selectedFiles.length; i++)
+					{
+						if(this.fileCaptions[selectedFiles[i]] == "")
+							this.promptCallback(selectedFiles[i]);
+						else
+							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>")
+					}
 			else
-			if(ext.match(/\.(mp4|ogg|webm|ogv)$/i))
-				this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
-			else
-				this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+				if((this.meta.caption && this.meta.alt) == "")
+					this.promptCallback(this.value);
+				else
+				if(ext.match(/\.(mp4|ogg|webm|ogv)$/i))
+					this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+				else
+					this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+
 			this.clearSelection();
 			this.promptCallback = null;
 		},
@@ -531,6 +562,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.set("meta.description", "");
 				this.set("meta.alt", "");
 				this.set("fileId", "");
+				this.fileCaptions[this.fUrl] = "";
 			}
 			else {
 				this.isInfo = true;
@@ -540,6 +572,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.set("meta.alt", this.fileDescription.alt);
 				this.set("fileId", this.fileDescription.id);
 				this.fire('captionChanged', { caption : this.meta.caption });
+				this.fileCaptions[this.fUrl] = this.meta.caption;
 			}
 		},
 
@@ -616,12 +649,18 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.promptMode = "true";
 				this.fullViewMode = "true";
 				this.showDialog();
-			};
+			}
+
+			if(this.archiveMode)
+			{
+				this.promptMode = true;
+				this.showDialog();
+			}
 
 			if(this.promptMode)
 			{
 				this.$.dialog.modal = true;			
-				this.maxItems = 1;
+				this.maxItems = 10;
 				this.autoPreview = false; // until there's a better way
 			}
 			
@@ -701,20 +740,22 @@ Remove specific item from selection. Note: all selected items matching the url w
 			showFiles :			{ type : Boolean, value : true },
 			resize :			{ type : Boolean, value : true },
 
-			renameFiles :		{ type : Boolean, value : false},
+			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },
 			tempselected :		{ type : String, notify : false },
 			inputValue :		{ type : String },
 			fileName : 			{ type : String },
 			selectedDirectory : { type : Object },
-			fullView :			{ type : Boolean},
+			fullView :			{ type : Boolean} ,
 			fullViewMode :		{ type : Boolean, value : false },
-			fileId :			{ type : Number},
-			isInfo : 			{ type : Boolean},
+			archiveMode : 		{ type : Boolean },
+			fileId :			{ type : Number },
+			isInfo : 			{ type : Boolean },
 			meta : 				{ type : Object, value : {
 								caption : "",
 								description : "",
 								alt : ""}},
+			fileCaptions :		{ type : Array, value : {} },
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },

@@ -149,7 +149,7 @@ Example:
 						<paper-icon-button icon="clear" on-tap="filterClear">
 						</paper-icon-button>
 					</div>
-					<div class="layout horizontal center">
+					<div class="layout horizontal center" hidden$="{{ archiveMode }}">
 						<paper-item>
 							<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
 						</paper-item>
@@ -173,14 +173,14 @@ Example:
 					<iron-image title="{{ fUrl }}" preload fade id="imgthumb" sizing="contain" src="{{ fUrl }}"></iron-image>
 					<p>{{ fName }}</p><h2> File info </h2>
 					<div hidden$="{{ !isInfo }}">
-						<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}"></paper-input>
-						<paper-input label="Description" value="{{ meta.description }}"></paper-input>
-						<paper-input label="Alt" value="{{ meta.alt }}"></paper-input>
+						<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" disabled="{{ archiveMode }}"></paper-input>
+						<paper-input label="Description" value="{{ meta.description }}" disabled="{{ archiveMode }}"></paper-input>
+						<paper-input label="Alt" value="{{ meta.alt }}" disabled="{{ archiveMode }}"></paper-input>
 					</div>
 					<label hidden$="{{ isInfo }}">No information</label></br>
 					<label>Size : {{ fSize }} </label></br>
 					<label>Date : {{ fDate }} </label></br>
-					<div class="pocketButton"><paper-button on-click="updateDescription" raised>update</paper-button></div>
+					<div class="pocketButton" hidden$="{{ archiveMode }}"><paper-button on-click="updateDescription" raised>update</paper-button></div>
 				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
 					<div>
@@ -224,7 +224,7 @@ Example:
 			</paper-drawer-panel>
 		</paper-dialog-scrollable>
 
-		<div id="bottomButtons" class="buttons">
+		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
 			<div class="buttons">
 				Drag and drop files into this dialog to upload to the current directory.
 				<div hidden$="{{ fullViewMode }}">

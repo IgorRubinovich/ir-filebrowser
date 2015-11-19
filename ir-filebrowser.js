@@ -206,7 +206,7 @@
 						this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
 						this.$.dialog.style.height = "auto";
 						this.$.dialog.style.zIndex = "0";
-						
+
 						Polymer.updateStyles();
 						Polymer.dom.flush();
 					});
@@ -659,8 +659,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			if(this.promptMode)
 			{
-				this.$.dialog.modal = true;			
-				this.maxItems = 10;
+				this.$.dialog.modal = true;
 				this.autoPreview = false; // until there's a better way
 			}
 			

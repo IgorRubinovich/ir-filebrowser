@@ -294,13 +294,17 @@
 		},
 
 		deleteFile : function() {
-			var askUser = confirm("Are you sure you want to delete " + this.fileName + "?");
-			if (askUser == true) {
-				this.$.deletefileloader.body = {name : this.fileName, fpath : this.relPath};
-				this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
-				this.$.deletefileloader.url = this._deletefileUrl;
-				this.$.deletefileloader.generateRequest();
-			};
+			if(this.fileName !== undefined) {
+				var askUser = confirm("Are you sure you want to delete " + this.fileName + "?");
+				if (askUser == true) {
+					this.$.deletefileloader.body = {name: this.fileName, fpath: this.relPath};
+					this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
+					this.$.deletefileloader.url = this._deletefileUrl;
+					this.$.deletefileloader.generateRequest();
+				}
+			}
+			else
+				alert("Choose file to delete");
 		},
 		
 		filterClear : function() {

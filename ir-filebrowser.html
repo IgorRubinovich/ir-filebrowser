@@ -178,6 +178,8 @@ Example:
 						<paper-input label="Alt" value="{{ meta.alt }}" disabled="{{ archiveMode }}"></paper-input>
 					</div>
 					<label hidden$="{{ isInfo }}">No information</label></br>
+					<label hidden$="{{ isntImg }}">Img width : {{ meta.width }} </label></br>
+					<label hidden$="{{ isntImg }}">Img height : {{ meta.height }} </label></br> 
 					<label>Size : {{ fSize }} </label></br>
 					<label>Date : {{ fDate }} </label></br>
 					<div class="pocketButton" hidden$="{{ archiveMode }}"><paper-button on-click="updateDescription" raised>update</paper-button></div>

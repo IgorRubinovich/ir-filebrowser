@@ -516,12 +516,20 @@ Remove specific item from selection. Note: all selected items matching the url w
 				if (!e.detail.isSelected) {
 					this.addSelection(e.detail.item);
 					e.detail.select();
-					var imgSize = e.detail.item.size/1000 + "Kb";
+					var fileSize = e.detail.item.size/1000 + "Kb";
 					if(e.detail.item.isImage)
+					{
+						this.isntImg = false;
+
 						this.set('fUrl', e.detail.item.url);
+					}
 					else
+					{
+						this.isntImg = true; 
+
 						this.set('fUrl', "");
-					this.set('fSize', imgSize);
+					}
+					this.set('fSize', fileSize);
 
 					var date = new Date(e.detail.item.birthtime);
 					var options = {
@@ -565,6 +573,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.set("meta.caption", "");
 				this.set("meta.description", "");
 				this.set("meta.alt", "");
+				this.set("meta.height", "");
+				this.set("meta.width", "");
 				this.set("fileId", "");
 				this.fileCaptions[this.fUrl] = "";
 			}
@@ -574,6 +584,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.set("meta.caption", this.fileDescription.title);
 				this.set("meta.description", this.fileDescription.content);
 				this.set("meta.alt", this.fileDescription.alt);
+				this.set("meta.height", this.fileDescription.height);
+				this.set("meta.width", this.fileDescription.width);
 				this.set("fileId", this.fileDescription.id);
 				this.fire('captionChanged', { caption : this.meta.caption });
 				this.fileCaptions[this.fUrl] = this.meta.caption;
@@ -587,8 +599,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.updateFile.generateRequest();
 		},
 
-		closeDrawer : function() {
+		closeDrawer : function(relPath) {
 			this.$.pocketDrawer.drawerWidth = 0;
+			this.ls(relPath);
 		},
 		
 		/** Updates .value for ir-reflect-to-native-behavior */
@@ -757,8 +770,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 			meta : 				{ type : Object, value : {
 								caption : "",
 								description : "",
-								alt : ""}},
+								alt : "",
+								width : "",
+								height : ""}},
 			fileCaptions :		{ type : Array, value : {} },
+
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },

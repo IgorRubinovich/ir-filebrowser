@@ -398,16 +398,16 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			if(selectedFiles.length > 1)
 				for(i = 0; i < selectedFiles.length; i++)
 					{
-						if(this.fileCaptions[selectedFiles[i]] == "")
+						if(!this.fileCaptions[selectedFiles[i]])
 							this.promptCallback(selectedFiles[i]);
 						else
 							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>")
 					}
 			else
-				if((this.meta.caption && this.meta.alt) == "")
+				if(!this.meta.caption && !this.meta.alt)
 					this.promptCallback(this.value);
 				else
-				if(ext.match(/\.(mp4|ogg|webm|ogv)$/i))
+				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
 					this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 				else
 					this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");

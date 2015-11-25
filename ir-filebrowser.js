@@ -231,7 +231,6 @@
 					})
 				}
 
-			this.$.pocketDrawer.drawerWidth = 0;
 		},
 
 		makeDir : function(relPath) {
@@ -258,7 +257,7 @@
 
 		findFile : function() {
 			if (this.inputValue !== null){
-				this.$.findfileloader.url = this._findfileUrl.replace(/\[path\]/, this.inputValue);  //"/medialib/json/find/" + this.inputValue;
+				this.$.findfileloader.url = this._findfileUrl.replace(/\[path\]/, encodeURIComponent(this.inputValue).replace('-', '%2D').replace('.', '%2E').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21"));  //"/medialib/json/find/" + this.inputValue;
 				this.$.findfileloader.generateRequest();
 			};
 		},
@@ -283,7 +282,7 @@
 				var fname = this.fileName,
 					rename = prompt("New file name", fname);
 				if ((fname && rename) !== null) {
-					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, fname);  //"/medialib/json/rename/" + fname;
+					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, encodeURIComponent(fname).replace('.', '%2E').replace('-', '%2D').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21"));  //"/medialib/json/rename/" + fname;
 					this.$.renamefileloader.contentType = "application/x-www-form-urlencoded";
 					this.$.renamefileloader.body = {name: rename, fpath : this.relPath};
 					this.$.renamefileloader.generateRequest();
@@ -410,7 +409,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
 					this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 				else
-					this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+					this.promptCallback("<div class='caption-wrapper'>" + "<ir-gallery><img src='" + this.value + "'></ir-gallery>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 
 			this.clearSelection();
 			this.promptCallback = null;
@@ -542,6 +541,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 						second: 'numeric'
 					};
 					this.set('fDate', date.toLocaleString("en-Us", options));
+
+					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, encodeURIComponent(this.fileName).replace('-', '%2D').replace('.', '%2E').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21").replace('.', '%2E') + 'nocache');
+					this.$.getDescription.generateRequest();
 				}
 				else {
 					this.removeSelection(e.detail.item);
@@ -553,20 +555,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			this._updateValue();
 			Polymer.dom.flush();
-
-			if(e.detail.isSelected && !e.detail.item.isDirectory)
-				this.$.pocketDrawer.drawerWidth = "33%";
-			else
-				this.$.pocketDrawer.drawerWidth = 0;
-
-
-			this.$.getDescription.body = {name : this.fileName};
-			this.$.getDescription.contentType = "application/x-www-form-urlencoded";
-			this.$.getDescription.url = this._getdescriptionUrl;
-			this.$.getDescription.generateRequest();
 		},
 
-		showDrawer : function() {
+		showDescription : function() {
 			if(!this.fileDescription){
 				this.isInfo = false;
 				this.set("fName", this.fileName);
@@ -597,11 +588,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.updateFile.contentType = "application/x-www-form-urlencoded";
 			this.$.updateFile.url = this._updatefileUrl;
 			this.$.updateFile.generateRequest();
-		},
-
-		closeDrawer : function(relPath) {
-			this.$.pocketDrawer.drawerWidth = 0;
-			this.ls(relPath);
 		},
 		
 		/** Updates .value for ir-reflect-to-native-behavior */
@@ -650,7 +636,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.async(function() {
 				this.refitDialog()
 			});
-			this.$.pocketDrawer.drawerWidth = 0;
 		},
 		
 		hideDialog : function (e) {
@@ -679,8 +664,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.$.dialog.modal = true;
 				this.autoPreview = false; // until there's a better way
 			}
+
+			this.$.pocketDrawer.drawerWidth = "33%";
 			
-			this._urlsChanged();-
+			this._urlsChanged();
 			this.setupBrowser();
 			
 			// this.$.scrollableDialog.assignParentResizeable(this.$.dialog);

@@ -103,10 +103,6 @@ Example:
 		overflow: auto;
 	}
 
-	.pocketButton {
-		padding: 15px 5px;
-	}
-
 	iron-image {
 		width : 150px;
 		height : 150px;
@@ -173,16 +169,14 @@ Example:
 					<iron-image title="{{ fUrl }}" preload fade id="imgthumb" sizing="contain" src="{{ fUrl }}"></iron-image>
 					<p>{{ fName }}</p><h2> File info </h2>
 					<div hidden$="{{ !isInfo }}">
-						<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" disabled="{{ archiveMode }}"></paper-input>
-						<paper-input label="Description" value="{{ meta.description }}" disabled="{{ archiveMode }}"></paper-input>
-						<paper-input label="Alt" value="{{ meta.alt }}" disabled="{{ archiveMode }}"></paper-input>
+						<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+						<paper-input label="Description" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+						<paper-input label="Alt" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 					</div>
 					<label hidden$="{{ isInfo }}">No information</label></br>
-					<label hidden$="{{ isntImg }}">Img width : {{ meta.width }} </label></br>
-					<label hidden$="{{ isntImg }}">Img height : {{ meta.height }} </label></br> 
+					<label hidden$="{{ isntImg }}"><span>{{ meta.width }}</span> x <span>{{ meta.height }}</span></label></br>
 					<label>Size : {{ fSize }} </label></br>
 					<label>Date : {{ fDate }} </label></br>
-					<div class="pocketButton" hidden$="{{ archiveMode }}"><paper-button on-click="updateDescription" raised>update</paper-button></div>
 				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
 					<div>
@@ -300,11 +294,11 @@ Example:
 
 	<iron-ajax
 		id="getDescription"
-		method="POST"
+		method="GET"
 		handle-as="json"
 		debounce-duration="300"
 		last-response="{{ fileDescription }}"
-		on-response="showDrawer"
+		on-response="showDescription"
 		verbose="true">
 	</iron-ajax>
 
@@ -313,7 +307,6 @@ Example:
 		method="POST"
 		handle-as="json"
 		debounce-duration="300"
-		on-response="closeDrawer"
 		verbose="true">
 	</iron-ajax>
 

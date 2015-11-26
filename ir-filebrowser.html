@@ -109,6 +109,11 @@ Example:
 		background: white;
 		background-size : 32px;
 	}
+	
+	#bottomButtons, file-upload {
+		overflow : hidden;
+		max-height : 71px;
+	}
 
   </style>
   <template>
@@ -180,30 +185,28 @@ Example:
 				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
 					<div>
-						<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi>
-							<div id="uploaderContainer">
-								<template is="dom-if" if="{{showDirectories}}">
-									<template hidden$="{{ showDirectories}}" is="dom-repeat" items="{{directories}}">
-										<ir-filebrowser-item
-												on-item-dblclick="dblclickDirectory"
-												on-item-click="clickFile"
-												index="{{ index }}"
-												item="{{ item }}">
-										</ir-filebrowser-item>
-									</template>
+						<div id="uploaderContainer">
+							<template is="dom-if" if="{{showDirectories}}">
+								<template hidden$="{{ showDirectories}}" is="dom-repeat" items="{{directories}}">
+									<ir-filebrowser-item
+											on-item-dblclick="dblclickDirectory"
+											on-item-click="clickFile"
+											index="{{ index }}"
+											item="{{ item }}">
+									</ir-filebrowser-item>
 								</template>
-								<template is="dom-if" if="{{showFiles}}">
-									<template is="dom-repeat" items="{{files}}">
-										<ir-filebrowser-item
-												on-item-dblclick="dblclickFile"
-												on-item-click="clickFile"
-												index="{{ index }}"
-												item="{{ item }}">
-										</ir-filebrowser-item>
-									</template>
+							</template>
+							<template is="dom-if" if="{{showFiles}}">
+								<template is="dom-repeat" items="{{files}}">
+									<ir-filebrowser-item
+											on-item-dblclick="dblclickFile"
+											on-item-click="clickFile"
+											index="{{ index }}"
+											item="{{ item }}">
+									</ir-filebrowser-item>
 								</template>
-							</div>
-							</file-upload>
+							</template>
+						</div>
 					</div>
 					<div>
 						<div class="layout horizontal">
@@ -221,8 +224,10 @@ Example:
 		</paper-dialog-scrollable>
 
 		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
+			<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi progress-timeout="100">
+				<paper-button>Browse...</paper-button> or drop files into the dialog
+			</file-upload>
 			<div class="buttons">
-				Drag and drop files into this dialog to upload to the current directory.
 				<div hidden$="{{ fullViewMode }}">
 				<span class="layout horizontal" hidden$="{{ !promptMode }}">
 					<paper-button raised on-click="hideDialog">Cancel</paper-button>

@@ -56,14 +56,12 @@
 				if(/\.{2,}/.test(relPath))
 				{
 					this.status = 403;
-					throw new Error("Can not use .. in path");
+					throw new Error("Cannot use .. in path");
 
 				};
 
 				this.relPath = relPath;
 			}
-
-
 
 			if(this.relPath)
 				this.relPath += '/';
@@ -471,7 +469,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				fstat = this.renamedFile,
 				that = this;
 
-			this.ls(relPath);
+			this.ls();
 
 			this._getSelectionElements()
 				.forEach(function(el) {
@@ -622,8 +620,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 		setupBrowser: function() {
 			if(!this.setupDone)
 			{
-				this.$.fileUploader.setupDrop();
-				this.$.fileUploader._fileClick = function () {}; //setupDrop(this.$.selectorContainer);
+				this.$.fileUploader.setupDrop(this.$.dialog);
+				//this.$.fileUploader._fileClick = function () {}; //setupDrop(this.$.selectorContainer);
 				this.setupDone = true;
 			}
 		},

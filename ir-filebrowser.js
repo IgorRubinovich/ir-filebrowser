@@ -255,7 +255,7 @@
 
 		findFile : function() {
 			if (this.inputValue !== null){
-				this.$.findfileloader.url = this._findfileUrl.replace(/\[path\]/, this.inputValue.replace('-', '%2D'));  //"/medialib/json/find/" + this.inputValue;
+				this.$.findfileloader.url = this._findfileUrl.replace(/\[path\]/, encodeURIComponent(this.inputValue).replace('-', '%2D').replace('.', '%2E').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21"));  //"/medialib/json/find/" + this.inputValue;
 				this.$.findfileloader.generateRequest();
 			};
 		},
@@ -280,7 +280,7 @@
 				var fname = this.fileName,
 					rename = prompt("New file name", fname);
 				if ((fname && rename) !== null) {
-					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, fname.replace('-', '%2D'));  //"/medialib/json/rename/" + fname;
+					this.$.renamefileloader.url = this._renameUrl.replace(/\[path\]/, encodeURIComponent(fname).replace('.', '%2E').replace('-', '%2D').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21"));  //"/medialib/json/rename/" + fname;
 					this.$.renamefileloader.contentType = "application/x-www-form-urlencoded";
 					this.$.renamefileloader.body = {name: rename, fpath : this.relPath};
 					this.$.renamefileloader.generateRequest();
@@ -540,7 +540,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					};
 					this.set('fDate', date.toLocaleString("en-Us", options));
 
-					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, this.fileName.replace('-', '%2D') + 'nocache');
+					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, encodeURIComponent(this.fileName).replace('-', '%2D').replace('.', '%2E').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21").replace('.', '%2E') + 'nocache');
 					this.$.getDescription.generateRequest();
 				}
 				else {

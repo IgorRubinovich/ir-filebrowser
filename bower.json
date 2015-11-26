@@ -28,6 +28,6 @@
     "paper-input": "polymerelements/paper-input#~1.0.15",
     "paper-ripple": "PolymerElements/paper-ripple#~1.0.2",
     "paper-tabs": "polymerelements/paper-tabs#~1.0.4",
-    "file-upload": "git@github.com:IgorRubinovich/file-upload.git"
+    "file-upload": "git@github.com:IgorRubinovich/file-upload.git#master"
   }
 }

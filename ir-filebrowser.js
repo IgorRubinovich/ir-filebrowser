@@ -540,7 +540,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					};
 					this.set('fDate', date.toLocaleString("en-Us", options));
 
-					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, encodeURIComponent(this.fileName).replace(/-/g, '%2D').replace(/\./g, '%2E').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21").replace('.', '%2E') + 'nocache');
+					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, this.fileName.replace(/-/g, "%2E"));
 					this.$.getDescription.generateRequest();
 				}
 				else {

@@ -294,6 +294,7 @@
 			if(this.fileName !== undefined) {
 				var askUser = confirm("Are you sure you want to delete " + this.fileName + "?");
 				if (askUser == true) {
+					this.set('withoutFile', true);
 					this.$.deletefileloader.body = {name: this.fileName, fpath: this.relPath};
 					this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
 					this.$.deletefileloader.url = this._deletefileUrl;
@@ -539,6 +540,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 						second: 'numeric'
 					};
 					this.set('fDate', date.toLocaleString("en-Us", options));
+					this.set('withoutFile', false);
 
 					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, this.fileName.replace(/-/g, "%2E"));
 					this.$.getDescription.generateRequest();
@@ -752,6 +754,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			archiveMode : 		{ type : Boolean },
 			fileId :			{ type : Number },
 			isInfo : 			{ type : Boolean },
+			withoutFile : 		{ type : Boolean, value : true},
 			meta : 				{ type : Object, value : {
 								caption : "",
 								description : "",

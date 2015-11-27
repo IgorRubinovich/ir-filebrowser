@@ -32,7 +32,7 @@ Example:
 <!-- link rel="import" href="./iron-select-item.html" -->
 
 <dom-module id="ir-filebrowser">
-  <style>
+  <style is="custom-style">
     :host {	
     }
     @media (max-width: 600px) {
@@ -88,10 +88,6 @@ Example:
 		margin-right : 10px;
 	}
 
-	.buttons {
-		display: flex;
-	}
-
 	#drawPocket {
 		border-left: 1px solid #e5e5e5;
 		border-bottom: 1px solid #e5e5e5;
@@ -110,9 +106,32 @@ Example:
 		background-size : 32px;
 	}
 	
+	.buttons {
+		display: flex;
+		align-items : center;
+		justify-content : space-between;
+	}
+
 	#bottomButtons, file-upload {
 		overflow : hidden;
-		max-height : 71px;
+	}
+	
+	#bottomButtons {
+		display : flex;
+		justify-content : space-between;
+	}
+	
+	#fileUploaderContainer {
+		margin-bottom : 5px;
+		max-height : 55px;
+		overflow : hidden;
+		display : flex;
+		--upload-border-style : {
+			display : flex;
+			flex-direction : row;
+			padding : 0;
+			margin : 0;
+		};
 	}
 
   </style>
@@ -189,8 +208,8 @@ Example:
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
 					<div>
 						<div id="uploaderContainer">
-							<template is="dom-if" if="{{showDirectories}}">
-								<template hidden$="{{ showDirectories}}" is="dom-repeat" items="{{directories}}">
+							<template is="dom-if" if="{{ showDirectories }}">
+								<template hidden$="{{ showDirectories }}" is="dom-repeat" items="{{directories}}">
 									<ir-filebrowser-item
 											on-item-dblclick="dblclickDirectory"
 											on-item-click="clickFile"
@@ -227,9 +246,13 @@ Example:
 		</paper-dialog-scrollable>
 
 		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
-			<file-upload id="fileUploader" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi progress-timeout="100">
-				<paper-button>Browse...</paper-button> or drop files into the dialog
-			</file-upload>
+			<div id="fileUploaderContainer">
+				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi progress-timeout="0">
+					<div hidden$="[[ isUploadingFiles ]]">
+						<paper-button raised>Browse...</paper-button> or drop files into this dialog
+					</div>
+				</file-upload>
+			</div>
 			<div class="buttons">
 				<div hidden$="{{ fullViewMode }}">
 				<span class="layout horizontal" hidden$="{{ !promptMode }}">

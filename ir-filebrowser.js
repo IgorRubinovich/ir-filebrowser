@@ -619,13 +619,19 @@ Remove specific item from selection. Note: all selected items matching the url w
 			//this.preview = true;			
 		},
 
-		setupBrowser: function() {
+		setupUploader: function() {
+			var that = this;
 			if(!this.setupDone)
 			{
 				this.$.fileUploader.setupDrop(this.$.dialog);
 				//this.$.fileUploader._fileClick = function () {}; //setupDrop(this.$.selectorContainer);
 				this.setupDone = true;
 			}
+		},
+		
+		filesChanged : function() {
+			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
+			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
 		},
 
 		showDialog : function(relPath) {
@@ -668,7 +674,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.pocketDrawer.drawerWidth = "33%";
 			
 			this._urlsChanged();
-			this.setupBrowser();
+			this.setupUploader();
 			
 			// this.$.scrollableDialog.assignParentResizeable(this.$.dialog);
 
@@ -763,7 +769,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 								height : ""}},
 			fileCaptions :		{ type : Array, value : {} },
 
-
+			isUploadingFiles : { type : Boolean },
+				
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },
 

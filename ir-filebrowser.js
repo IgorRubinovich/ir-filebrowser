@@ -305,6 +305,11 @@
 				alert("Choose file to delete");
 		},
 		
+		cannotDelete : function() {
+			if(this.deleteFileError)
+				alert("Could not delete directory, make sure it's empty");
+		},
+	
 		filterClear : function() {
 			this.set("filterValue", '');
 			this.ls();

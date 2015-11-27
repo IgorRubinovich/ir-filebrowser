@@ -318,7 +318,8 @@ Example:
 		debounce-duration="300"
 		last-response="{{ deletedFile }}"
 		on-response="deleteSelectionElement"
-		last-error="{{ lastError }}"
+		on-error="cannotDelete"
+		last-error="{{ deleteFileError }}"
 		verbose=true
 		>
 	</iron-ajax>

@@ -413,7 +413,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
 					this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 				else
-					this.promptCallback("<div class='caption-wrapper'>" + "<ir-gallery><img src='" + this.value + "'></ir-gallery>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+					this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 
 			this.clearSelection();
 			this.promptCallback = null;

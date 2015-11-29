@@ -55,9 +55,12 @@ Example:
 	}
 	
 	.browserDialog {
-
     }
 
+	#dialog {
+		padding : 10px;
+	}
+	
 	file-upload {
 		--button-content-align : left;
 	}
@@ -92,7 +95,7 @@ Example:
 		border-left: 1px solid #e5e5e5;
 		border-bottom: 1px solid #e5e5e5;
 		padding: 5px;
-		overflow: auto;
+		overflow-x : hidden;
 	}
 
 	#scrollableFiles {
@@ -132,6 +135,23 @@ Example:
 			padding : 0;
 			margin : 0;
 		};
+	}
+	
+	#imgpreview {
+		float : right;
+		width : 50%;
+	}
+	
+	.clearfloat
+	{
+		clear : both;
+	}
+	
+	#fileInfo label{
+		margin-top: 5px;
+		font-size: smaller;
+		display: block;
+		color: grey;
 	}
 
   </style>
@@ -180,9 +200,9 @@ Example:
 							<paper-checkbox on-tap="clickResizeSwitch" checked="true">resize</paper-checkbox>
 						</paper-item>
 						<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
-						<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add directory</paper-button>
-						<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename file</paper-button>
-						<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete file</paper-button>
+						<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
+						<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename</paper-button>
+						<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete</paper-button>
 					</div>
 				</div>
 			</iron-pages>
@@ -190,19 +210,22 @@ Example:
 		<paper-dialog-scrollable id="scrollableDialog">
 			<paper-drawer-panel id="pocketDrawer" right-drawer>
 				<div id="drawPocket" drawer>
-					<iron-image title="{{ fUrl }}" preload hidden$="{{ withoutFile }}" fade id="imgthumb" sizing="contain" src="{{ fUrl }}"></iron-image>
-					<p hidden$="{{ withoutFile }}">{{ fName }}</p><h2> File info </h2></br>
-					<p hidden$="{{ !withoutFile }}">Select file to view information.</p>
-					<div hidden$="{{ withoutFile }}">
-						<div hidden$="{{ !isInfo }}">
+					<p hidden$="{{ !noFile }}">File info will appear here</p>
+					<div id="fileInfo" hidden$="{{ noFile }}">
+						<div>{{ fName }}</div>
+						<div id="imgpreview" hidden$="{{ noImage }}">
+							<iron-image title="{{ fUrl }}" preload fade sizing="contain" src="{{ fUrl }}"></iron-image>
+						</div>
+						<label>Size</label><div>{{ fSize }}</div>
+						<label>Date</label><div>{{ fDate }}</div>
+						<span hidden$="{{ noImage }}"><label>Image Dimensions</label><div><span>{{ meta.width }}</span> x <span>{{ meta.height }}</span></div></span>
+						<div class="clearfloat"></div>
+						<div hidden$="{{ hasInfo }}">No information</div>
+						<div hidden$="{{ !hasInfo }}">
 							<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 							<paper-input label="Description" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 							<paper-input label="Alt" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-						</div>
-						<label hidden$="{{ isInfo }}">No information</label></br>
-						<label hidden$="{{ isntImg }}"><span>{{ meta.width }}</span> x <span>{{ meta.height }}</span></label></br>
-						<label>Size : {{ fSize }} </label></br>
-						<label>Date : {{ fDate }} </label></br>
+						</div>						
 					</div>
 				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
@@ -349,15 +372,15 @@ Example:
   <style>
 	:host
 	{
-		width  : 150px;
+		width  : 140px;
 		display : inline-block;
 		overflow : hidden;
 		text-align : center;
 		padding : 0;
 	}
 	iron-image {
-		width : 150px;
-		height : 150px;
+		width : 140px;
+		height : 140px;
 		background: white;
 		background-size : 32px;
 	}

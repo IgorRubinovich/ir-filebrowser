@@ -191,44 +191,49 @@
 					this.$.scrollableDialog.style.height = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				});
+				
+				return;
 			}
-			else
-				if(this.archiveMode)
-				{
-					this.$.dialog.refit();
+			if(this.archiveMode)
+			{
+				this.$.dialog.refit();
 
-					this.async(function () {
-						this.$.dialog.fitInto = Polymer.dom(this).parentNode;
+				this.async(function () {
+					this.$.dialog.fitInto = Polymer.dom(this).parentNode;
 
-						this.$.dialog.style.position = "";
-						this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
-						this.$.dialog.style.height = "auto";
-						this.$.dialog.style.zIndex = "0";
+					this.$.dialog.style.position = "";
+					this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
+					this.$.dialog.style.height = "auto";
+					this.$.dialog.style.zIndex = "0";
 
-						Polymer.updateStyles();
-						Polymer.dom.flush();
-					});
-				}
-				else
-				{
-					var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-					if (!this._maxWidth || (this._maxWidth < currentWidth))
-						this._maxWidth = currentWidth;
+					Polymer.updateStyles();
+					Polymer.dom.flush();
+				});
+				
+				return;
+			}
 
-					this.$.dialog.refit();
+			// else
+			
+			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
+			if (!this._maxWidth || (this._maxWidth < currentWidth))
+				this._maxWidth = currentWidth;
 
-					this.async(function () {
-						var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-						this.$.dialog.constrain();
-						this.$.dialog.style.width = this._maxWidth + "px";
-						this.$.dialog.center();
+			this.$.dialog.refit();
 
-						Polymer.dom.flush();
+			this.async(function () {
+				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
+				this.$.dialog.left="33%";
+				this.$.dialog.right="33%";
+				
+				this.$.dialog.constrain();
+				this.$.dialog.style.width = this._maxWidth + "px";
+				this.$.dialog.center();
+				
+				Polymer.dom.flush();
 
-						this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
-					})
-				}
-
+				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
+			})
 		},
 
 		makeDir : function(relPath) {
@@ -294,7 +299,7 @@
 			if(this.fileName !== undefined) {
 				var askUser = confirm("Are you sure you want to delete " + this.fileName + "?");
 				if (askUser == true) {
-					this.set('withoutFile', true);
+					this.set('noFile', true);
 					this.$.deletefileloader.body = {name: this.fileName, fpath: this.relPath};
 					this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
 					this.$.deletefileloader.url = this._deletefileUrl;
@@ -392,7 +397,11 @@ Open dialog in prompt mode - i. e. Select and Cancel buttons are shown instead o
 Close dialog, call the callback with `this.value` and forget the callback.
 */
 		promptSelect : function() {
-			console.log('prompt selected!')
+			//console.log('prompt selected!')
+			
+			if(!this.promptCallback)
+				return;
+			
 			this.hideDialog();
 			var ext = this.value.match(/\.([^\.]+)$/)[1];
 			var selectedFiles = this.value.split(',');
@@ -520,18 +529,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.addSelection(e.detail.item);
 					e.detail.select();
 					var fileSize = e.detail.item.size/1000 + "Kb";
-					if(e.detail.item.isImage)
-					{
-						this.isntImg = false;
 
-						this.set('fUrl', e.detail.item.url);
-					}
-					else
-					{
-						this.isntImg = true; 
-
-						this.set('fUrl', "");
-					}
+					this.set('noImage', !e.detail.item.isImage);
+					this.set('fUrl',  e.detail.item.isImage ? e.detail.item.url : '' );
+					
 					this.set('fSize', fileSize);
 
 					var date = new Date(e.detail.item.birthtime);
@@ -545,7 +546,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 						second: 'numeric'
 					};
 					this.set('fDate', date.toLocaleString("en-Us", options));
-					this.set('withoutFile', false);
+					this.set('noFile', false);
 
 					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, this.fileName.replace(/-/g, "%2E"));
 					this.$.getDescription.generateRequest();
@@ -553,6 +554,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				else {
 					this.removeSelection(e.detail.item);
 					e.detail.unselect();
+					this.set('noFile', true);
 				}
 
 			if (this.autoPreview && !this.promptMode)
@@ -564,7 +566,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		showDescription : function() {
 			if(!this.fileDescription){
-				this.isInfo = false;
+				this.hasInfo = false;
 				this.set("fName", this.fileName);
 				this.set("meta.caption", "");
 				this.set("meta.description", "");
@@ -575,7 +577,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.fileCaptions[this.fUrl] = "";
 			}
 			else {
-				this.isInfo = true;
+				this.hasInfo = true;
 				this.set("fName", this.fileDescription.fileName);
 				this.set("meta.caption", this.fileDescription.title);
 				this.set("meta.description", this.fileDescription.content);
@@ -676,7 +678,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.autoPreview = false; // until there's a better way
 			}
 
-			this.$.pocketDrawer.drawerWidth = "33%";
+			this.$.pocketDrawer.drawerWidth = "35%";
 			
 			this._urlsChanged();
 			this.setupUploader();
@@ -764,8 +766,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			fullViewMode :		{ type : Boolean, value : false },
 			archiveMode : 		{ type : Boolean },
 			fileId :			{ type : Number },
-			isInfo : 			{ type : Boolean },
-			withoutFile : 		{ type : Boolean, value : true},
+			hasInfo : 			{ type : Boolean },
+			noFile : 		{ type : Boolean, value : true},
 			meta : 				{ type : Object, value : {
 								caption : "",
 								description : "",

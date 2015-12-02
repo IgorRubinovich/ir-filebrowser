@@ -39,7 +39,6 @@
 				if (newSplit.length && !newSplit[newSplit.length - 1])
 					newSplit.pop();
 
-
 				while (newSplit.length) // just like node's path.resolve(this.relPath, relPath)
 				{
 					p = newSplit.shift();
@@ -56,7 +55,7 @@
 				if(/\.{2,}/.test(relPath))
 				{
 					this.status = 403;
-					throw new Error("Cannot use .. in path");
+					throw new Error("Acess forbidden (did you use '..' in requested path?)");
 
 				};
 
@@ -104,7 +103,7 @@
 			rootUrl = path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
 			statsData = this.get(this.lsStatsPath, this.loadedData).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
 
-			sorted = statsData.sort(function(x,y) { return new Date(x.mtime) > new Date(y.mtime) });
+			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
 
 			for(var i=0; i < sorted.length; i++)
 			{
@@ -164,6 +163,8 @@
 			
 			Polymer.dom.flush();
 
+			this.lsAfterUpload();
+			
 			//this.files = res;
 		},
 
@@ -354,7 +355,7 @@ Adds object to selection.
 			else if(this.maxItems != -1 && (selectedElements.length >= this.maxItems))
 			{
 				this.fire('item-overFlow');
-				return false;
+				return true;
 			}
 			
 			
@@ -365,7 +366,7 @@ Adds object to selection.
 			if(selectedElements.filter(function(el) { return el.item.url == fstat.url }).length)
 			{	
 				this.fire('item-duplicate', fstat);
-				return;
+				return false;
 			}
 			
 			newEl = document.createElement("ir-filebrowser-item");
@@ -379,6 +380,8 @@ Adds object to selection.
 			Polymer.dom(this).appendChild(newEl);
 
 			this._updateValue();
+
+			return true;			
 		},
 
 /** 
@@ -453,7 +456,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				});
 			
 			// unselect in dialog
-			Polymer.dom(this.$.uploaderContainer).childNodes
+			Polymer.dom(this.$.fileItemsList).childNodes
 				.forEach(function(el) {
 					if (el.is == 'ir-filebrowser-item' && el.item.url == url)
 						el.unselect();
@@ -473,7 +476,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 		clearSelection : function() {
 			var that = this;
 			this._getSelectionElements()
-				.forEach(function(el) { that.removeSelection(el.item); });
+				.forEach(function(el) { 
+					that.removeSelection(el.item); 
+				});
 				
 			this.value = '';
 		},
@@ -526,8 +531,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 			else
 				if (!e.detail.isSelected) {
-					this.addSelection(e.detail.item);
+					if(!this.addSelection(e.detail.item))
+						return;
+
 					e.detail.select();
+
 					var fileSize = e.detail.item.size/1000 + "Kb";
 
 					this.set('noImage', !e.detail.item.isImage);
@@ -637,8 +645,42 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		filesChanged : function() {
-			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
+			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);			
 			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
+		},
+		
+		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
+		lsAfterUpload : function(restore) { 
+			var diff, that = this;
+			if(typeof restore == 'object') // it's an event
+			{
+				this._filesBeforeUpload = {};
+				this.files.forEach(function(f) {
+					that._filesBeforeUpload[f.name] = 1;
+				});
+				this.ls();
+			}
+			else if(this._filesBeforeUpload)
+			{
+				diff = [];
+				Array.prototype.forEach.call(Array.prototype.reverse.call(this.$.fileItemsList.children),
+					function(fi) {
+						if(fi.is != 'ir-filebrowser-item')
+							return;
+						
+						var selectedElements = that._getSelectionElements(),
+							toSelect = [];
+
+						if(!that._filesBeforeUpload[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
+							toSelect.push(fi);
+							
+						if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
+							that.clearSelection();
+						
+						toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });													
+					});
+				that._filesBeforeUpload = null;									
+			}
 		},
 
 		showDialog : function(relPath) {
@@ -726,7 +768,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			lsStatsPath :		{ type : String, value : "" },
 			postUrl :			{ type : String, value : "", notify : true },
 			
-			postFields :		{ type : Object, value : { path : "", resize : true } },
+			postFields :		{ type : Object, value : { path : "" } },
 
 			renameUrl:			{ type : String, value : "", notify : true },
 			findfileUrl:		{ type : String, value : "", notify : true },
@@ -791,10 +833,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 		behaviors: [
 			ir.ReflectToNativeBehavior
 		],
-		clickResizeSwitch : function(e)
-		{
-			this.postFields.resize = e.currentTarget.checked;
-		}
 	});
 	
 

@@ -122,11 +122,12 @@ Example:
 	#bottomButtons {
 		display : flex;
 		justify-content : space-between;
+		margin-top : 5px;
 	}
 	
 	#fileUploaderContainer {
 		margin-bottom : 5px;
-		max-height : 55px;
+		max-height : 60px;
 		overflow : hidden;
 		display : flex;
 		--upload-border-style : {
@@ -197,7 +198,7 @@ Example:
 							<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
 						</paper-item>
 						<paper-item>
-							<paper-checkbox on-tap="clickResizeSwitch">resize</paper-checkbox>
+							<paper-checkbox checked="{{ postFields.resize }}">resize</paper-checkbox>
 						</paper-item>
 						<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
 						<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
@@ -231,7 +232,7 @@ Example:
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
 					<div>
 						<div id="uploaderContainer">
-							<template is="dom-if" if="{{ showDirectories }}">
+							<span hidden$="{{ !showDirectories }}">
 								<template hidden$="{{ showDirectories }}" is="dom-repeat" items="{{directories}}">
 									<ir-filebrowser-item
 											on-item-dblclick="dblclickDirectory"
@@ -240,9 +241,9 @@ Example:
 											item="{{ item }}">
 									</ir-filebrowser-item>
 								</template>
-							</template>
-							<template is="dom-if" if="{{showFiles}}">
-								<template is="dom-repeat" items="{{files}}">
+							</span>
+							<span id="fileItemsList" hidden$="{{ !showFiles }}">
+								<template hidden$="{{showFiles}}" id="fileItems" is="dom-repeat" items="{{files}}">
 									<ir-filebrowser-item
 											on-item-dblclick="dblclickFile"
 											on-item-click="clickFile"
@@ -250,7 +251,7 @@ Example:
 											item="{{ item }}">
 									</ir-filebrowser-item>
 								</template>
-							</template>
+							</span>
 						</div>
 					</div>
 					<div>
@@ -270,7 +271,7 @@ Example:
 
 		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
 			<div id="fileUploaderContainer">
-				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="ls" target="{{ _postUrl }}" noink multi progress-timeout="0">
+				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="lsAfterUpload" target="{{ _postUrl }}" noink multi progress-timeout="0">
 					<div hidden$="[[ isUploadingFiles ]]">
 						<paper-button raised>Browse...</paper-button> or drop files into this dialog
 					</div>

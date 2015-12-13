@@ -411,13 +411,17 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			var i, j;
 
 			if(selectedFiles.length > 1)
+			{
+				var imgHtml = "";
 				for(i = 0; i < selectedFiles.length; i++)
 					{
 						if(!this.fileCaptions[selectedFiles[i]])
-							this.promptCallback(selectedFiles[i]);
+							imgHtml += "<img src='" + selectedFiles[i] + "'>";
 						else
-							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>")
+							imgHtml += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>";
 					}
+				this.promptCallback(imgHtml);	
+			}		
 			else
 				if(!this.meta.caption && !this.meta.alt)
 					this.promptCallback(this.value);

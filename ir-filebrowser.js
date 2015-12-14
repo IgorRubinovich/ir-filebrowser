@@ -165,6 +165,7 @@
 
 			this.lsAfterUpload();
 			
+			this.ls();
 			//this.files = res;
 		},
 
@@ -412,24 +413,25 @@ Close dialog, call the callback with `this.value` and forget the callback.
 
 			if(selectedFiles.length > 1)
 			{
-				var imgHtml = "";
+				var imgHTML = "<ir-gallery>";
 				for(i = 0; i < selectedFiles.length; i++)
 					{
 						if(!this.fileCaptions[selectedFiles[i]])
-							imgHtml += "<img src='" + selectedFiles[i] + "'>";
+							imgHTML += "<img src='" + selectedFiles[i] + "'>";
 						else
-							imgHtml += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>";
+							imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>";
 					}
-				this.promptCallback(imgHtml);	
+				imgHTML += "</ir-gallery>"; 	
+				this.promptCallback(imgHTML);	
 			}		
 			else
 				if(!this.meta.caption && !this.meta.alt)
 					this.promptCallback(this.value);
 				else
-				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
-					this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
-				else
-					this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+					if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
+						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+					else
+						this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 
 			this.clearSelection();
 			this.promptCallback = null;
@@ -662,7 +664,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.files.forEach(function(f) {
 					that._filesBeforeUpload[f.name] = 1;
 				});
-				this.ls();
+				
 			}
 			else if(this._filesBeforeUpload)
 			{
@@ -676,12 +678,12 @@ Remove specific item from selection. Note: all selected items matching the url w
 							toSelect = [];
 
 						if(!that._filesBeforeUpload[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
-							toSelect.push(fi);
+							that.clickFile({ detail : fi});
 							
 						if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
 							that.clearSelection();
 						
-						toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });													
+						//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });													
 					});
 				that._filesBeforeUpload = null;									
 			}

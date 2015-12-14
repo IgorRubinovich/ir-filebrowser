@@ -165,7 +165,6 @@
 
 			this.lsAfterUpload();
 			
-			this.ls();
 			//this.files = res;
 		},
 
@@ -653,39 +652,42 @@ Remove specific item from selection. Note: all selected items matching the url w
 		filesChanged : function() {
 			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);			
 			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
+			if(!this.$.fileUploader.files.length)
+				this.ls();
 		},
 		
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
-		lsAfterUpload : function(restore) { 
-			var diff, that = this;
+		lsAfterUpload : function(restore) {
+			var diff, that = this, toSelect;
 			if(typeof restore == 'object') // it's an event
 			{
 				this._filesBeforeUpload = {};
 				this.files.forEach(function(f) {
 					that._filesBeforeUpload[f.name] = 1;
 				});
-				
 			}
 			else if(this._filesBeforeUpload)
 			{
 				diff = [];
+				toSelect = [];
 				Array.prototype.forEach.call(Array.prototype.reverse.call(this.$.fileItemsList.children),
 					function(fi) {
 						if(fi.is != 'ir-filebrowser-item')
 							return;
-						
-						var selectedElements = that._getSelectionElements(),
-							toSelect = [];
 
 						if(!that._filesBeforeUpload[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
-							that.clickFile({ detail : fi});
-							
-						if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
-							that.clearSelection();
-						
-						//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });													
+							toSelect.push(fi);
+
 					});
-				that._filesBeforeUpload = null;									
+
+				var selectedElements = that._getSelectionElements();
+
+				if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
+					that.clearSelection();
+
+				toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
+
+				that._filesBeforeUpload = null;
 			}
 		},
 

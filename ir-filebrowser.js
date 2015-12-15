@@ -422,28 +422,45 @@ Close dialog, call the callback with `this.value` and forget the callback.
 
 			if(selectedFiles.length > 1)
 			{
-				var imgHTML = "";
+				var imgHTML = "",
+					oneImgGallery = "";
+
 				for(i = 0; i < selectedFiles.length; i++)
 					{
 						if(!this.fileCaptions[selectedFiles[i]])
 							imgHTML += "<img src='" + selectedFiles[i] + "'>";
 						else
 							imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>";
+
+						if(!this.gallery && this.wrapperPromptResult)
+							if(!this.fileCaptions[selectedFiles[i]])
+								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>");
+							else
+								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>");
 					}
 				
-				if(this.wrapperPromptResult) 	
+				if(this.gallery) 	
 					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));	
 				else
-					this.promptCallback(imgHTML);
+					if(this.wrapperPromptResult)
+						this.promptCallback(oneImgGallery);
+					else
+						this.promptCallback(imgHTML);
 			}		
 			else
-				if(!this.meta.caption && !this.meta.alt)
-					this.promptCallback(this.value);
-				else
-					if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
+				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
 						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+				else
+					if(this.wrapperPromptResult)
+						if(!this.meta.caption)
+							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + this.value + "'>"));
+						else
+							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>"));
 					else
-						this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+						if(!this.meta.caption)
+							this.promptCallback(this.value);
+						else
+							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
 
 			this.clearSelection();
 			this.promptCallback = null;
@@ -824,6 +841,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			resize :			{ type : Boolean, value : true },
 
 			wrapperPromptResult:{ type : String, notify : true },
+			gallery : 			{ type : Boolean, value : true },
 			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },
 			tempselected :		{ type : String, notify : false },

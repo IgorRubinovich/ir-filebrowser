@@ -307,7 +307,7 @@
 				else
 					if(this.fileName && this.noFile)
 						filesList = this.fileName;
-							
+
 				var askUser = confirm("Are you sure you want to delete " + filesList.replace(/,$/, "?"));
 				if (askUser == true) {
 					this.set('noFile', true);
@@ -422,7 +422,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 
 			if(selectedFiles.length > 1)
 			{
-				var imgHTML = "<ir-gallery>";
+				var imgHTML = "";
 				for(i = 0; i < selectedFiles.length; i++)
 					{
 						if(!this.fileCaptions[selectedFiles[i]])
@@ -430,8 +430,11 @@ Close dialog, call the callback with `this.value` and forget the callback.
 						else
 							imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>";
 					}
-				imgHTML += "</ir-gallery>"; 	
-				this.promptCallback(imgHTML);	
+				
+				if(this.wrapperPromptResult) 	
+					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));	
+				else
+					this.promptCallback(imgHTML);
 			}		
 			else
 				if(!this.meta.caption && !this.meta.alt)
@@ -820,6 +823,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			showFiles :			{ type : Boolean, value : true },
 			resize :			{ type : Boolean, value : true },
 
+			wrapperPromptResult:{ type : String, notify : true },
 			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },
 			tempselected :		{ type : String, notify : false },

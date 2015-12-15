@@ -297,11 +297,21 @@
 		},
 
 		deleteFile : function() {
-			if(this.fileName !== undefined) {
-				var askUser = confirm("Are you sure you want to delete " + this.fileName + "?");
+			var filesToDelete = this._getSelectionElements(),
+				filesList = "";
+
+			if(filesToDelete.length > 0 || this.fileName) {
+				if(filesToDelete.length > 0)
+					for(var i = 0; i < filesToDelete.length; i++)
+						filesList += filesToDelete[i].item.name + ',';
+				else
+					if(this.fileName && this.noFile)
+						filesList = this.fileName;
+							
+				var askUser = confirm("Are you sure you want to delete " + filesList.replace(/,$/, "?"));
 				if (askUser == true) {
 					this.set('noFile', true);
-					this.$.deletefileloader.body = {name: this.fileName, fpath: this.relPath};
+					this.$.deletefileloader.body = {name: filesList.replace(/,$/, '').split(','), fpath: this.relPath};
 					this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
 					this.$.deletefileloader.url = this._deletefileUrl;
 					this.$.deletefileloader.generateRequest();
@@ -508,7 +518,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 		deleteSelectionElement : function(relPath) {
 			this.ls(relPath);
 
-			this.removeSelection(this.deletedFile);
+			for(var i = 0; i < this.deletedFile.length; i++)
+				this.removeSelection(this.deletedFile[i]);
 		},
 
 		metaChanged : function() {
@@ -517,19 +528,20 @@ Remove specific item from selection. Note: all selected items matching the url w
 		
 		/** Toggles clicked file */
 		clickFile : function (e) {
-			this.fileName = e.detail.item.name;
-
+			
 			if(this.selectedDirectory && (this.selectedDirectory !== e.detail))
 				this.selectedDirectory.unselect();
 
 			if(e.detail.item.isDirectory) {
 				if(!e.detail.isSelected)
 				{
+					this.fileName = e.detail.item.name;
 					this.selectedDirectory = e.detail;
 					e.detail.select();
 				}
 				else
 				{
+					this.fileName = null;
 					e.detail.unselect();
 				}
 
@@ -539,6 +551,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					if(!this.addSelection(e.detail.item))
 						return;
 
+					this.fileName = e.detail.item.name;
 					e.detail.select();
 
 					var fileSize = e.detail.item.size/1000 + "Kb";
@@ -567,6 +580,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				else {
 					this.removeSelection(e.detail.item);
 					e.detail.unselect();
+					this.fileName = null;
 					this.set('noFile', true);
 				}
 

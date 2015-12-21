@@ -296,6 +296,39 @@
 			this.renameFiles = false;
 		},
 
+		searchFiles : function() {
+			if(this.searchValue.length > 3)
+			{
+				this.$.searchByDesc.url = this._searchbydescUrl.replace(/\[path\]/, this.searchValue);
+				this.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
+				this.$.searchByDesc.generateRequest();
+			}
+		},
+
+		listDesire : function() {
+			this.splice('filesList', 0);
+			if(this.desiredFiles[0] == "notFound")
+				this.push('filesList', { name : 'notFound', content : '', path : '' });
+			else
+				for(var i = 0; i < this.desiredFiles.length; i++)
+				{
+					this.push('filesList', this.desiredFiles[i]);
+				}
+
+			this.$.desiredList.open();
+
+		},
+
+		nothingFound : function() {
+			this.splice('filesList', 0);
+			this.push('filesList', { name : 'wrong query', content : '', path : '' });
+		},
+
+		searchClear : function() {
+			this.set('searchValue', "");
+			this.splice('filesList', 0);
+		},
+
 		deleteFile : function() {
 			var filesToDelete = this._getSelectionElements(),
 				filesList = "";
@@ -795,7 +828,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			
 			this._lsUrl = path.join(this.host, this.lsUrl);
 			
-			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl,getdescriptionUrl,updatefileUrl"
+			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl,getdescriptionUrl,updatefileUrl,searchbydescUrl"
 			.split(',')
 			.forEach(function(f) {
 				if(that[f])
@@ -818,6 +851,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			deletefileUrl:		{ type : String, value : "", notify : true },
 			getdescriptionUrl:  { type : String, value : "", notify : true },
 			updatefileUrl:		{ type : String, value : "", notify : true },
+			searchbydescUrl: 	{ type : String, value : "", notify : true },  
 
 /* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
@@ -847,6 +881,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			tempselected :		{ type : String, notify : false },
 			inputValue :		{ type : String },
 			fileName : 			{ type : String },
+			filesList : 		{ type : Array , value : []},
 			selectedDirectory : { type : Object },
 			fullView :			{ type : Boolean} ,
 			fullViewMode :		{ type : Boolean, value : false },
@@ -872,7 +907,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 		
 		observers: [
-			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl)'
+			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)'
 		],
 		behaviors: [
 			ir.ReflectToNativeBehavior

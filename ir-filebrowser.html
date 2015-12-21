@@ -22,9 +22,13 @@ Example:
 <link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../ir-reflect-to-native-behavior/ir-reflect-to-native-behavior.html">
 <link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-item/paper-item-body.html">
 
 
 
@@ -155,6 +159,14 @@ Example:
 		color: grey;
 	}
 
+	.desiredImg {
+	    border-collapse: collapse;
+	    border-radius: 24px;
+	    border-width: 24px;
+	    height: 44px;
+	    width: 44px;
+	}
+
   </style>
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
@@ -180,15 +192,34 @@ Example:
 			<iron-pages selected="{{tableselected}}">
 				<div class="layout vertical left">
 					<div class="layout horizontal center">
-						<h3 id="relPath">
-							<template is="dom-repeat" items="{{ splitRelPath }}">
-								<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 
-							</template>
-						</h3>
-						<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles">
-						</paper-input>
-						<paper-icon-button icon="clear" on-tap="filterClear">
-						</paper-icon-button>
+							<h3 id="relPath">
+								<template is="dom-repeat" items="{{ splitRelPath }}">
+									<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 
+								</template>
+							</h3>
+							<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles">
+							</paper-input>
+							<paper-icon-button icon="clear" on-tap="filterClear">
+							</paper-icon-button>
+						<div class="layout horizontal center" style="margin-left:30px">
+							<paper-input placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
+							</paper-input>
+							<paper-icon-button icon="clear" on-tap="searchClear">
+							</paper-icon-button>
+							<iron-dropdown id="desiredList" style="margin-top:55px;">
+									<paper-menu class="dropdown-content" selectable="paper-item">
+										<template is="dom-repeat" items="{{ filesList }}">
+											<paper-item>
+										        <div style="padding-right: 10px;"><img src="{{ item.path }}" class="desiredImg"></div>
+										        <paper-item-body two-line>
+										            <div><span>{{item.name}}</span></div>
+										            <div secondary><span>{{item.content}}</span></div>
+										        </paper-item-body>
+										    </paper-item>
+										</template>
+									</paper-menu>	
+							</iron-dropdown>
+						</div>		
 					</div>
 					<div class="layout horizontal center" hidden$="{{ archiveMode }}">
 						<paper-item>
@@ -368,6 +399,17 @@ Example:
 		debounce-duration="300"
 		verbose="true">
 	</iron-ajax>
+
+	<iron-ajax
+		id="searchByDesc"
+		method="GET"
+		handle-as="json"
+		debounce-duration="300"
+		last-response="{{ desiredFiles }}"
+		on-response="listDesire"
+		on-error="nothingFound"
+		verbose="true">
+	</iron-ajax>	
 
   </template>
 </dom-module>

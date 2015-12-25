@@ -308,7 +308,7 @@
 		listDesire : function() {
 			this.splice('filesList', 0);
 			if(this.desiredFiles[0] == "notFound")
-				this.push('filesList', { name : 'notFound', content : '', path : '' });
+				this.push('filesList', { name : 'not found', content : '', path : '' });
 			else
 				for(var i = 0; i < this.desiredFiles.length; i++)
 				{

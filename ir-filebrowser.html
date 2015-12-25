@@ -209,7 +209,7 @@ Example:
 							<iron-dropdown id="desiredList" style="margin-top:55px;">
 									<paper-menu class="dropdown-content" selectable="paper-item">
 										<template is="dom-repeat" items="{{ filesList }}">
-											<paper-item>
+											<paper-item on-click="jumptofilePath">
 										        <div style="padding-right: 10px;"><img src="{{ item.path }}" class="desiredImg"></div>
 										        <paper-item-body two-line>
 										            <div><span>{{item.name}}</span></div>

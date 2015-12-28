@@ -27,7 +27,6 @@
 
 			if(relPath)
 				this.set("filterValue", "");
-
 			
 			if(abs !== true) {
 				var p, split, newSplit;
@@ -719,12 +718,13 @@ Remove specific item from selection. Note: all selected items matching the url w
 		filesChanged : function() {
 			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);			
 			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
-			if(!this.$.fileUploader.files.length)
+			if(!this.$.fileUploader.files.length && this.isUploadEnds)
 				this.ls();
 		},
 		
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
 		lsAfterUpload : function(restore) {
+			this.isUploadEnds = true;
 			var diff, that = this, toSelect;
 			if(typeof restore == 'object') // it's an event
 			{
@@ -792,6 +792,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(this.promptMode)
 			{
 				this.$.dialog.modal = true;
+				//this.$.dialog.noCancelOnOutsideClick = false;
 				this.autoPreview = false; // until there's a better way
 			}
 
@@ -874,6 +875,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			showFiles :			{ type : Boolean, value : true },
 			resize :			{ type : Boolean, value : true },
 
+			isUploadEnds : 		{ type : Boolean, value : false },
 			wrapperPromptResult:{ type : String, notify : true },
 			gallery : 			{ type : Boolean, value : true },
 			renameFiles :		{ type : Boolean, value : false },

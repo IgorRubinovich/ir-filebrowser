@@ -752,10 +752,28 @@ Remove specific item from selection. Note: all selected items matching the url w
 				if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
 					that.clearSelection();
 
-				toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
+				//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
+				that.selectUploadedItems(toSelect);
 
 				that._filesBeforeUpload = null;
 			}
+		},
+
+		selectUploadedItems : function(items) {
+			var that = this;
+
+			if(this.$.dialog.opened)
+				{
+					items.forEach(function(fi) {
+						that.clickFile({ detail : fi});
+					});
+					this.backgroundUpload = false;
+				}	
+			else
+				{
+					this.backgroundUpload = true;
+					this.backgroundItems = items;
+				}
 		},
 
 		showDialog : function(relPath) {
@@ -763,6 +781,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.tableselected = "0";
 			this.$.dialog.open();
 			this.ls(relPath);
+			if(this.backgroundUpload)
+				this.selectUploadedItems(this.backgroundItems);
 			this.async(function() {
 				this.refitDialog()
 			});
@@ -875,6 +895,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			showFiles :			{ type : Boolean, value : true },
 			resize :			{ type : Boolean, value : true },
 
+			backgroundUpload : 	{ type : Boolean, value : false },
+			backgroundItems : 	{ type : Object },
 			isUploadEnds : 		{ type : Boolean, value : false },
 			wrapperPromptResult:{ type : String, notify : true },
 			gallery : 			{ type : Boolean, value : true },

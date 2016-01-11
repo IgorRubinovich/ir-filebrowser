@@ -304,18 +304,19 @@
 			}
 		},
 
-		listDesire : function() {
-			this.splice('filesList', 0);
-			if(this.desiredFiles[0] == "notFound")
-				this.push('filesList', { name : 'not found', content : '', path : '' });
-			else
-				for(var i = 0; i < this.desiredFiles.length; i++)
-				{
-					this.push('filesList', this.desiredFiles[i]);
-				}
+		listDesire : function() { 
+			setTimeout(function() { 
+				this.splice('filesList', 0); 
+				if(this.desiredFiles[0] == "notFound") 
+					this.push('filesList', { name : 'not found', content : '', path : '' }); 
+				else 
+					for(var i = 0; i < this.desiredFiles.length; i++) 
+					{ 
+					this.push('filesList', this.desiredFiles[i]); 
+					} 
 
-			this.$.desiredList.open();
-
+				this.$.desiredList.open(); 
+			}.bind(this), 2000); 
 		},
 
 		nothingFound : function() {

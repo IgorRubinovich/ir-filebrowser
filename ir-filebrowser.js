@@ -2,8 +2,8 @@
 	* @license
 	* Copyright (c) 2015 Igor Rubinovich. All rights reserved.
 	* This code may only be used under the MIT license found at http://opensource.org/licenses/MIT
-	* 
-	* File browser and uploader. 
+	*
+	* File browser and uploader.
 	* Works with arrays of (node fs.Stats)[https://nodejs.org/api/fs.html#fs_class_fs_stats] objects.
 	* Example:
     * <ir-file-browser>DEMO HERE</ir-file-browser>
@@ -14,20 +14,20 @@
 	Polymer({
 		is : 'ir-filebrowser',
 
-		
+
 		/**
 		  * Loads list of files at location relative to the this.relPath
 		  *
 		  * @method ls
 		*/
 		ls : function(relPath, abs)
-		{	
+		{
 			if(typeof relPath !== 'string')
 				relPath  = "";
 
 			if(relPath)
 				this.set("filterValue", "");
-			
+
 			if(abs !== true) {
 				var p, split, newSplit;
 				split = this.relPath.split('/');
@@ -63,34 +63,34 @@
 
 			if(this.relPath)
 				this.relPath += '/';
-			
+
 			var reqUrl = this._lsUrl.replace(/\[path\]/, this.relPath).replace(/\/\//, "/");
-			
+
 			if(this._lsUrl == reqUrl)
 				reqUrl += this.relPath; //this.host + reqUrl; error!
-			
+
 			this.$.loader.url = reqUrl;
 			this.$.loader.generateRequest();
 
 			this.postFields.path = this.relPath;
 		},
-		
+
 /**
   * Displays files loaded as a result of calling ls or user typing into the filter box
   *
   * @method displayLoadedFiles
 */
 		displayLoadedFiles : function () {
-			var t, 
+			var t,
 				i,
-				ext, 
-				name, 
-				fstat, 
+				ext,
+				name,
+				fstat,
 				sorted,
-				rootUrl, 
-				statsData, 
+				rootUrl,
+				statsData,
 				files = [],
-				that = this, 
+				that = this,
 				directories = [];
 
 			if(!this.loadedData)
@@ -143,7 +143,7 @@
 				this.addEventListener('item-attached', this.refitDialog, true);
 				this._itemsListenerAttached = true;
 			}
-			
+
 			//else
 			//	this.removeEventListener('item-attached', this.refitDialog, true);
 
@@ -158,12 +158,12 @@
 			}
 			console.log(this.splitRelPath);
 			//this.notifyPath("splitRelPath.splices");
-			
-			
+
+
 			Polymer.dom.flush();
 
 			this.lsAfterUpload();
-			
+
 			//this.files = res;
 		},
 
@@ -191,7 +191,7 @@
 					this.$.scrollableDialog.style.height = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				});
-				
+
 				return;
 			}
 			if(this.archiveMode)
@@ -209,12 +209,12 @@
 					Polymer.updateStyles();
 					Polymer.dom.flush();
 				});
-				
+
 				return;
 			}
 
 			// else
-			
+
 			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
 			if (!this._maxWidth || (this._maxWidth < currentWidth))
 				this._maxWidth = currentWidth;
@@ -225,11 +225,11 @@
 				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
 				this.$.dialog.left="33%";
 				this.$.dialog.right="33%";
-				
+
 				this.$.dialog.constrain();
 				this.$.dialog.style.width = this._maxWidth + "px";
 				this.$.dialog.center();
-				
+
 				Polymer.dom.flush();
 
 				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
@@ -249,7 +249,7 @@
 		updateVal : function(relPath) {
 			this.ls(relPath);
 		},
-		
+
 		searchBoxKeyDown: function(e) {
 			if((e.which || e.keyCode) == 13)
 			{
@@ -352,12 +352,12 @@
 			else
 				alert("Choose file to delete");
 		},
-		
+
 		cannotDelete : function() {
 			if(this.deleteFileError)
 				alert("Could not delete directory, make sure it's empty");
 		},
-	
+
 		filterClear : function() {
 			this.set("filterValue", '');
 			this.ls();
@@ -370,12 +370,12 @@
 			this.ls(item.shortpath, true);
 			this.set("filterValue", item.name);
 		},
-		
+
 		jumpUp : function(e){
 			this.ls(e.model.item, true);
 			this.set("filterValue", "");
 		},
-		
+
 		clickDirectory : function(e) {
 			e.stopImmediatePropagation();
 			e.stopPropagation();
@@ -383,14 +383,14 @@
 		},
 
 
-/** 
+/**
 Adds object to selection.
 @param (Object|String) url string or nodejs fstat-like object.
- */		
+ */
 		addSelection : function(fstat) {
 			var newEl, that = this;
 			var selectedElements = this._getSelectionElements();
-			
+
 			// maxItems == 1 is special case: if there's a selected item it is unselected and new item is selected instead
 			if(this.maxItems == 1 && (selectedElements.length == 1))
 				this.clearSelection();
@@ -399,34 +399,34 @@ Adds object to selection.
 				this.fire('item-overFlow');
 				return true;
 			}
-			
-			
+
+
 			if(typeof fstat == 'string')
 				fstat == { url : fstat };
-			
+
 			// prevent duplicates
 			if(selectedElements.filter(function(el) { return el.item.url == fstat.url }).length)
-			{	
+			{
 				this.fire('item-duplicate', fstat);
 				return false;
 			}
-			
+
 			newEl = document.createElement("ir-filebrowser-item");
 			newEl.item = fstat;
 			newEl.addEventListener('item-click', // open dialog to relPath if available
-				function (e) { 
+				function (e) {
 					if(e.detail.item.relPath)
 						that.relPath = e.detail.item.relPath;
 					that.showDialog();
-				}); 
+				});
 			Polymer.dom(this).appendChild(newEl);
 
 			this._updateValue();
 
-			return true;			
+			return true;
 		},
 
-/** 
+/**
 Open dialog in prompt mode - i. e. Select and Cancel buttons are shown instead of Close.
 @param (Function) callback(value, extraData)
 */
@@ -438,15 +438,17 @@ Open dialog in prompt mode - i. e. Select and Cancel buttons are shown instead o
 			this.showDialog();
 		},
 
-/** 
+/**
 Close dialog, call the callback with `this.value` and forget the callback.
 */
 		promptSelect : function() {
 			//console.log('prompt selected!')
-			
+
 			if(!this.promptCallback)
 				return;
-			
+
+
+			this._scrollAfterSelect = this.$.scrollableFiles.scrollTop;
 			this.hideDialog();
 			var ext = this.value.match(/\.([^\.]+)$/)[1];
 			var selectedFiles = this.value.split(',');
@@ -470,15 +472,15 @@ Close dialog, call the callback with `this.value` and forget the callback.
 							else
 								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>");
 					}
-				
-				if(this.gallery) 	
-					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));	
+
+				if(this.gallery)
+					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));
 				else
 					if(this.wrapperPromptResult)
 						this.promptCallback(oneImgGallery);
 					else
 						this.promptCallback(imgHTML);
-			}		
+			}
 			else
 				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
 						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
@@ -497,16 +499,16 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			this.clearSelection();
 			this.promptCallback = null;
 		},
-		
-/** 
+
+/**
 Close dialog and forget the callback.
 */
 		promptCancel : function() {
 			this.hideDialog();
 			delete this.promptCallback;
 		},
-		
-/** 
+
+/**
 Remove specific item from selection. Note: all selected items matching the url will be removed, in case there are duplicates.
 @param (Object|String) url or object with .url property
 */
@@ -518,10 +520,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			// remove from selection
 			this._getSelectionElements()
 				.forEach(function(el, i) {
-					if(el.item.url == url)				
+					if(el.item.url == url)
 						Polymer.dom(that).removeChild(el);
 				});
-			
+
 			// unselect in dialog
 			Polymer.dom(this.$.fileItemsList).childNodes
 				.forEach(function(el) {
@@ -529,7 +531,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 						el.unselect();
 			});
 
-				
+
 			this._updateValue();
 		},
 
@@ -538,15 +540,15 @@ Remove specific item from selection. Note: all selected items matching the url w
 			return this.getContentChildren()
 					.filter(function(el) { return el.is == 'ir-filebrowser-item'});
 		},
-		
+
 		/** Remove all items from selection */
 		clearSelection : function() {
 			var that = this;
 			this._getSelectionElements()
-				.forEach(function(el) { 
-					that.removeSelection(el.item); 
+				.forEach(function(el) {
+					that.removeSelection(el.item);
 				});
-				
+
 			this.value = '';
 		},
 
@@ -577,10 +579,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 		metaChanged : function() {
 			this.fire('captionChanged', { caption : this.meta.caption });
 		},
-		
+
 		/** Toggles clicked file */
 		clickFile : function (e) {
-			
+
 			if(this.selectedDirectory && (this.selectedDirectory !== e.detail))
 				this.selectedDirectory.unselect();
 
@@ -610,7 +612,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 					this.set('noImage', !e.detail.item.isImage);
 					this.set('fUrl',  e.detail.item.isImage ? e.detail.item.url : '' );
-					
+
 					this.set('fSize', fileSize);
 
 					var date = new Date(e.detail.item.birthtime);
@@ -675,11 +677,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.updateFile.url = this._updatefileUrl;
 			this.$.updateFile.generateRequest();
 		},
-		
+
 		/** Updates .value for ir-reflect-to-native-behavior */
 		_updateValue : function() {
 			var that = this;
-			
+
 			this.async(function() {
 				that.value = this._getSelectionElements().map(function(s) { return s.item.url }).join(',');
 				if(this.hideAfterUpdate)
@@ -689,7 +691,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				}
 			});
 		},
-	
+
 		dblclickFile : function (e) {
 			// the following is problematic because single click handler unselects the file, look into it.
 			if(this.promptMode)
@@ -702,7 +704,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.ls(e.detail.item.name);
 		},
 		unselect : function (e) {
-			//this.preview = true;			
+			//this.preview = true;
 		},
 
 		setupUploader: function() {
@@ -714,14 +716,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.setupDone = true;
 			}
 		},
-		
+
 		filesChanged : function() {
-			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);			
+			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
 			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
 			if(!this.$.fileUploader.files.length && this.isUploadEnds)
 				this.ls();
 		},
-		
+
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
 		lsAfterUpload : function(restore) {
 			this.isUploadEnds = true;
@@ -768,7 +770,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 						that.clickFile({ detail : fi});
 					});
 					this.backgroundUpload = false;
-				}	
+				}
 			else
 				{
 					this.backgroundUpload = true;
@@ -786,8 +788,17 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.async(function() {
 				this.refitDialog()
 			});
+
+
+			if(this._scrollAfterSelect){
+				setTimeout(function() {
+					this.$.scrollableFiles.scrollTop=this._scrollAfterSelect;
+
+					this._scrollAfterSelect = null;
+				}.bind(this), 200);
+			};
 		},
-		
+
 		hideDialog : function (e) {
 			this.$.dialog.close();
 		},
@@ -817,25 +828,25 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 
 			this.$.pocketDrawer.drawerWidth = "35%";
-			
+
 			this._urlsChanged();
 			this.setupUploader();
-			
+
 			// this.$.scrollableDialog.assignParentResizeable(this.$.dialog);
 
 			this.async(function() { // wait for ir-filebrowser-items to initialize
 				// collect values, remove and add again
 				var preselection = [];
 				that.getContentChildren()
-					.forEach(function(el) { 
+					.forEach(function(el) {
 						if(el.is != 'ir-filebrowser-item')
 							return;
-						
+
 						preselection.push(el.item);
 					});
 
 				that.clearSelection();
-					
+
 				that.async(function() {
 					preselection.forEach(function(item) {
 						that.addSelection(item);
@@ -843,18 +854,18 @@ Remove specific item from selection. Note: all selected items matching the url w
 				});
 			});
 		},
-		
+
 		_urlsChanged : function() {
 			var that = this;
-			
+
 			this._lsUrl = path.join(this.host, this.lsUrl);
-			
+
 			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl,getdescriptionUrl,updatefileUrl,searchbydescUrl"
 			.split(',')
 			.forEach(function(f) {
 				if(that[f])
 					that["_" + f] = path.join(that.host, that[f]);
-			});			
+			});
 		},
 
 		properties : {
@@ -863,7 +874,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			lsRootUrlPath :		{ type : String, value : "/" },
 			lsStatsPath :		{ type : String, value : "" },
 			postUrl :			{ type : String, value : "", notify : true },
-			
+
 			postFields :		{ type : Object, value : { path : "" } },
 
 			renameUrl:			{ type : String, value : "", notify : true },
@@ -872,7 +883,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			deletefileUrl:		{ type : String, value : "", notify : true },
 			getdescriptionUrl:  { type : String, value : "", notify : true },
 			updatefileUrl:		{ type : String, value : "", notify : true },
-			searchbydescUrl: 	{ type : String, value : "", notify : true },  
+			searchbydescUrl: 	{ type : String, value : "", notify : true },
 
 /* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
@@ -882,12 +893,12 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			selected	:		{ type : Array, notify : true },
 			selectedItems	:	{ type : Array, value : [], notify : true },
-			
+
 			/** Maximum number items that may be selected. Default -1 means unlimited. */
 			maxItems :			{ type : Number, value : -1, notify : true },
-			
+
 			autoPreview :		{ type : Boolean },
-			
+
 			cloneToNative :		{ type : Boolean,	value : true },
 			name :				{ type : String, value : "" },
 
@@ -922,14 +933,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 			fileCaptions :		{ type : Array, value : {} },
 
 			isUploadingFiles : { type : Boolean },
-				
+
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
 			promptMode :			{ type : Boolean, value : false },
 
 			/** Open by default - precursor to inline mode. */
 			opened : { type : Boolean, value : false }
 		},
-		
+
 		observers: [
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)'
 		],
@@ -937,7 +948,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			ir.ReflectToNativeBehavior
 		],
 	});
-	
+
 
 	Polymer(
 	{
@@ -958,7 +969,7 @@ Fired when an item is doubleclicked.
 			this.fire("item-dblclick", this);
 			ev.stopPropagation();
 		},
-		
+
 		/** Select this ir-filebrowser-item */
 		select : function() {
 			this.$.container.classList.add('selected');
@@ -989,13 +1000,13 @@ Fired when an item is doubleclicked.
 		},
 		_itemChanged : function() {
 			var item = this.item;
-			
+
 			if(this.url)
 				item.url = this.url;
-			
+
 			if(item.url && !item.name)
 				item.name = decodeURIComponent(item.url.match(/([^/]+)$/)[1]);
-			else if(!item.url && item.name && item.relPath) // if(!item.url) 
+			else if(!item.url && item.name && item.relPath) // if(!item.url)
 			{
 				item.url = item.rootUrl + item.relPath + encodeURIComponent(item.name);
 				console.log('decoded (name) %s -> (url) %s', item.name, item.url);
@@ -1006,18 +1017,18 @@ Fired when an item is doubleclicked.
 
 			if(!item.ext)
 				item.ext = item.isDirectory ? "<dir>" : item.url.match(/([^.]+)$/)[1];
-			
+
 			item.isImage = ['jpeg','jpg','png','gif'].indexOf(item.ext) > -1;
-			
+
 			if(item.isSelected)
 				this.select();
 			else
 				this.unselect();
-			
+
 			this._item = item;
 			//this.set('item.isImage', this.item.isImage);
-			
-			this.async(function() { 
+
+			this.async(function() {
 				Polymer.dom.flush();
 			});
 		},
@@ -1029,34 +1040,34 @@ Fired when an item is doubleclicked.
 					//ext : this.url.match("([^.]+)$")[1]
 				}
 				//item.isImage = ['jpg','jpeg','gif','png'].indexOf(item.ext) > -1;
-				
+
 				this.item = item;
 			}
 		},
-		
+
 		attached : function() {
 			this.fire('item-attached');
 		}
-	});	
+	});
 
 	function encodeQuery(q)
 	{
-		if(!q) 
+		if(!q)
 			return ""
 		return q.split("&").map(function(pair) { var res = pair.split("="); return [res[0], encodeURIComponent(res[1])].join("=") }).join('&');
 	}
-	
-	
-	
+
+
+
 	// simulate nodejs path for urls
 	var path = {
 		join : function() {
 			var protocol,
-				lead = '', 
+				lead = '',
 				trail = '';
-			
+
 			protocol = arguments[0].match(/^[^:]+:(\d)*\/\//);
-			
+
 			if(protocol)
 			{
 				protocol = protocol[0];
@@ -1071,26 +1082,26 @@ Fired when an item is doubleclicked.
 			trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
 
 			var join, split;
-			
+
 			split = [].filter.call(arguments, function(p) {
 				return p;
 			});
-			
+
 			// if there was no protocol now is the time to check if first non-empty argument is an absolute path
 			if(!lead && !protocol)
 				lead = split[0].match(/^\//) ? '/' : '';
-			
+
 			split = split.map(function(p) {
 				return p.split('/');
 			});
-					
+
 			join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
 
-			
+
 			return protocol + lead + join + trail; // note that `protocol` includes :// in the regex
 		}
 	};
-		
+
 })();
 
 

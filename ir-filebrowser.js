@@ -304,19 +304,19 @@
 			}
 		},
 
-		listDesire : function() { 
-			setTimeout(function() { 
-				this.splice('filesList', 0); 
-				if(this.desiredFiles[0] == "notFound") 
-					this.push('filesList', { name : 'not found', content : '', path : '' }); 
-				else 
-					for(var i = 0; i < this.desiredFiles.length; i++) 
-					{ 
-					this.push('filesList', this.desiredFiles[i]); 
-					} 
+		listDesire : function() {
+			setTimeout(function() {
+				this.splice('filesList', 0);
+				if(this.desiredFiles[0] == "notFound")
+					this.push('filesList', { name : 'not found', content : '', path : '' });
+				else
+					for(var i = 0; i < this.desiredFiles.length; i++)
+					{
+					this.push('filesList', this.desiredFiles[i]);
+					}
 
-				this.$.desiredList.open(); 
-			}.bind(this), 2000); 
+				this.$.desiredList.open();
+			}.bind(this), 2000);
 		},
 
 		nothingFound : function() {
@@ -465,13 +465,13 @@ Close dialog, call the callback with `this.value` and forget the callback.
 						if(!this.fileCaptions[selectedFiles[i]])
 							imgHTML += "<img src='" + selectedFiles[i] + "'>";
 						else
-							imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>";
+							imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>";
 
 						if(!this.gallery && this.wrapperPromptResult)
 							if(!this.fileCaptions[selectedFiles[i]])
 								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>");
 							else
-								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<p class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</p></div>");
+								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>");
 					}
 
 				if(this.gallery)
@@ -484,18 +484,18 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			}
 			else
 				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
-						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
 				else
 					if(this.wrapperPromptResult)
 						if(!this.meta.caption)
 							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + this.value + "'>"));
 						else
-							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>"));
+							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<span class='caption'>" +  this.meta.caption + "</span></div>"));
 					else
 						if(!this.meta.caption)
 							this.promptCallback(this.value);
 						else
-							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<p class='caption'>" +  this.meta.caption + "</p></div>");
+							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
 
 			this.clearSelection();
 			this.promptCallback = null;

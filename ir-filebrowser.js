@@ -141,8 +141,8 @@
 						{
 							this.ls(this.relPath + year);
 							return;
-						}	
-						
+						}
+
 					this.$.makedirloader.body = {name : year, fpath : this.relPath};
 					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
 					this.$.makedirloader.url = this._makedirUrl;
@@ -151,7 +151,7 @@
 					this.ls(this.relPath + year);
 					return;
 
-				}	
+				}
 				else
 				{
 					for(var i = 0; i < directories.length; i++)
@@ -169,8 +169,8 @@
 
 					this.isFirstTimeOpened = false;
 					this.ls(month);
-					return;		
-				}						
+					return;
+				}
 			};
 
 			if(!(/^\/?$/.test(this.relPath))) // create an '..' directory entry
@@ -497,11 +497,27 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			if(!this.promptCallback)
 				return;
 
-
 			this._scrollAfterSelect = this.$.scrollableFiles.scrollTop;
-			this.hideDialog();
-			var ext = this.value.match(/\.([^\.]+)$/)[1];
 			var selectedFiles = this.value.split(',');
+			if(selectedFiles.length > 1) {
+
+				for (i = 0; i < selectedFiles.length; i++) {
+
+					var x = selectedFiles[i].match(/\.([^\.]+)$/)[1];
+					if (x.match(/^(mp4|ogg|webm|ogv)$/i)) {
+						alert('You may currently only insert multiple images or a single video');
+						this.showDialog();
+						return;
+					}
+					else{
+						this.hideDialog();
+					}
+				}
+			}
+
+
+			var ext = this.value.match(/\.([^\.]+)$/)[1];
+
 			var i, j;
 
 			if(selectedFiles.length > 1)
@@ -830,24 +846,26 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		showDialog : function(relPath) {
 			// Polymer.dom.flush();
-			this.tableselected = "0";
-			this.$.dialog.open();
-			this.ls(relPath);
+			var that = this;
+			setTimeout(function() {
+				that.tableselected = "0";
+				that.$.dialog.open();
+				that.ls(relPath);
+				if(that.backgroundUpload)
+					that.selectUploadedItems(this.backgroundItems);
+				that.async(function() {
+					that.refitDialog()
+				});
 
-			if(this.backgroundUpload)
-				this.selectUploadedItems(this.backgroundItems);
-			this.async(function() {
-				this.refitDialog()
-			});
+				if(that._scrollAfterSelect){
+					setTimeout(function() {
+						that.$.scrollableFiles.scrollTop=this._scrollAfterSelect;
 
+						that._scrollAfterSelect = null;
+					}.bind(this), 200);
+				};
+			}, 300);
 
-			if(this._scrollAfterSelect){
-				setTimeout(function() {
-					this.$.scrollableFiles.scrollTop=this._scrollAfterSelect;
-
-					this._scrollAfterSelect = null;
-				}.bind(this), 200);
-			};
 		},
 
 		hideDialog : function (e) {

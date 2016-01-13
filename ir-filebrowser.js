@@ -125,6 +125,54 @@
 					files.push(fstat);
 			};
 
+			if(this.isFirstTimeOpened)
+			{
+				var date = new Date(),
+					year = date.getFullYear(),
+					month = date.getMonth() + 1;
+
+					if(month < 10)
+						month = "0" + month;
+
+				if(this.relPath == "")
+				{
+					for(var i = 0; i < directories.length; i++)
+						if(year == directories[i].name)
+						{
+							this.ls(this.relPath + year);
+							return;
+						}	
+						
+					this.$.makedirloader.body = {name : year, fpath : this.relPath};
+					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+					this.$.makedirloader.url = this._makedirUrl;
+					this.$.makedirloader.generateRequest();
+
+					this.ls(this.relPath + year);
+					return;
+
+				}	
+				else
+				{
+					for(var i = 0; i < directories.length; i++)
+						if(month == directories[i].name)
+						{
+							this.isFirstTimeOpened = false;
+							this.ls(month);
+							return;
+						}
+
+					this.$.makedirloader.body = {name : month, fpath : this.relPath};
+					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+					this.$.makedirloader.url = this._makedirUrl;
+					this.$.makedirloader.generateRequest();
+
+					this.isFirstTimeOpened = false;
+					this.ls(month);
+					return;		
+				}						
+			};
+
 			if(!(/^\/?$/.test(this.relPath))) // create an '..' directory entry
 				directories.unshift({
 					name: '..',
@@ -247,7 +295,8 @@
 		},
 
 		updateVal : function(relPath) {
-			this.ls(relPath);
+			if(!this.isFirstTimeOpened);
+				this.ls(relPath);
 		},
 
 		searchBoxKeyDown: function(e) {
@@ -784,6 +833,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.tableselected = "0";
 			this.$.dialog.open();
 			this.ls(relPath);
+
 			if(this.backgroundUpload)
 				this.selectUploadedItems(this.backgroundItems);
 			this.async(function() {
@@ -911,6 +961,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			backgroundItems : 	{ type : Object },
 			isUploadEnds : 		{ type : Boolean, value : false },
 			wrapperPromptResult:{ type : String, notify : true },
+			dir : 				{ type : String, notify : true },
+			isFirstTimeOpened : { type : Boolean, value : true },
 			gallery : 			{ type : Boolean, value : true },
 			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },

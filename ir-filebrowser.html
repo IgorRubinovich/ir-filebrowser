@@ -260,7 +260,7 @@ Example:
 						</div>						
 					</div>
 				</div>
-				<iron-pages selected="{{tableselected}}" id="scrollableFiles" main>
+				<iron-pages selected="{{tableselected}}" id="scrollableFiles" on-scroll="loadMoreFiles" main>
 					<div>
 						<div id="uploaderContainer">
 							<span hidden$="{{ !showDirectories }}">

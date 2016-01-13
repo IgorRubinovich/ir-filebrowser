@@ -93,6 +93,9 @@
 				that = this,
 				directories = [];
 
+			this.loadedFiles = [];
+			this.loadedDirectories = [];	
+
 			if(!this.loadedData)
 				return;
 
@@ -124,6 +127,7 @@
 				else
 					files.push(fstat);
 			};
+
 
 			if(this.isFirstTimeOpened)
 			{
@@ -182,9 +186,11 @@
 					rootUrl: rootUrl
 				});
 
+			this._directories = directories;
+			this._files = files;
 
-			this.set("directories", directories);
-			this.set("files", files);
+			this.set('directories', this._directories.splice(0, this.limit));
+			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));	
 
 			if(!this._itemsListenerAttached)
 			{
@@ -213,6 +219,18 @@
 			this.lsAfterUpload();
 
 			//this.files = res;
+		},
+
+		loadMoreFiles : function(e) {
+			var scrollerHeight = e.currentTarget.scrollHeight * 2 / 3,
+				allFiles = this.loadedFiles + this.loadedDirectories;
+
+			if(e.currentTarget.scrollTop >= scrollerHeight)
+			{
+				this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
+				this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
+			}
+
 		},
 
 		refitDialog : function() {
@@ -980,6 +998,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			isUploadEnds : 		{ type : Boolean, value : false },
 			wrapperPromptResult:{ type : String, notify : true },
 			dir : 				{ type : String, notify : true },
+			skip : 				{ type : Number, value : 0 },
+			limit : 			{ type : Number, value : 20 },
+			loadedFiles : 		{ type : Array, value : [] },
+			loadedDirectories : { type : Array, value : [] },
 			isFirstTimeOpened : { type : Boolean, value : true },
 			gallery : 			{ type : Boolean, value : true },
 			renameFiles :		{ type : Boolean, value : false },

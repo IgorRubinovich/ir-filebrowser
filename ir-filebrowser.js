@@ -909,7 +909,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			if(this.promptMode)
 			{
-				this.$.dialog.modal = true;
+				if(!this.fullView)
+					this.$.dialog.modal = true;
 				//this.$.dialog.noCancelOnOutsideClick = false;
 				this.autoPreview = false; // until there's a better way
 			}

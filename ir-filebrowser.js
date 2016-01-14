@@ -229,7 +229,7 @@
 			var date = new Date();
 			var newtime = date.getSeconds()*1000 + date.getMilliseconds();
 
-			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) * i)
+			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) *(1/i))
 			{
 				if(newtime - this.currentTime >= 400)
 				{

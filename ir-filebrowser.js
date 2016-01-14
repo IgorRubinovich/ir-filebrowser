@@ -222,13 +222,23 @@
 		},
 
 		loadMoreFiles : function(e) {
-			var scrollerHeight = e.currentTarget.scrollHeight * 2 / 3,
-				allFiles = this.loadedFiles + this.loadedDirectories;
+			var scrollerHeight = e.currentTarget.scrollHeight,
+				allFiles = this.loadedFiles + this.loadedDirectories,
+				i = 1;
 
-			if(e.currentTarget.scrollTop >= scrollerHeight)
+			var date = new Date();
+			var newtime = date.getSeconds()*1000 + date.getMilliseconds();
+
+			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) * i)
 			{
-				this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
-				this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
+				if(newtime - this.currentTime >= 400)
+				{
+					this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
+					this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
+					i++;
+
+					this.currentTime = newtime;
+				}
 			}
 
 		},
@@ -999,7 +1009,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			isUploadEnds : 		{ type : Boolean, value : false },
 			wrapperPromptResult:{ type : String, notify : true },
 			dir : 				{ type : String, notify : true },
-			skip : 				{ type : Number, value : 0 },
+			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
 			loadedFiles : 		{ type : Array, value : [] },
 			loadedDirectories : { type : Array, value : [] },

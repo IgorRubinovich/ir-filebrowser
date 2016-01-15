@@ -335,6 +335,11 @@
 			}
 		},
 
+		blockBackspace : function(e) {
+			if(e.keyCode == 8)
+				e.preventDefault();
+		},
+
 		findFile : function() {
 			if (this.inputValue !== null){
 				this.$.findfileloader.url = this._findfileUrl.replace(/\[path\]/, encodeURIComponent(this.inputValue).replace(/-/g, '%2D').replace(/\./g, '%2E').replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21"));  //"/medialib/json/find/" + this.inputValue;

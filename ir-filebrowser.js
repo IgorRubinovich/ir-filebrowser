@@ -852,6 +852,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 				that.selectUploadedItems(toSelect);
 
 				that._filesBeforeUpload = null;
+
+				this.fire('toast', 'upload is complete');
 			}
 		},
 

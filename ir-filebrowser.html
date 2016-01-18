@@ -310,7 +310,13 @@ Example:
 				<span>
 					<paper-spinner class="loaded" active$="[[ isLoaded ]]"></paper-spinner>
 				</span>
-				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="lsAfterUpload" target="{{ _postUrl }}" noink multi progress-timeout="0">
+				<span>
+					<paper-spinner class="loaded" active$="[[ isUploadingFiles ]]"></paper-spinner>
+				</span>
+				<span hidden$="[[ !isUploadingFiles ]]">
+					<p>Files left: </p><span>{{ uploadedFiles }}</span>
+				</span>
+				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="lsAfterUpload" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 					<div hidden$="[[ isUploadingFiles ]]">
 						<paper-button raised>Browse...</paper-button> or drop files into this dialog
 					</div>

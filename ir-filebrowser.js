@@ -824,6 +824,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		filesChanged : function() {
 			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
+			this.set('uploadedFiles', this.$.fileUploader.files.length);
 			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
 			if(!this.$.fileUploader.files.length && this.isUploadEnds)
 				this.ls();
@@ -1027,6 +1028,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			limit : 			{ type : Number, value : 20 },
 			loadedFiles : 		{ type : Array, value : [] },
 			isLoaded : 			{ type : Boolean, value : true },
+			uploadedFiles : 	{ type : Number, value : 0 },
 			loadedDirectories : { type : Array, value : [] },
 			isFirstTimeOpened : { type : Boolean, value : true },
 			gallery : 			{ type : Boolean, value : true },

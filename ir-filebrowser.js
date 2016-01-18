@@ -215,6 +215,7 @@
 
 
 			Polymer.dom.flush();
+			this.set('isLoaded', false);
 
 			this.lsAfterUpload();
 
@@ -223,14 +224,19 @@
 
 		loadMoreFiles : function(e) {
 			var scrollerHeight = e.currentTarget.scrollHeight,
-				allFiles = this.loadedFiles + this.loadedDirectories,
+				allFiles = this._files + this._directories,
 				i = 1;
 
 			var date = new Date();
 			var newtime = date.getSeconds()*1000 + date.getMilliseconds();
 
-			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) *(1/i))
+			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) *(1/i) && allFiles.length > 0)
 			{
+				this.set('isLoaded', true);
+				var that = this;
+				setTimeout(function(){
+					that.set('isLoaded', false);
+				}, 400);
 				if(newtime - this.currentTime >= 400)
 				{
 					this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
@@ -240,7 +246,6 @@
 					this.currentTime = newtime;
 				}
 			}
-
 		},
 
 		refitDialog : function() {
@@ -537,7 +542,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 				for (i = 0; i < selectedFiles.length; i++) {
 
 					var x = selectedFiles[i].match(/\.([^\.]+)$/)[1];
-					if (x.match(/^(mp4|ogg|webm|ogv)$/i)) {
+					if (x && x.match(/^(mp4|ogg|webm|ogv)$/i)) {
 						alert('You may currently only insert multiple images or a single video');
 						this.showDialog();
 						return;
@@ -581,7 +586,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 						this.promptCallback(imgHTML);
 			}
 			else
-				if(ext.match(/^(mp4|ogg|webm|ogv)$/i))
+				if(ext && ext.match(/^(mp4|ogg|webm|ogv)$/i))
 						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
 				else
 					if(this.wrapperPromptResult)
@@ -800,6 +805,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 		},
 		dblclickDirectory : function (e) {
+			this.set('isLoaded', true);
 			this.ls(e.detail.item.name);
 		},
 		unselect : function (e) {
@@ -884,6 +890,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			var that = this;
 			setTimeout(function() {
 				that.tableselected = "0";
+				that.set('isLoaded', true);
 				that.$.dialog.open();
 				that.ls(relPath);
 				if(that.backgroundUpload)
@@ -1019,6 +1026,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
 			loadedFiles : 		{ type : Array, value : [] },
+			isLoaded : 			{ type : Boolean, value : true },
 			loadedDirectories : { type : Array, value : [] },
 			isFirstTimeOpened : { type : Boolean, value : true },
 			gallery : 			{ type : Boolean, value : true },

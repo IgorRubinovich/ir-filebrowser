@@ -29,6 +29,7 @@ Example:
 <link rel="import" href="../paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-item/paper-item-body.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
 
 
 
@@ -167,6 +168,10 @@ Example:
 	    width: 44px;
 	}
 
+	paper-spinner.loaded {
+		--paper-spinner-color : var(--paper-blue-grey-500);
+	}
+
   </style>
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
@@ -262,7 +267,7 @@ Example:
 				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" on-scroll="loadMoreFiles" main>
 					<div>
-						<div id="uploaderContainer">
+						<div id="uploaderContainer">	
 							<span hidden$="{{ !showDirectories }}">
 								<template hidden$="{{ showDirectories }}" is="dom-repeat" items="{{directories}}">
 									<ir-filebrowser-item
@@ -302,6 +307,9 @@ Example:
 
 		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
 			<div id="fileUploaderContainer">
+				<span>
+					<paper-spinner class="loaded" active$="[[ isLoaded ]]"></paper-spinner>
+				</span>
 				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="lsAfterUpload" target="{{ _postUrl }}" noink multi progress-timeout="0">
 					<div hidden$="[[ isUploadingFiles ]]">
 						<paper-button raised>Browse...</paper-button> or drop files into this dialog

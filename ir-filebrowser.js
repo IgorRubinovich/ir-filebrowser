@@ -735,7 +735,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.set('fDate', date.toLocaleString("en-Us", options));
 					this.set('noFile', false);
 
-					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, this.fileName.replace(/-/g, "%2E"));
+					var nameReq = this.relPath + this.fileName;
+
+					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, nameReq.replace(/-/g, "%2E"));
 					this.$.getDescription.generateRequest();
 				}
 				else {

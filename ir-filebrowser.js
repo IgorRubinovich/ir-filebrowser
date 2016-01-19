@@ -94,7 +94,7 @@
 				directories = [];
 
 			this.loadedFiles = [];
-			this.loadedDirectories = [];	
+			this.loadedDirectories = [];
 
 			if(!this.loadedData)
 				return;
@@ -190,7 +190,7 @@
 			this._files = files;
 
 			this.set('directories', this._directories.splice(0, this.limit));
-			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));	
+			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
 
 			if(!this._itemsListenerAttached)
 			{
@@ -587,6 +587,9 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			}
 			else
 				if(ext && ext.match(/^(mp4|ogg|webm|ogv)$/i))
+					if(!this.meta.caption)
+						this.promptCallback("<video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>");
+					else
 						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
 				else
 					if(this.wrapperPromptResult)

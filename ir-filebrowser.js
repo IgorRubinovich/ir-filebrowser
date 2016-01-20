@@ -191,6 +191,7 @@
 
 			this.set('directories', this._directories.splice(0, this.limit));
 			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
+			this.currentTime = 0;
 
 			if(!this._itemsListenerAttached)
 			{
@@ -228,7 +229,7 @@
 				i = 1;
 
 			var date = new Date();
-			var newtime = date.getSeconds()*1000 + date.getMilliseconds();
+			var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
 
 			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) *(1/i) && allFiles.length > 0)
 			{

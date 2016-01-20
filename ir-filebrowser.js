@@ -225,13 +225,12 @@
 
 		loadMoreFiles : function(e) {
 			var scrollerHeight = e.currentTarget.scrollHeight,
-				allFiles = this._files + this._directories,
-				i = 1;
+				allFiles = this._files + this._directories;
 
 			var date = new Date();
 			var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
 
-			if(e.currentTarget.scrollTop >= scrollerHeight - scrollerHeight * (1/3) *(1/i) && allFiles.length > 0)
+			if((scrollerHeight - e.currentTarget.scrollTop <= 600) && allFiles.length > 0)
 			{
 				this.set('isLoaded', true);
 				var that = this;
@@ -242,7 +241,6 @@
 				{
 					this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
 					this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
-					i++;
 
 					this.currentTime = newtime;
 				}

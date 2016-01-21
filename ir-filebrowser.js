@@ -603,6 +603,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 						else
 							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
 
+			this.hideDialog();
 			this.clearSelection();
 			this.promptCallback = null;
 		},

@@ -219,8 +219,6 @@
 			Polymer.dom.flush();
 			this.set('isLoaded', false);
 
-			this.lsAfterUpload();
-
 			//this.files = res;
 		},
 
@@ -833,7 +831,13 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.set('uploadedFiles', this.$.fileUploader.files.length);
 			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
 			if(!this.$.fileUploader.files.length && this.isUploadEnds)
+			{
 				this.ls();
+				var that = this;
+				setTimeout(function(){
+					that.lsAfterUpload();
+				}.bind(this), 200);
+			}
 		},
 
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
@@ -843,7 +847,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(typeof restore == 'object') // it's an event
 			{
 				this._filesBeforeUpload = {};
-				this.upFiles.forEach(function(f) {
+				this.files.forEach(function(f) {
 					that._filesBeforeUpload[f.name] = 1;
 				});
 			}

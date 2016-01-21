@@ -188,6 +188,7 @@
 
 			this._directories = directories;
 			this._files = files;
+			this.upFiles = files;
 
 			this.set('directories', this._directories.splice(0, this.limit));
 			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
@@ -841,7 +842,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(typeof restore == 'object') // it's an event
 			{
 				this._filesBeforeUpload = {};
-				this.files.forEach(function(f) {
+				this.upFiles.forEach(function(f) {
 					that._filesBeforeUpload[f.name] = 1;
 				});
 			}
@@ -899,7 +900,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				that.$.dialog.open();
 				that.ls(relPath);
 				if(that.backgroundUpload)
-					that.selectUploadedItems(this.backgroundItems);
+					that.selectUploadedItems(that.backgroundItems);
 				that.async(function() {
 					that.refitDialog()
 				});

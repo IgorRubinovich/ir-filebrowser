@@ -339,7 +339,7 @@
 		},
 
 		blockBackspace : function(e) {
-			if(e.keyCode == 8)
+			if(e.keyCode == 8 && e.target.tagName !== "INPUT")
 				e.preventDefault();
 		},
 

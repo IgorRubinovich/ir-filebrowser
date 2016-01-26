@@ -1042,7 +1042,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			uploadedFiles : 	{ type : Number, value : 0 },
 			loadedDirectories : { type : Array, value : [] },
 			isFirstTimeOpened : { type : Boolean, value : true },
-			gallery : 			{ type : Boolean, value : true },
+			gallery : 			{ type : Boolean, value : false },
 			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },
 			tempselected :		{ type : String, notify : false },

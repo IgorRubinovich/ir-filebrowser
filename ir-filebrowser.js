@@ -401,18 +401,6 @@
 					}
 
 				this.$.desiredList.open();
-
-			var sel = window.getSelection(),
-    			range = document.createRange();
-
-    		var inputS = this.$.searchInput;
-
-			range = range.cloneRange();
-		   	range.setStart(inputS, 0);
-		   	range.setEnd(inputS, 0);
-		   	range.collapse(true);
-		   	sel.removeAllRanges();
-		   	sel.addRange(range);
 		},
 
 		nothingFound : function() {

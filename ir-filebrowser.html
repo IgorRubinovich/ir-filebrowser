@@ -207,11 +207,13 @@ Example:
 							<paper-icon-button icon="clear" on-tap="filterClear">
 							</paper-icon-button>
 						<div class="layout horizontal center" style="margin-left:30px">
-							<paper-input placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
+							<paper-input id="searchInput" label="Press Enter to search" always-float-label placeholder="Search by description..." value="{{searchValue}}" on-keydown="searchFiles">
 							</paper-input>
+							<paper-icon-button icon="search" on-tap="searchFiles">
+							</paper-icon-button>
 							<paper-icon-button icon="clear" on-tap="searchClear">
 							</paper-icon-button>
-							<iron-dropdown id="desiredList" style="margin-top:55px;">
+							<iron-dropdown id="desiredList" no-auto-focus style="margin-top:55px;">
 									<paper-menu class="dropdown-content" selectable="paper-item">
 										<template is="dom-repeat" items="{{ filesList }}">
 											<paper-item on-click="jumptofilePath">
@@ -326,7 +328,7 @@ Example:
 				<div hidden$="{{ fullViewMode }}">
 				<span class="layout horizontal" hidden$="{{ !promptMode }}">
 					<paper-item>
-						<paper-checkbox checked="{{ gallery }}">Gallery</paper-checkbox>
+						<paper-checkbox title="if You want to combine pictures in the gallery click on this checkbox" checked="{{ gallery }}">Gallery</paper-checkbox>
 					</paper-item>
 					<paper-button raised on-click="hideDialog">Cancel</paper-button>
 					<paper-button raised on-click="promptSelect">Select</paper-button>

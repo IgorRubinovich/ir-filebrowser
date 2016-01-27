@@ -380,9 +380,10 @@
 			this.renameFiles = false;
 		},
 
-		searchFiles : function() {
-			if(this.searchValue.length > 3)
+		searchFiles : function(e) {
+			if(e.type == 'tap' || e.keyCode == 13)
 			{
+				e.preventDefault();
 				this.$.searchByDesc.url = this._searchbydescUrl.replace(/\[path\]/, this.searchValue);
 				this.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
 				this.$.searchByDesc.generateRequest();
@@ -390,8 +391,7 @@
 		},
 
 		listDesire : function() {
-			setTimeout(function() {
-				this.splice('filesList', 0);
+			this.splice('filesList', 0);
 				if(this.desiredFiles[0] == "notFound")
 					this.push('filesList', { name : 'not found', content : '', path : '' });
 				else
@@ -401,7 +401,18 @@
 					}
 
 				this.$.desiredList.open();
-			}.bind(this), 2000);
+
+			var sel = window.getSelection(),
+    			range = document.createRange();
+
+    		var inputS = this.$.searchInput;
+
+			range = range.cloneRange();
+		   	range.setStart(inputS, 0);
+		   	range.setEnd(inputS, 0);
+		   	range.collapse(true);
+		   	sel.removeAllRanges();
+		   	sel.addRange(range);
 		},
 
 		nothingFound : function() {

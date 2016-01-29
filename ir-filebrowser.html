@@ -177,14 +177,15 @@ Example:
 	<!-- template is="dom-repeat" items="{{selected}}">
 		<ir-filebrowser-item on-item-click="showDialog" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
 	</template -->
-
-	<div id="selectionPreview" hidden$="{{ promptMode }}">
-		<content select="ir-filebrowser-item">
-		</content>
-		<template is="dom-if" if="{{value}}">
-			<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
-		</template>
-		<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+	<div hidden$="{{ archiveMode }}">
+		<div id="selectionPreview" hidden$="{{ promptMode }}">
+			<content select="ir-filebrowser-item">
+			</content>
+			<template is="dom-if" if="{{value}}">
+				<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
+			</template>
+			<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+		</div>
 	</div>
 
 	<paper-dialog no-cancel-on-esc-key="[[ fullView ]]" no-cancel-on-outside-click="[[ fullView ]]" on-keydown="blockBackspace" opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
@@ -251,6 +252,12 @@ Example:
 				<div id="drawPocket" drawer>
 					<p hidden$="{{ !noFile }}">File info will appear here</p>
 					<div id="fileInfo" hidden$="{{ noFile }}">
+						<div hidden$="{{ !archiveMode }}">
+							<a href="{{ linkForDownload }}" download><iron-icon icon="file-download">
+							</iron-icon>download</a>
+							<h3>{{ meta.caption }}</h3>
+							<p>{{ meta.description }}</p>
+						</div>
 						<div>{{ fName }}</div>
 						<div id="imgpreview" hidden$="{{ noImage }}">
 							<iron-image title="{{ fUrl }}" preload fade sizing="contain" src="{{ fUrl }}"></iron-image>
@@ -259,12 +266,14 @@ Example:
 						<label>Date</label><div>{{ fDate }}</div>
 						<span hidden$="{{ noImage }}"><label>Image Dimensions</label><div><span>{{ meta.width }}</span> x <span>{{ meta.height }}</span></div></span>
 						<div class="clearfloat"></div>
-						<div hidden$="{{ hasInfo }}">No information</div>
-						<div hidden$="{{ !hasInfo }}">
-							<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-							<paper-input label="Description" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-							<paper-input label="Alt" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-						</div>						
+						<div hidden$="{{ archiveMode }}">
+							<div hidden$="{{ hasInfo }}">No information</div>
+							<div hidden$="{{ !hasInfo }}">
+								<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+								<paper-input label="Description" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+								<paper-input label="Alt" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+							</div>		
+						</div>					
 					</div>
 				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" on-scroll="loadMoreFiles" main>

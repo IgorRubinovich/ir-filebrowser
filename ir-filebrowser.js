@@ -717,6 +717,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 					this.set('noImage', !e.detail.item.isImage);
 					this.set('fUrl',  e.detail.item.isImage ? e.detail.item.url : '' );
+					this.set('linkForDownload', e.detail.item.url);
 
 					this.set('fSize', fileSize);
 
@@ -925,6 +926,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.dialog.close();
 		},
 
+
 		ready: function() {
 			var that = this;
 
@@ -938,8 +940,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			if(this.archiveMode)
 			{
-				this.promptMode = true;
+				//this.promptMode = true;
 				this.showDialog();
+				this.$.dialog.style.margin = 0;
+				this.$.dialog.noCancelOnOutsideClick = true;
+				this.$.dialog.noCancelOnEscKey = true;
 			}
 
 			if(this.promptMode)

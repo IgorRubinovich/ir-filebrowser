@@ -676,8 +676,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 				});
 		},
 
-		deleteSelectionElement : function(relPath) {
-			this.ls(relPath);
+		deleteSelectionElement : function() {
+			this.ls();
+			this.fileName = null;
 
 			for(var i = 0; i < this.deletedFile.length; i++)
 				this.removeSelection(this.deletedFile[i]);

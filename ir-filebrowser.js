@@ -626,7 +626,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._getSelectionElements()
 				.forEach(function(el, i) {
 					if(el.item.url == url)
-						el.parentNode.removeChild(el);
+						Polymer.dom(Polymer.dom(el).parentNode).removeChild
 				});
 
 			// unselect in dialog

@@ -868,8 +868,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 				var selectedElements = that._getSelectionElements();
 
-				if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
-					that.clearSelection();
+				/*if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
+					that.clearSelection(); */
 
 				//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
 				that.selectUploadedItems(toSelect);

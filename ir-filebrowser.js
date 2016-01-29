@@ -626,7 +626,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._getSelectionElements()
 				.forEach(function(el, i) {
 					if(el.item.url == url)
-						Polymer.dom(that).removeChild(el);
+						el.parentNode.removeChild(el);
 				});
 
 			// unselect in dialog
@@ -1059,7 +1059,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			archiveMode : 		{ type : Boolean },
 			fileId :			{ type : Number },
 			hasInfo : 			{ type : Boolean },
-			noFile : 		{ type : Boolean, value : true},
+			noFile : 			{ type : Boolean, value : true},
 			meta : 				{ type : Object, value : {
 								caption : "",
 								description : "",

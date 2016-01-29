@@ -327,7 +327,7 @@ Example:
 				<span hidden$="[[ !isUploadingFiles ]]">
 					<span>Files left: </span><span>{{ uploadedFiles }}</span>
 				</span>
-				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="lsAfterUpload" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 					<div hidden$="[[ isUploadingFiles ]]">
 						<paper-button raised>Browse...</paper-button> or drop files into this dialog
 					</div>

@@ -219,6 +219,8 @@
 			Polymer.dom.flush();
 			this.set('isLoaded', false);
 
+			that.lsAfterUpload();
+
 			//this.files = res;
 		},
 
@@ -828,34 +830,39 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		filesChanged : function() {
-			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
-			this.set('uploadedFiles', this.$.fileUploader.files.length);
-			console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
-			if(!this.$.fileUploader.files.length && this.isUploadEnds)
+			if(!this.firstUpload)
 			{
-				this.ls();
-				var that = this;
-				setTimeout(function(){
-					that.lsAfterUpload();
-				}.bind(this), 200);
+				this.set('isUploadingFiles', false);
+				if(this.$.fileUploader.files.length > 0)
+					this.firstUpload = true;
+			}
+
+			if(this.firstUpload)
+			{
+				this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
+				this.set('uploadedFiles', this.$.fileUploader.files.length);
+				console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
+				if(!this.$.fileUploader.files.length && !this.isUploadEnds)
+				{
+					var that = this;
+					this.ls();
+					this._filesBeforeUpload = {};
+					this.files.forEach(function(f) {
+						that._filesBeforeUpload[f.name] = 1;
+					});
+					this.isUploadEnds = true;
+				}
 			}
 		},
 
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
-		lsAfterUpload : function(restore) {
-			this.isUploadEnds = true;
-			var diff, that = this, toSelect;
-			if(typeof restore == 'object') // it's an event
+		lsAfterUpload : function() {
+
+			if(this._filesBeforeUpload && this.isUploadEnds)
 			{
-				this._filesBeforeUpload = {};
-				this.files.forEach(function(f) {
-					that._filesBeforeUpload[f.name] = 1;
-				});
-			}
-			else if(this._filesBeforeUpload)
-			{
-				diff = [];
-				toSelect = [];
+				var diff = [],
+					that = this,
+					toSelect = [];
 				Array.prototype.forEach.call(Array.prototype.reverse.call(this.$.fileItemsList.children),
 					function(fi) {
 						if(fi.is != 'ir-filebrowser-item')
@@ -877,6 +884,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				that._filesBeforeUpload = null;
 
 				this.fire('toast', 'upload is complete');
+				this.isUploadEnds = false;
 			}
 		},
 
@@ -1037,6 +1045,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			backgroundUpload : 	{ type : Boolean, value : false },
 			backgroundItems : 	{ type : Object },
 			isUploadEnds : 		{ type : Boolean, value : false },
+			firstUpload : 		{ type : Boolean, value : false },
 			wrapperPromptResult:{ type : String, notify : true },
 			dir : 				{ type : String, notify : true },
 			currentTime : 		{ type : Number, value : 0 },

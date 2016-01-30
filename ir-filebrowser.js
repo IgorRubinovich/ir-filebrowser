@@ -815,7 +815,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		dblclickDirectory : function (e) {
 			this.set('isLoaded', true);
 			this.ls(e.detail.item.name);
-			if(this.maxItems > 1)
+			if(this.maxItems !== 1)
 				this.clearSelection();
 		},
 		unselect : function (e) {

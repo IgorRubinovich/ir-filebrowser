@@ -832,7 +832,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 		},
 
-		filesChanged : function(e) {
+		filesChanged : function() {
 			if(!this.firstUpload)
 			{
 				this.set('isUploadingFiles', false);
@@ -859,7 +859,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		makeList : function(e) {
-			var fileName = JSON.parse(e.detail.xhr.response)[0].split((/\\/)).pop();
+			var fileName = JSON.parse(e.detail.xhr.response)[0].split('/').pop();
 				this.uploadedList[fileName] = 1;
 		},
 

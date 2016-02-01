@@ -832,7 +832,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 		},
 
-		filesChanged : function() {
+		filesChanged : function(e) {
 			if(!this.firstUpload)
 			{
 				this.set('isUploadingFiles', false);
@@ -858,6 +858,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 		},
 
+		makeList : function(e) {
+			var fileName = JSON.parse(e.detail.xhr.response)[0].split((/\\/)).pop();
+				this.uploadedList[fileName] = 1;
+		},
+
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
 		lsAfterUpload : function() {
 
@@ -871,7 +876,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 						if(fi.is != 'ir-filebrowser-item')
 							return;
 
-						if(!that._filesBeforeUpload[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
+						if(!that._filesBeforeUpload[fi.item.name] && that.uploadedList[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
 							toSelect.push(fi);
 
 					});
@@ -888,6 +893,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 				this.fire('toast', 'upload is complete');
 				this.isUploadEnds = false;
+				this.uploadedList = {};
 			}
 		},
 
@@ -1049,6 +1055,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			backgroundItems : 	{ type : Object },
 			isUploadEnds : 		{ type : Boolean, value : false },
 			firstUpload : 		{ type : Boolean, value : false },
+			uploadedList : 		{ type : Object, value : {} },
 			wrapperPromptResult:{ type : String, notify : true },
 			dir : 				{ type : String, notify : true },
 			currentTime : 		{ type : Number, value : 0 },

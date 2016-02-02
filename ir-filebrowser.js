@@ -193,6 +193,10 @@
 			this.set('directories', this._directories.splice(0, this.limit));
 			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
 			this.currentTime = 0;
+			if(this._files.length + this._directories.length > 0)
+				this.isMore = true;
+			else
+				this.isMore = false;
 
 			if(!this._itemsListenerAttached)
 			{
@@ -226,12 +230,15 @@
 
 		loadMoreFiles : function(e) {
 			var scrollerHeight = e.currentTarget.scrollHeight,
-				allFiles = this._files + this._directories;
+				allFiles = this._files.length + this._directories.length;
 
 			var date = new Date();
 			var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
 
-			if((scrollerHeight - e.currentTarget.scrollTop <= 600) && allFiles.length > 0)
+			if(allFiles < this.limit)
+				this.isMore = false;
+
+			if(((scrollerHeight - e.currentTarget.scrollTop <= 600) || e.type == "tap") && allFiles > 0)
 			{
 				this.set('isLoaded', true);
 				var that = this;
@@ -1059,6 +1066,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			dir : 				{ type : String, notify : true },
 			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
+			isMore : 			{ type : Boolean, value : false },
 			loadedFiles : 		{ type : Array, value : [] },
 			isLoaded : 			{ type : Boolean, value : true },
 			uploadedFiles : 	{ type : Number, value : 0 },

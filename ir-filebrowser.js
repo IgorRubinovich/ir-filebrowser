@@ -679,9 +679,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		deleteSelectionElement : function() {
 			this.ls();
 			this.fileName = null;
-
-			for(var i = 0; i < this.deletedFile.length; i++)
-				this.removeSelection(this.deletedFile[i]);
+			this.clearSelection();
 		},
 
 		metaChanged : function() {
@@ -697,7 +695,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(e.detail.item.isDirectory) {
 				if(!e.detail.isSelected)
 				{
-					this.fileName = e.detail.item.name;
+					if(e.detail.item.name !== "..")
+						this.fileName = e.detail.item.name;
 					this.selectedDirectory = e.detail;
 					e.detail.select();
 				}

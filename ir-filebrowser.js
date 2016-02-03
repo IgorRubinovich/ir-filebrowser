@@ -981,7 +981,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.pocketDrawer.drawerWidth = "35%";
 
 			this._urlsChanged();
-			this.setupUploader();
+			if(!this.archiveMode)
+				this.setupUploader();
 
 			// this.$.scrollableDialog.assignParentResizeable(this.$.dialog);
 

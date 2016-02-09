@@ -131,50 +131,73 @@
 
 			if(this.isFirstTimeOpened)
 			{
-				var date = new Date(),
+				if(this.dir.match(/\[year\]\[month\]/))
+				{
+					var date = new Date(),
 					year = date.getFullYear(),
 					month = date.getMonth() + 1;
 
 					if(month < 10)
 						month = "0" + month;
 
-				if(this.relPath == "")
-				{
-					for(var i = 0; i < directories.length; i++)
-						if(year == directories[i].name)
-						{
-							this.ls(this.relPath + year);
-							return;
-						}
+					if(this.relPath == "")
+					{
+						for(var i = 0; i < directories.length; i++)
+							if(year == directories[i].name)
+							{
+								this.ls(this.relPath + year);
+								return;
+							}
 
-					this.$.makedirloader.body = {name : year, fpath : this.relPath};
-					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-					this.$.makedirloader.url = this._makedirUrl;
-					this.$.makedirloader.generateRequest();
+						this.$.makedirloader.body = {name : year, fpath : this.relPath};
+						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+						this.$.makedirloader.url = this._makedirUrl;
+						this.$.makedirloader.generateRequest();
 
-					this.ls(this.relPath + year);
-					return;
+						this.ls(this.relPath + year);
+						return;
 
+					}
+					else
+					{
+						for(var i = 0; i < directories.length; i++)
+							if(month == directories[i].name)
+							{
+								this.isFirstTimeOpened = false;
+								this.ls(month);
+								return;
+							}
+
+						this.$.makedirloader.body = {name : month, fpath : this.relPath};
+						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+						this.$.makedirloader.url = this._makedirUrl;
+						this.$.makedirloader.generateRequest();
+
+						this.isFirstTimeOpened = false;
+						this.ls(month);
+						return;
+					}
 				}
 				else
 				{
 					for(var i = 0; i < directories.length; i++)
-						if(month == directories[i].name)
+						if(this.dir == directories[i].name)
 						{
 							this.isFirstTimeOpened = false;
-							this.ls(month);
+							this.ls(this.dir);
 							return;
 						}
 
-					this.$.makedirloader.body = {name : month, fpath : this.relPath};
+					this.$.makedirloader.body = {name : this.dir, fpath : this.relPath};
 					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
 					this.$.makedirloader.url = this._makedirUrl;
 					this.$.makedirloader.generateRequest();
 
 					this.isFirstTimeOpened = false;
-					this.ls(month);
-					return;
+					this.ls(this.dir);
+					return;	
 				}
+				
 			};
 
 			if(!(/^\/?$/.test(this.relPath))) // create an '..' directory entry
@@ -953,6 +976,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 		ready: function() {
 			var that = this;
 
+			if(this.dir)
+				this.isFirstTimeOpened = true;
 
 			if(this.fullView)
 			{
@@ -1072,7 +1097,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			isLoaded : 			{ type : Boolean, value : true },
 			uploadedFiles : 	{ type : Number, value : 0 },
 			loadedDirectories : { type : Array, value : [] },
-			isFirstTimeOpened : { type : Boolean, value : true },
+			isFirstTimeOpened : { type : Boolean, value : false },
 			gallery : 			{ type : Boolean, value : false },
 			renameFiles :		{ type : Boolean, value : false },
 			tableselected :		{ type : String, notify : false },

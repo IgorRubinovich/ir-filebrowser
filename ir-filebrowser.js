@@ -590,7 +590,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 			if(selectedFiles.length > 1)
 			{
 				var imgHTML = "",
-					oneImgGallery = "";
+					oneImgGallery = [];
 
 				for(i = 0; i < selectedFiles.length; i++)
 					{
@@ -601,10 +601,12 @@ Close dialog, call the callback with `this.value` and forget the callback.
 
 						if(!this.gallery && this.wrapperPromptResult)
 							if(!this.fileCaptions[selectedFiles[i]])
-								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>");
+								oneImgGallery.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>"));
 							else
-								oneImgGallery += this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>");
+								oneImgGallery.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>"));
 					}
+
+				oneImgGallery = oneImgGallery.join('<br>');
 
 				if(this.gallery)
 					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));

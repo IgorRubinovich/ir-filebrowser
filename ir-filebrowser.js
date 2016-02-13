@@ -606,7 +606,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 								oneImgGallery.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>"));
 					}
 
-				oneImgGallery = oneImgGallery.join('<br>');
+				oneImgGallery = oneImgGallery.join('');
 
 				if(this.gallery)
 					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));

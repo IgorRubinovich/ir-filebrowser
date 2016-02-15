@@ -284,23 +284,24 @@
 
 				this.$.dialog.refit();
 
-				this.async(function() {
-					this.$.dialog.fitInto = Polymer.dom(this).parentNode;
+				this.$.dialog.constrain();
 
-					this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
+				this.async(function() {
+					//this.$.dialog.fitInto = Polymer.dom(this).parentNode;
+
 					this.$.dialog.style.height = "auto";
-					this.$.dialog.style.position = "absolute";
 					this.$.dialog.style.zIndex = "0";
+					this.$.dialog.style.position = "absolute";
 
 					Polymer.updateStyles();
 					Polymer.dom.flush();
 
-					var currentHeight = Number(getComputedStyle(this.$.dialog).height.replace(/px/, '')),
-						topTabsHeight = Number(getComputedStyle(this.$.topTabs).height.replace(/px/, '')),
-						bottomButtonsHeight = Number(getComputedStyle(this.$.bottomButtons).height.replace(/px/, ''));
+					var currentHeight = document.documentElement.clientHeight,
+						topTabsHeight = 300,
+						bottomButtonsHeight = 0;
 
 					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
-					this.$.scrollableDialog.style.height = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+					this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				});
 
@@ -326,10 +327,29 @@
 			}
 
 			// else
+			this.$.dialog.style.position = "fixed";
 
-			this.$.dialog.constrain();
+			this.$.dialog.refit();
+
+			this.$.dialog.style.position = "fixed";
+
+
+
+			this.$.dialog.style.position = "fixed";
 
 			this.async(function() {
+
+				this.$.dialog.fitInto = window;
+
+							this.$.dialog.constrain();
+
+				this.$.dialog.style.position = "fixed";
+
+				this.$.dialog.center();
+
+				Polymer.updateStyles();
+				Polymer.dom.flush();
+
 				var currentHeight = document.documentElement.clientHeight,
 					topTabsHeight = 300,
 					bottomButtonsHeight = 0;
@@ -338,6 +358,8 @@
 				this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 			})
+
+			this.$.dialog.style.position = "fixed";
 			
 			/*
 			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
@@ -781,7 +803,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.set('fDate', date.toLocaleString("en-Us", options));
 					this.set('noFile', false);
 
-					var nameReq = path.join(this.relPath + this.fileName);
+					var nameReq = path.join(e.detail.item.relPath + this.fileName);
 
 					
 					this.$.getDescription.url = this._getdescriptionUrl.replace(/\/?\[path\]/, nameReq.replace(/-/g, "%2E"));

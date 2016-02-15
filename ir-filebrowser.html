@@ -64,6 +64,12 @@ Example:
 
 	#dialog {
 		padding : 10px;
+	    width: auto!important;
+	    left: 0!important;
+	    right: 0!important;
+	    bottom: 0!important;
+	    top: 0!important;
+	    position: fixed;
 	}
 	
 	file-upload {
@@ -208,25 +214,10 @@ Example:
 							<paper-icon-button icon="clear" on-tap="filterClear">
 							</paper-icon-button>
 						<div class="layout horizontal center" style="margin-left:30px">
-							<paper-input id="searchInput" label="Press Enter to search" always-float-label placeholder="Search by description..." value="{{searchValue}}" on-keydown="searchFiles">
+							<paper-input id="searchInput" style="width: 300px;" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
 							</paper-input>
-							<paper-icon-button icon="search" on-tap="searchFiles">
-							</paper-icon-button>
 							<paper-icon-button icon="clear" on-tap="searchClear">
 							</paper-icon-button>
-							<iron-dropdown id="desiredList" no-auto-focus style="margin-top:55px;">
-									<paper-menu class="dropdown-content" selectable="paper-item">
-										<template is="dom-repeat" items="{{ filesList }}">
-											<paper-item on-click="jumptofilePath">
-										        <div style="padding-right: 10px;"><img src="{{ item.path }}" class="desiredImg"></div>
-										        <paper-item-body two-line>
-										            <div><span>{{item.name}}</span></div>
-										            <div secondary><span>{{item.content}}</span></div>
-										        </paper-item-body>
-										    </paper-item>
-										</template>
-									</paper-menu>	
-							</iron-dropdown>
 						</div>		
 					</div>
 					<div class="layout horizontal center" hidden$="{{ archiveMode }}">
@@ -269,6 +260,7 @@ Example:
 						<div hidden$="{{ archiveMode }}">
 							<div hidden$="{{ hasInfo }}">No information</div>
 							<div hidden$="{{ !hasInfo }}">
+								<paper-input label="Title" value="{{ meta.title }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 								<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 								<paper-input label="Description" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 								<paper-input label="Alt" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
@@ -444,14 +436,14 @@ Example:
   <style>
 	:host
 	{
-		width  : 140px;
+		width  : 180px;
 		display : inline-block;
 		overflow : hidden;
 		text-align : center;
 		padding : 0;
 	}
 	iron-image {
-		width : 140px;
+		width : 180px;
 		height : 140px;
 		background: white;
 		background-size : 32px;

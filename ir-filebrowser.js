@@ -223,7 +223,7 @@
 
 			if(!this._itemsListenerAttached)
 			{
-				this.addEventListener('item-attached', this.refitDialog, true);
+				//this.addEventListener('item-attached', this.refitDialog, true);
 				this._itemsListenerAttached = true;
 			}
 
@@ -279,6 +279,7 @@
 		},
 
 		refitDialog : function() {
+			
 			if(this.fullView) {
 
 				this.$.dialog.refit();
@@ -326,6 +327,19 @@
 
 			// else
 
+			this.$.dialog.constrain();
+
+			this.async(function() {
+				var currentHeight = document.documentElement.clientHeight,
+					topTabsHeight = 300,
+					bottomButtonsHeight = 0;
+
+				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+				this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+				this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+			})
+			
+			/*
 			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
 			if (!this._maxWidth || (this._maxWidth < currentWidth))
 				this._maxWidth = currentWidth;
@@ -334,17 +348,20 @@
 
 			this.async(function () {
 				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-				this.$.dialog.left="33%";
-				this.$.dialog.right="33%";
+				this.$.dialog.left="0!important";
+				this.$.dialog.right="0!important";
+				this.$.dialog.top="0!important";
+				this.$.dialog.bottom="0!important";
 
-				this.$.dialog.constrain();
-				this.$.dialog.style.width = this._maxWidth + "px";
-				this.$.dialog.center();
+				//this.$.dialog.constrain();
+				//this.$.dialog.style.width = this._maxWidth + "px";
+				this.$.dialog.style.width = "auto!important";
+				//this.$.dialog.center();
 
 				Polymer.dom.flush();
 
 				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
-			})
+			}) */
 		},
 
 		makeDir : function(relPath) {
@@ -413,26 +430,22 @@
 		},
 
 		searchFiles : function(e) {
-			if(e.type == 'tap' || e.keyCode == 13)
-			{
-				e.preventDefault();
-				this.$.searchByDesc.url = this._searchbydescUrl.replace(/\[path\]/, this.searchValue);
-				this.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
-				this.$.searchByDesc.generateRequest();
-			}
+			this.$.searchByDesc.url = this._searchbydescUrl.replace(/\[path\]/, this.searchValue);
+			this.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
+			this.$.searchByDesc.generateRequest();
 		},
 
 		listDesire : function() {
-			this.splice('filesList', 0);
-				if(this.desiredFiles[0] == "notFound")
-					this.push('filesList', { name : 'not found', content : '', path : '' });
-				else
-					for(var i = 0; i < this.desiredFiles.length; i++)
-					{
-					this.push('filesList', this.desiredFiles[i]);
-					}
 
-				this.$.desiredList.open();
+			this.splice('files', 0, this.files.length);
+			this.splice('directories', 0, this.directories.length);
+
+			if(this.desiredFiles)
+				for(var i = 0; i < this.desiredFiles.length; i++)
+				{
+					this.push('files', this.desiredFiles[i]);
+				}
+
 		},
 
 		nothingFound : function() {
@@ -442,7 +455,7 @@
 
 		searchClear : function() {
 			this.set('searchValue', "");
-			this.splice('filesList', 0);
+			this.ls();
 		},
 
 		deleteFile : function() {
@@ -792,6 +805,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(!this.fileDescription){
 				this.hasInfo = false;
 				this.set("fName", this.fileName);
+				this.set("meta.title", "");
 				this.set("meta.caption", "");
 				this.set("meta.description", "");
 				this.set("meta.alt", "");
@@ -803,7 +817,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			else {
 				this.hasInfo = true;
 				this.set("fName", this.fileDescription.fileName);
-				this.set("meta.caption", this.fileDescription.title);
+				this.set("meta.title", this.fileDescription.title);
+				this.set("meta.caption", this.fileDescription.caption);
 				this.set("meta.description", this.fileDescription.content);
 				this.set("meta.alt", this.fileDescription.alt);
 				this.set("meta.height", this.fileDescription.height);
@@ -815,7 +830,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		updateDescription : function() {
-			this.$.updateFile.body = { id : this.fileId, title : this.meta.caption, content : this.meta.description, alt : this.meta.alt };
+			this.$.updateFile.body = { id : this.fileId, title : this.meta.title, caption : this.meta.caption, content : this.meta.description, alt : this.meta.alt };
 			this.$.updateFile.contentType = "application/x-www-form-urlencoded";
 			this.$.updateFile.url = this._updatefileUrl;
 			this.$.updateFile.generateRequest();

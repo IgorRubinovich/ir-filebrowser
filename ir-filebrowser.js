@@ -452,9 +452,17 @@
 		},
 
 		searchFiles : function(e) {
-			this.$.searchByDesc.url = this._searchbydescUrl.replace(/\[path\]/, this.searchValue);
-			this.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
-			this.$.searchByDesc.generateRequest();
+			var that = this;
+
+			if(this.searchValue.length > 3)
+				setTimeout(function() {
+					that.$.searchByDesc.url = that._searchbydescUrl.replace(/\[path\]/, that.searchValue);
+					that.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
+					that.$.searchByDesc.generateRequest();
+				}, 200);
+
+			if(e.code == "Backspace" && this.searchValue == "")
+				this.ls();
 		},
 
 		listDesire : function() {

@@ -814,7 +814,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					var nameReq = path.join(e.detail.item.relPath + this.fileName);
 
 					
-					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, nameReq.replace(/\//, '').replace(/-/g, "%2E"));
+					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, nameReq.replace(/-/g, "%2E")).replace(/\/(?=\/)/g, "");
 					this.$.getDescription.generateRequest();
 				}
 				else {

@@ -184,15 +184,51 @@ Example:
 	    width: 44px;
 	}
 
+	#searchInput {
+		width : 300px;
+	}
+
 	paper-spinner.loaded {
 		--paper-spinner-color : var(--paper-blue-grey-500);
 	}
+	@media (max-width: 600px) {
+      #uploaderContainer {
+        width: 300px;
+      }
+      #scrollableDialog {
+      	min-width: 300px;
+      }
+      #dialog {
+      	margin: 0;
+      }
+      #topNav {
+      	flex-direction: column;
+      }
+      #searchInput {
+      	width : 250px;
+      }
+      #filesNav {
+      	align-items : baseline;
+      	flex-direction: column;
+      }
+      #galleryCheckbox {
+      	padding: 0;
+      }
+
+      .buttons {
+      	padding: 0;
+      }
+
+    }
 
   </style>
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
 		<ir-filebrowser-item on-item-click="showDialog" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
 	</template -->
+
+	<iron-media-query query="(max-width: 600px)" query-matches="{{ mobile }}"></iron-media-query>
+
 	<div hidden$="{{ archiveMode }}">
 		<div id="selectionPreview" hidden$="{{ promptMode }}">
 			<content select="ir-filebrowser-item">
@@ -213,24 +249,28 @@ Example:
 
 			<iron-pages selected="{{tableselected}}">
 				<div class="layout vertical left">
-					<div class="layout horizontal center">
+					<div id="topNav" class="layout horizontal center">
 							<h3 id="relPath">
 								<template is="dom-repeat" items="{{ splitRelPath }}">
 									<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 
 								</template>
 							</h3>
-							<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles">
+							<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
 							</paper-input>
-							<paper-icon-button icon="clear" on-tap="filterClear">
+							<paper-icon-button icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
 							</paper-icon-button>
 						<div class="layout horizontal center" style="margin-left:30px">
-							<paper-input id="searchInput" style="width: 300px;" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
+							<paper-input id="searchInput" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
 							</paper-input>
 							<paper-icon-button icon="clear" on-tap="searchClear">
 							</paper-icon-button>
 						</div>		
 					</div>
-					<div class="layout horizontal center" hidden$="{{ archiveMode }}">
+					<div>
+						<paper-icon-button icon="menu" on-click="triggerMenu" hidden$="{{ !mobile }}"></paper-icon-button>
+						<paper-checkbox checked="{{ showInfo }}" hidden$="{{ !mobile }}">show file info</paper-checkbox>
+					</div>
+					<div id="filesNav" class="layout horizontal center" hidden$="{{ mobile }}">
 						<paper-item>
 							<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
 						</paper-item>
@@ -241,9 +281,11 @@ Example:
 							<paper-checkbox checked="{{ postFields.resize }}">resize</paper-checkbox>
 						</paper-item>
 						<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
-						<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
-						<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename</paper-button>
-						<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete</paper-button>
+						<div>
+							<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
+							<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename</paper-button>
+							<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete</paper-button>
+						</div>
 					</div>
 				</div>
 			</iron-pages>
@@ -320,26 +362,26 @@ Example:
 
 		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
 			<div id="fileUploaderContainer">
-				<span>
+				<span hidden$="{{ mobile }}">
 					<paper-spinner class="loaded" active$="[[ isLoaded ]]"></paper-spinner>
 				</span>
-				<span>
+				<span hidden$="{{ mobile }}">
 					<paper-spinner class="loaded" active$="[[ isUploadingFiles ]]"></paper-spinner>
 				</span>
 				<span hidden$="[[ !isUploadingFiles ]]">
-					<span>Files left: </span><span>{{ uploadedFiles }}</span>
+					<span hidden$="{{ mobile }}">Files left: </span><span hidden$="{{ mobile }}">{{ uploadedFiles }}</span>
 				</span>
 				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 					<div hidden$="[[ isUploadingFiles ]]">
-						<paper-button raised>Browse...</paper-button> or drop files into this dialog
+						<paper-button raised>Browse...</paper-button> <span hidden$="{{ mobile }}">or drop files into this dialog</span>
 					</div>
 				</file-upload>
 			</div>
 			<div class="buttons">
 				<div hidden$="{{ fullViewMode }}">
 				<span class="layout horizontal" hidden$="{{ !promptMode }}">
-					<paper-item>
-						<paper-checkbox title="if You want to combine pictures in the gallery click on this checkbox" checked="{{ gallery }}">Gallery</paper-checkbox>
+					<paper-item id="galleryCheckbox">
+						<paper-checkbox title="if You want to combine pictures in the gallery click on this checkbox" checked="{{ gallery }}"><span hidden$="{{ mobile }}">Gallery</span></paper-checkbox>
 					</paper-item>
 					<paper-button raised on-click="hideDialog">Cancel</paper-button>
 					<paper-button raised on-click="promptSelect">Select</paper-button>
@@ -451,6 +493,7 @@ Example:
 		text-align : center;
 		padding : 0;
 	}
+
 	iron-image {
 		width : 180px;
 		height : 140px;
@@ -478,6 +521,21 @@ Example:
 		/* background-color : #efefef; */
 		border-top-left-radius : 5px;
 	}
+	@media (max-width: 600px) {
+	  :host
+	  {
+	  	width: 90px;
+	  }	
+      iron-image 
+      {
+        width: 90px;
+        height: 60px;
+      }
+      .ext
+      {
+      	height: 60px;
+      }
+    }
 	span {
 		white-space : nowrap;
 	}

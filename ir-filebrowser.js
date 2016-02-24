@@ -761,6 +761,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.fire('captionChanged', { caption : this.meta.caption });
 		},
 
+		triggerMenu : function(e)
+		{
+			if(this.$.filesNav.hasAttribute('hidden'))
+				this.$.filesNav.removeAttribute('hidden');
+			else
+				this.$.filesNav.setAttribute('hidden', true);
+		},
+
 		/** Toggles clicked file */
 		clickFile : function (e) {
 
@@ -789,6 +797,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 					this.fileName = e.detail.item.name;
 					e.detail.select();
+
+					if(this.mobile && this.showInfo)
+						this.$.pocketDrawer.openDrawer();
 
 					var fileSize = e.detail.item.size/1000 + "Kb";
 
@@ -1050,7 +1061,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.autoPreview = false; // until there's a better way
 			}
 
-			this.$.pocketDrawer.drawerWidth = "35%";
+			if(!this.mobile)
+				this.$.pocketDrawer.drawerWidth = "35%";
 
 			this._urlsChanged();
 			if(!this.archiveMode)

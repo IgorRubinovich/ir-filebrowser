@@ -37,8 +37,9 @@ Example:
 <!-- link rel="import" href="./iron-select-item.html" -->
 
 <dom-module id="ir-filebrowser">
-  <style is="custom-style">
+  <style>
     :host {	
+    	
     }
     @media (max-width: 600px) {
       h1.paper-font-display1 {
@@ -59,9 +60,6 @@ Example:
 		min-height: 400px;
 	}
 	
-	.browserDialog {
-    }
-
    	#dialog {
 		padding : 10px;
 	    width: auto!important;
@@ -91,10 +89,7 @@ Example:
 		min-heght : 400px;
 		width : 100%;
 	}
-	
-	#browseButton {
-	}
-	
+
 	#searchBox {
 		display : flex;
 		flex-direction : row;
@@ -136,7 +131,7 @@ Example:
 		justify-content : space-between;
 	}
 
-	#bottomButtons, file-upload {
+	#bottomButtons file-upload {
 		overflow : hidden;
 	}
 	
@@ -188,9 +183,6 @@ Example:
 		width : 300px;
 	}
 
-	paper-spinner.loaded {
-		--paper-spinner-color : var(--paper-blue-grey-500);
-	}
 	@media (max-width: 600px) {
       #uploaderContainer {
         width: 300px;

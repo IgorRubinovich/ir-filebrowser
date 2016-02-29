@@ -159,10 +159,8 @@ Example:
 		width : 50%;
 	}
 
-	#homeButton {
-		background-color: #3F51B5;
-	    color: white;
-	    border-radius: 100px;
+	.topNavButtons {
+		margin-top: 20px;
 	}
 	
 	.clearfloat
@@ -212,7 +210,12 @@ Example:
       #galleryCheckbox {
       	padding: 0;
       }
-
+      #homeButton{
+      	position: absolute;
+      }
+      .topNavButtons {
+      	margin-top: 15px;
+      }
       .buttons {
       	padding: 0;
       }
@@ -248,8 +251,8 @@ Example:
 			<iron-pages selected="{{tableselected}}">
 				<div class="layout vertical left">
 					<div id="topNav" class="layout horizontal center">
-							<div style="padding-right: 10px;">
-								<paper-icon-button id="homeButton" icon="home" on-tap="goHome"></paper-icon-button>
+							<div id="homeButton" style="padding-right: 10px;">
+								<paper-icon-button class="topNavButtons" icon="home" on-tap="goHome"></paper-icon-button>
 							</div>
 							<h3 id="relPath">
 								<template is="dom-repeat" items="{{ splitRelPath }}">
@@ -258,12 +261,12 @@ Example:
 							</h3>
 							<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
 							</paper-input>
-							<paper-icon-button icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
+							<paper-icon-button class="topNavButtons" icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
 							</paper-icon-button>
 						<div class="layout horizontal center" style="margin-left:30px">
 							<paper-input id="searchInput" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
 							</paper-input>
-							<paper-icon-button icon="clear" on-tap="searchClear">
+							<paper-icon-button class="topNavButtons" icon="clear" on-tap="searchClear">
 							</paper-icon-button>
 						</div>		
 					</div>

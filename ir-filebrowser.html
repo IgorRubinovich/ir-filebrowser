@@ -158,6 +158,12 @@ Example:
 		float : right;
 		width : 50%;
 	}
+
+	#homeButton {
+		background-color: #3F51B5;
+	    color: white;
+	    border-radius: 100px;
+	}
 	
 	.clearfloat
 	{
@@ -242,6 +248,9 @@ Example:
 			<iron-pages selected="{{tableselected}}">
 				<div class="layout vertical left">
 					<div id="topNav" class="layout horizontal center">
+							<div style="padding-right: 10px;">
+								<paper-icon-button id="homeButton" icon="home" on-tap="goHome"></paper-icon-button>
+							</div>
 							<h3 id="relPath">
 								<template is="dom-repeat" items="{{ splitRelPath }}">
 									<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 

@@ -386,6 +386,25 @@
 			}) */
 		},
 
+		goHome : function() {
+			if(this.dir)
+				if(this.dir.match(/\[year\]\[month\]/))
+				{
+					var date = new Date(),
+					year = date.getFullYear(),
+					month = date.getMonth() + 1;
+
+					if(month < 10)
+						month = "0" + month;
+					
+					this.ls('/' + year + '/' + month, true);
+				}
+				else
+					this.ls(this.dir, true);
+			else
+				this.ls('');	
+		},
+
 		makeDir : function(relPath) {
 			var namebyuser = prompt("Folder name", "your folder name");
 			if (namebyuser !== null) {

@@ -97,8 +97,6 @@
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
 
-			this.firstRoot = false;
-
 			if(!this.loadedData)
 			{
 				if(this.firstRoot)
@@ -108,12 +106,16 @@
 					this.$.makedirloader.url = this._makedirUrl;
 					this.$.makedirloader.generateRequest();
 
+					this.firstRoot = false;
+
 					this.$.loader.url = this._lsUrl.replace(/\[path\]/, this.rootDir).replace(/\/\//, "/");
 					this.$.loader.generateRequest();					
 				}
 				
 				return;
 			}			
+
+			this.firstRoot = false;
 
 			this.files = [];
 			this.directories = [];

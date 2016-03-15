@@ -87,6 +87,7 @@
 				name,
 				fstat,
 				sorted,
+				localRoot,
 				rootUrl,
 				statsData,
 				files = [],
@@ -96,8 +97,23 @@
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
 
+			this.firstRoot = false;
+
 			if(!this.loadedData)
+			{
+				if(this.firstRoot)
+				{
+					this.$.makedirloader.body = {name : this.rootDir, fpath : ''};
+					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+					this.$.makedirloader.url = this._makedirUrl;
+					this.$.makedirloader.generateRequest();
+
+					this.$.loader.url = this._lsUrl.replace(/\[path\]/, this.rootDir).replace(/\/\//, "/");
+					this.$.loader.generateRequest();					
+				}
+				
 				return;
+			}			
 
 			this.files = [];
 			this.directories = [];
@@ -128,6 +144,10 @@
 					files.push(fstat);
 			};
 
+			if(this.rootDir)
+				localRoot = "/" + this.rootDir + "/";
+			else
+				localRoot = "";
 
 			if(this.isFirstTimeOpened)
 			{
@@ -138,14 +158,14 @@
 					month = date.getMonth() + 1;
 
 					if(month < 10)
-						month = "0" + month;
+						month = "0" + month;					
 
-					if(this.relPath == "")
+					if(this.relPath == localRoot)
 					{
 						for(var i = 0; i < directories.length; i++)
 							if(year == directories[i].name)
 							{
-								this.ls(this.relPath + year);
+								this.ls(String(year));
 								return;
 							}
 
@@ -154,7 +174,7 @@
 						this.$.makedirloader.url = this._makedirUrl;
 						this.$.makedirloader.generateRequest();
 
-						this.ls(this.relPath + year);
+						this.ls(String(year));
 						return;
 
 					}
@@ -164,7 +184,7 @@
 							if(month == directories[i].name)
 							{
 								this.isFirstTimeOpened = false;
-								this.ls(month);
+								this.ls(String(month));
 								return;
 							}
 
@@ -174,7 +194,7 @@
 						this.$.makedirloader.generateRequest();
 
 						this.isFirstTimeOpened = false;
-						this.ls(month);
+						this.ls(String(month));
 						return;
 					}
 				}
@@ -200,7 +220,7 @@
 				
 			};
 
-			if(!(/^\/?$/.test(this.relPath))) // create an '..' directory entry
+			if(!(/^\/?$/.test(this.relPath)) && (this.relPath != localRoot)) // create an '..' directory entry
 				directories.unshift({
 					name: '..',
 					ext: '..',
@@ -1027,7 +1047,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 				that.tableselected = "0";
 				that.set('isLoaded', true);
 				that.$.dialog.open();
-				that.ls(relPath);
+				if(that.rootDir && that.firstRoot)
+					that.ls(that.rootDir)
+				else
+					that.ls(relPath);
 				if(that.backgroundUpload)
 					that.selectUploadedItems(that.backgroundItems);
 				that.async(function() {
@@ -1055,6 +1078,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			if(this.dir)
 				this.isFirstTimeOpened = true;
+
+			if(this.rootDir)
+				this.firstRoot = true;
 
 			if(this.fullView)
 			{
@@ -1168,6 +1194,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			uploadedList : 		{ type : Object, value : {} },
 			wrapperPromptResult:{ type : String, notify : true },
 			dir : 				{ type : String, notify : true },
+			rootDir : 			{ type : String, notify : true },
+			firstRoot : 		{ type : Boolean, value : false },
 			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
 			isMore : 			{ type : Boolean, value : false },

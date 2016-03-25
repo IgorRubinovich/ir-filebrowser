@@ -614,12 +614,28 @@ Adds object to selection.
 
 			newEl = document.createElement("ir-filebrowser-item");
 			newEl.item = fstat;
+			newEl.isSelectionItem = true;
 			newEl.addEventListener('item-click', // open dialog to relPath if available
 				function (e) {
 					if(e.detail.item.relPath)
 						that.relPath = e.detail.item.relPath;
 					that.showDialog();
 				});
+			newEl.addEventListener('update-selection',
+				function(e) {
+					var buttons = that.$.sortableContent.querySelectorAll('paper-radio-button');
+					for(var i = 0; i < buttons.length; i++)
+						buttons[i].checked = false;
+
+					that.$.sortableContent.insertBefore(e.detail, that.$.sortableContent.children[0]);
+					e.detail.querySelector('paper-radio-button').checked = true;
+					that.updatefbValue();
+				});
+			newEl.addEventListener('remove-item', 
+				function(e) {
+					that.removeSelection(e.detail.item);
+					that.updatefbValue();
+				})
 			Polymer.dom(this).appendChild(newEl);
 
 			this._updateValue();
@@ -931,6 +947,24 @@ Remove specific item from selection. Note: all selected items matching the url w
 				}
 			});
 		},
+
+		updatefbValue : function() {
+			var items = this.$.selectionPreview.querySelectorAll('ir-filebrowser-item'),
+				value = [];
+
+			var buttons = this.$.selectionPreview.querySelectorAll('paper-radio-button');
+
+			for(var j = 0; j < buttons.length; j++)
+				buttons[j].checked = false;
+
+			for(var i = 0; i < items.length; i++) {
+				value[i] = items[i].item.url;
+			};	
+
+			items[0].querySelector('paper-radio-button').checked = true;
+
+			this.value = value.join(',');
+		},	
 
 		dblclickFile : function (e) {
 			// the following is problematic because single click handler unselects the file, look into it.
@@ -1255,7 +1289,10 @@ Fired when an item is clicked.
 @event item-click
 */
 		click : function(ev) {
-			this.fire("item-click", this);
+			if(ev.target.tagName == "IRON-ICON")
+				this.fire('remove-item', this);
+			else
+				this.fire("item-click", this);
 		},
 /*
 Fired when an item is doubleclicked.
@@ -1292,7 +1329,9 @@ Fired when an item is doubleclicked.
 			/** True if item is selected, false otherwise */
 			isSelected : { type : Boolean, readOnly : true },
 			/** Url of the selected file */
-			url : { type : String,  }
+			url : { type : String,  },
+			/** If true add radio-button to choose main item */
+			isSelectionItem : { type : Boolean, notify : true }
 		},
 		_itemChanged : function() {
 			var item = this.item;
@@ -1327,6 +1366,10 @@ Fired when an item is doubleclicked.
 			this.async(function() {
 				Polymer.dom.flush();
 			});
+		},
+		fireUpdate : function(e) {
+			if(e.currentTarget.checked)
+				this.fire('update-selection', this);
 		},
 		ready : function() {
 			if(this.url)

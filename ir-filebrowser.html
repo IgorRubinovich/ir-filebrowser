@@ -30,6 +30,9 @@ Example:
 <link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-item/paper-item-body.html">
 <link rel="import" href="../paper-spinner/paper-spinner.html">
+<link rel="import" href="../paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../Sortable/Sortable.html">
 
 
 
@@ -232,8 +235,11 @@ Example:
 
 	<div hidden$="{{ archiveMode }}">
 		<div id="selectionPreview" hidden$="{{ promptMode }}">
-			<content select="ir-filebrowser-item">
-			</content>
+			<sortable-js id="sortableContent" handle="ir-filebrowser-item" on-update="updatefbValue">
+				<content select="ir-filebrowser-item">
+				</content>
+			<sortable-js>
+
 			<template is="dom-if" if="{{value}}">
 				<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
 			</template>
@@ -555,9 +561,16 @@ Example:
 		  <template is="dom-if" if="{{!_item.isImage}}">
 			  <span class="ext">{{ _item.ext }}</span>
 		  </template>
-		  <span title="{{_item.name}}">{{_item.name}}</span>
+		  <span title="{{_item.name}}">{{_item.name}}
+		  	<template is="dom-if" if="{{ isSelectionItem }}">
+	  			<iron-icon icon="delete"></iron-icon>
+	  		</template>
+		  </span>
 	  </paper-material>
 
+	  <template is="dom-if" if="{{ isSelectionItem }}">
+	  		<paper-radio-button name$="{{ _item.name }}" active on-click="fireUpdate">Make this image a cover</paper-radio-button>
+	  </template>
   </template>
 </dom-module>
 

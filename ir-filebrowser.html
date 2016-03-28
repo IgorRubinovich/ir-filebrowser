@@ -156,6 +156,16 @@ Example:
 			margin : 0;
 		};
 	}
+
+	#selectionUploader {
+		max-height : 40px;
+	}
+
+	#selectionUploader paper-button {
+		padding: 0;
+		margin: 0;
+		box-shadow: none;
+	}
 	
 	#imgpreview {
 		float : right;
@@ -188,6 +198,10 @@ Example:
 
 	#searchInput {
 		width : 300px;
+	}
+
+	#selectionNav {
+		display : flex;
 	}
 
 	@media (max-width: 600px) {
@@ -235,15 +249,26 @@ Example:
 
 	<div hidden$="{{ archiveMode }}">
 		<div id="selectionPreview" hidden$="{{ promptMode }}">
-			<sortable-js id="sortableContent" handle="ir-filebrowser-item" on-update="updatefbValue">
-				<content select="ir-filebrowser-item">
-				</content>
-			<sortable-js>
+			<div>
+				<sortable-js id="sortableContent" handle="ir-filebrowser-item" on-update="updatefbValue">
+					<content select="ir-filebrowser-item">
+					</content>
+				<sortable-js>
+			</div>
 
-			<template is="dom-if" if="{{value}}">
-				<paper-button id="clearSelection" raised on-click="clearSelection">Clear</paper-button>
-			</template>
-			<paper-button id="browseButton" raised on-click="showDialog">Browse...</paper-button>
+			<div id="selectionNav">
+				<template is="dom-if" if="{{value}}">
+					<paper-button id="clearSelection" raised on-click="clearSelection">Clear all</paper-button>
+				</template>
+				<paper-button id="browseButton" raised on-click="showDialog">My files</paper-button>
+				<div id="selectionUploader">
+					<file-upload id="selectionFileUploader" fields="{{ postFields }}" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+							<div hidden$="[[ isUploadingFiles ]]">
+								<paper-button raised>Browse...</paper-button>
+							</div>
+					</file-upload>
+				</div>
+			</div>
 		</div>
 	</div>
 

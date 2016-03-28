@@ -222,6 +222,12 @@
 				
 			};
 
+			if(this.checkAvailability)
+			{
+				this.checkAvailability = false;
+				return;
+			}
+
 			if(!(/^\/?$/.test(this.relPath)) && (this.relPath != localRoot)) // create an '..' directory entry
 				directories.unshift({
 					name: '..',
@@ -1116,7 +1122,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.isFirstTimeOpened = true;
 
 			if(this.rootDir)
-				this.firstRoot = true;
+				{
+					this.firstRoot = true;
+					this.checkAvailability = true;
+					this.ls(this.rootDir);
+				}
 
 			if(this.fullView)
 			{
@@ -1232,6 +1242,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			dir : 				{ type : String, notify : true },
 			rootDir : 			{ type : String, notify : true },
 			firstRoot : 		{ type : Boolean, value : false },
+			checkAvailability : { type : Boolean, value : false },
 			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
 			isMore : 			{ type : Boolean, value : false },

@@ -247,7 +247,7 @@ Example:
 
 	<iron-media-query query="(max-width: 600px)" query-matches="{{ mobile }}"></iron-media-query>
 
-	<div hidden$="{{ archiveMode }}">
+	<div hidden$="{{ archiveMode }}" style="max-width: 550px;">
 		<div id="selectionPreview" hidden$="{{ promptMode }}">
 			<div>
 				<sortable-js id="sortableContent" handle="ir-filebrowser-item" on-update="updatefbValue">
@@ -262,7 +262,7 @@ Example:
 				</template>
 				<paper-button id="browseButton" raised on-click="showDialog">My files</paper-button>
 				<div id="selectionUploader">
-					<file-upload id="selectionFileUploader" fields="{{ postFields }}" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+					<file-upload id="selectionFileUploader" on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 							<div hidden$="[[ isUploadingFiles ]]">
 								<paper-button raised>Browse...</paper-button>
 							</div>
@@ -556,6 +556,11 @@ Example:
 		/* background-color : #efefef; */
 		border-top-left-radius : 5px;
 	}
+	.greyBorder {
+	    border: #F4F4F4;
+	    border-width: 1px;
+	    border-style: groove;
+	}
 	@media (max-width: 600px) {
 	  :host
 	  {
@@ -586,11 +591,13 @@ Example:
 		  <template is="dom-if" if="{{!_item.isImage}}">
 			  <span class="ext">{{ _item.ext }}</span>
 		  </template>
-		  <span title="{{_item.name}}">{{_item.name}}
+		  <div style="display: flex;justify-content: center;">
+		  	<span title="{{_item.name}}" hidden$="{{ isSelectionItem }}">{{_item.name}}</span>
 		  	<template is="dom-if" if="{{ isSelectionItem }}">
-	  			<iron-icon icon="delete"></iron-icon>
+		  		<span class="greyBorder" style="width: 150px;" title="{{_item.name}}">{{_item.name}}</span>
+	  			<iron-icon class="greyBorder" icon="delete"></iron-icon>
 	  		</template>
-		  </span>
+	  	  </div>
 	  </paper-material>
 
 	  <template is="dom-if" if="{{ isSelectionItem }}">

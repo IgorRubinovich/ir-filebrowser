@@ -146,6 +146,12 @@
 					files.push(fstat);
 			};
 
+			if(this.toSelection)
+			{
+				this.completeSelection(this, files);
+				this.toSelection = false;
+			}
+
 			if(this.rootDir)
 				localRoot = "/" + this.rootDir + "/";
 			else
@@ -1031,6 +1037,32 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.uploadedList[fileName] = 1;
 		},
 
+		collectFiles : function(e) {
+			var file = JSON.parse(e.detail.xhr.response)[0].split('/'),
+				fileName = file.pop(),
+				filePath = file.join('/'),
+				that = this;
+
+			this.collectedFiles[fileName] = fileName;
+
+			setTimeout(function() {
+				that.toSelection = true;
+				that.$.loader.url = that._lsUrl.replace(/\[path\]/, filePath).replace(/\/\//, "/");
+				that.$.loader.generateRequest();		
+
+			}, 200);
+
+		},
+
+		completeSelection : function(context, files) {
+			files.forEach(function(item) {
+				if(context.collectedFiles[item.name])
+					context.addSelection(item);
+			});
+
+			this.collectedFiles = {};
+		},
+
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
 		lsAfterUpload : function() {
 
@@ -1243,6 +1275,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			rootDir : 			{ type : String, notify : true },
 			firstRoot : 		{ type : Boolean, value : false },
 			checkAvailability : { type : Boolean, value : false },
+			collectedFiles : 	{ type : Object, value : {} },
+			toSelection : 		{ type : Boolean, value : false }, 
 			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
 			isMore : 			{ type : Boolean, value : false },

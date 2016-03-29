@@ -1057,7 +1057,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 		completeSelection : function(context, files) {
 			files.forEach(function(item) {
 				if(context.collectedFiles[item.name])
-					context.addSelection(item);
+					setTimeout(function() {
+						context.addSelection(item);
+					}, 100);
 			});
 
 			this.collectedFiles = {};
@@ -1152,6 +1154,13 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			if(this.dir)
 				this.isFirstTimeOpened = true;
+
+			if(this.dir && !this.rootDir)
+			{
+				this.checkAvailability = true;
+				this.ls();
+				this.isFirstTimeOpened = true;
+			}
 
 			if(this.rootDir)
 				{

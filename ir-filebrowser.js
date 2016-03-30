@@ -637,10 +637,15 @@ Adds object to selection.
 				function(e) {
 					var buttons = that.$.sortableContent.querySelectorAll('paper-radio-button');
 					for(var i = 0; i < buttons.length; i++)
+					{
 						buttons[i].checked = false;
+						buttons[i].style.visibility = "visible";
+					}
+						
 
 					that.$.sortableContent.insertBefore(e.detail, that.$.sortableContent.children[0]);
 					e.detail.querySelector('paper-radio-button').checked = true;
+					e.detail.querySelector('paper-radio-button').style.visibility = "hidden";
 					that.updatefbValue();
 				});
 			newEl.addEventListener('remove-item', 
@@ -649,6 +654,11 @@ Adds object to selection.
 					that.updatefbValue();
 				})
 			Polymer.dom(this).appendChild(newEl);
+
+			setTimeout(function() {
+				if(that.$.sortableContent.children[0].querySelector('paper-radio-button'))
+					that.$.sortableContent.children[0].querySelector('paper-radio-button').style.visibility = "hidden";
+			}, 100);
 
 			this._updateValue();
 
@@ -967,13 +977,18 @@ Remove specific item from selection. Note: all selected items matching the url w
 			var buttons = this.$.selectionPreview.querySelectorAll('paper-radio-button');
 
 			for(var j = 0; j < buttons.length; j++)
+			{
 				buttons[j].checked = false;
+				buttons[j].style.visibility = "visible";
+			}
+				
 
 			for(var i = 0; i < items.length; i++) {
 				value[i] = items[i].item.url;
 			};	
 
 			items[0].querySelector('paper-radio-button').checked = true;
+			items[0].querySelector('paper-radio-button').style.visibility = "hidden";
 
 			this.value = value.join(',');
 		},	

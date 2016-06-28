@@ -704,58 +704,81 @@ Close dialog, call the callback with `this.value` and forget the callback.
 				}
 			}
 
-
 			var ext = this.value.match(/\.([^\.]+)$/)[1];
 
 			var i, j;
 
 			if(selectedFiles.length > 1)
+			// multiple files selected
 			{
-				var imgHTML = "",
-					oneImgGallery = [];
+				var imgHTML = "", t,
+					multiImageItems = [], oneImageItems = [];
 
 				for(i = 0; i < selectedFiles.length; i++)
-					{
+				{
+					t = "<img src='" + selectedFiles[i] + "'>";
+					// multi image gallery, no caption
+					if(this.gallery)
 						if(!this.fileCaptions[selectedFiles[i]])
-							imgHTML += "<img src='" + selectedFiles[i] + "'>";
+							multiImageItems.push(this.wrapperPromptNoCaption.replace(/\[content\]/, t));
+						// multi image gallery, caption
 						else
-							imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>";
-
-						if(!this.gallery && this.wrapperPromptResult)
-							if(!this.fileCaptions[selectedFiles[i]])
-								oneImgGallery.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>"));
-							else
-								oneImgGallery.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>"));
-					}
-
-				oneImgGallery = oneImgGallery.join('');
-
-				if(this.gallery)
-					this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', imgHTML));
-				else
-					if(this.wrapperPromptResult)
-						this.promptCallback(oneImgGallery);
+						{
+							//imgHTML += "<div class='caption-wrapper'>" + "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>";
+							multiImageItems.push(this.wrapperPromptCaption.replace(/\[content\]/, t).replace(/\[caption\]/, this.fileCaptions[selectedFiles[i]]));
+						}
 					else
-						this.promptCallback(imgHTML);
+					// multiple single galleries
+					{
+						// single image, no caption 
+						if(!this.fileCaptions[selectedFiles[i]])
+						{
+							//oneImageItems.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>"));
+							oneImageItems.push(this.wrapperPromptNoCaption.replace(/\[content\]/, t));
+						}
+						// single image, caption
+						else
+						{	
+							//t = this.wrapperPromptCaption.replace(/\[content\]/, t);
+							//t = t.replace('[caption]', this.fileCaptions[selectedFiles[i]]);
+							//<div 
+							//oneImageItems.push(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + selectedFiles[i] + "'>" + "<span class='caption'>" +  this.fileCaptions[selectedFiles[i]] + "</span></div>"));
+							oneImageItems.push(this.wrapperPromptCaption.replace(/\[content\]/, t).replace(/\[caption\]/, this.fileCaptions[selectedFiles[i]]));
+						}
+					}
+				}
+
+
+				t = (this.gallery ? items : oneImageItems).join('');
+				/*if(this.gallery)
+					this.promptCallback(this.wrapperPromptResult.replace(/\[content\]/, imgHTML));
+				else
+				{
+					oneImageItems = oneImageItems.join('');
+					//if(this.wrapperPromptResult)
+					this.promptCallback(oneImageItems);
+					//else
+					//	this.promptCallback(imgHTML);
+				}*/
+				
+				this.promptCallback(this.wrapperPromptResult.replace(/\[content\]/, t));
 			}
 			else
+			// one file selected
+			{
+				t = this.value
+				// video
 				if(ext && ext.match(/^(mp4|ogg|webm|ogv)$/i))
-					if(!this.meta.caption)
-						this.promptCallback("<video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>");
-					else
-						this.promptCallback("<div class='caption-wrapper'><video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
+					t = "<video controls ><source src='" + this.value + "' type='video/" + ext + "'></video>";
 				else
-					if(this.wrapperPromptResult)
-						if(!this.meta.caption)
-							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<img src='" + this.value + "'>"));
-						else
-							this.promptCallback(this.wrapperPromptResult.replace(/\&lt;/g, '<').replace(/\&gt;/g, '>').replace('[content]', "<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<span class='caption'>" +  this.meta.caption + "</span></div>"));
-					else
-						if(!this.meta.caption)
-							this.promptCallback(this.value);
-						else
-							this.promptCallback("<div class='caption-wrapper'>" + "<img src='" + this.value + "'>" + "<span class='caption'>" +  this.meta.caption + "</span></div>");
+					t =  "<img src='" + this.value + "'>"
 
+				if(this.meta.caption)
+					t = this[this.meta.caption ? 'wrapperPromptCaption' : 'wrapperPromptNoCaption']
+						.replace(/\[content\]/, t).replace(/\[caption\]/, this.meta.caption)
+				
+				this.promptCallback(this.wrapperPromptResult.replace(/\[content\]/, t));
+			}
 			this.hideDialog();
 			this.clearSelection();
 			this.promptCallback = null;
@@ -1294,7 +1317,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 			isUploadEnds : 		{ type : Boolean, value : false },
 			firstUpload : 		{ type : Boolean, value : false },
 			uploadedList : 		{ type : Object, value : {} },
-			wrapperPromptResult:{ type : String, notify : true },
+			wrapperPromptResult:{ type : String, notify : true, value : '[content]' },
+			wrapperPromptCaption:{ type : String, notify : true, value : '<figure>[content]<figcaption>[caption]</figcaption></figure>' },
+			wrapperPromptNoCaption:{ type : String, notify : true, value : '[content]' },
 			dir : 				{ type : String, notify : true },
 			rootDir : 			{ type : String, notify : true },
 			firstRoot : 		{ type : Boolean, value : false },

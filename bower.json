@@ -18,7 +18,7 @@
     "ir-reflect-to-native-behavior": "https://github.com/IgorRubinovich/ir-reflect-to-native-behavior.git",
     "iron-ajax": "PolymerElements/iron-ajax#~1.0.4",
     "iron-icons": "PolymerElements/iron-icons#~1.0.3",
-    "iron-image": "PolymerElements/iron-image#~1.0.2",
+    "iron-image": "PolymerElements/iron-image#~1.2.3",
     "iron-input": "PolymerElements/iron-input#~1.0.6",
     "iron-pages": "polymerelements/iron-pages#~1.0.3",
     "iron-selector": "PolymerElements/iron-selector#~1.0.2",

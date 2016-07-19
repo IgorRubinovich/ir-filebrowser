@@ -21,7 +21,7 @@
     "iron-image": "PolymerElements/iron-image#~1.2.3",
     "iron-input": "PolymerElements/iron-input#~1.0.6",
     "iron-pages": "polymerelements/iron-pages#~1.0.3",
-    "iron-selector": "PolymerElements/iron-selector#~1.0.2",
+    "iron-selector": "PolymerElements/iron-selector#^1.5.2",
     "paper-checkbox": "PolymerElements/paper-checkbox#~1.0.10",
     "paper-dialog": "PolymerElements/paper-dialog#~1.0.1",
     "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#~1.0.1",

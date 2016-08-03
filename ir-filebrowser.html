@@ -114,6 +114,7 @@ Example:
 		border-left: 1px solid #e5e5e5;
 		border-bottom: 1px solid #e5e5e5;
 		padding: 5px;
+		overflow: auto;
 		overflow-x : hidden;
 	}
 
@@ -238,6 +239,15 @@ Example:
       }
 
     }
+	
+	#dropMessage {
+	    white-space: nowrap;
+	}
+	
+	paper-dialog-scrollable {
+       @apply(--layout-flex);
+	   min-height : 0;
+    }
 
   </style>
   <template>
@@ -274,12 +284,12 @@ Example:
 
 	<paper-dialog no-cancel-on-esc-key="[[ fullView ]]" no-cancel-on-outside-click="[[ fullView ]]" on-keydown="blockBackspace" opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
 		<div id="topTabs">
-			<paper-tabs selected="{{tableselected}}" on-click="refitDialog">
+			<!-- paper-tabs selected="{{tableselected}}" on-click="refitDialog">
 				<paper-tab>FOLDERS</paper-tab>
 				<paper-tab>SEARCH</paper-tab>
-			</paper-tabs>
+			</paper-tabs -->
 
-			<iron-pages selected="{{tableselected}}">
+			<!--iron-pages selected="{{tableselected}}"-->
 				<div class="layout vertical left">
 					<div id="topNav" class="layout horizontal center">
 							<div id="homeButton" style="padding-right: 10px;">
@@ -327,7 +337,7 @@ Example:
 		</div>
 		<paper-dialog-scrollable id="scrollableDialog">
 			<paper-drawer-panel id="pocketDrawer" right-drawer>
-				<paper-scroll-panel id="drawPocket" drawer>
+				<div id="drawPocket" drawer>
 					<p hidden$="{{ !noFile }}">File info will appear here</p>
 					<div id="fileInfo" hidden$="{{ noFile }}">
 						<div hidden$="{{ !archiveMode }}">
@@ -354,7 +364,7 @@ Example:
 							</div>		
 						</div>					
 					</div>
-				</paper-scroll-panel>
+				</div>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" on-scroll="loadMoreFiles" main>
 					<div>
 						<div id="uploaderContainer">	
@@ -397,7 +407,7 @@ Example:
 
 		<div id="bottomButtons" class="buttons" hidden$="{{ archiveMode }}">
 			<div id="fileUploaderContainer">
-				<span hidden$="{{ mobile }}">
+				<span hidden$=[[ isUploadingFiles ]] hidden$="[[ mobile ]]">
 					<paper-spinner class="loaded" active$="[[ isLoaded ]]"></paper-spinner>
 				</span>
 				<span hidden$="{{ mobile }}">
@@ -408,7 +418,7 @@ Example:
 				</span>
 				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 					<div hidden$="[[ isUploadingFiles ]]">
-						<paper-button raised>Browse...</paper-button> <span hidden$="{{ mobile }}">or drop files into this dialog</span>
+						<paper-button raised>Browse...</paper-button> <span id="dropMessage" hidden$="{{ mobile }}">or drop files into this dialog</span>
 					</div>
 				</file-upload>
 			</div>

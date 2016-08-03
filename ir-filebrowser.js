@@ -54,7 +54,7 @@
 				if(/\.{2,}/.test(relPath))
 				{
 					this.status = 403;
-					throw new Error("Acess forbidden (did you use '..' in requested path?)");
+					throw new Error("403 Acess forbidden (did you use '..' in requested path?)");
 
 				};
 
@@ -247,8 +247,8 @@
 			this._files = files;
 			this.upFiles = files;
 
-			this.set('directories', this._directories.splice(0, this.limit));
-			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
+			this.set('directories', this._directories.slice(0, this.limit));
+			this.set('files', this._files.slice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
 			this.currentTime = 0;
 			if(this._files.length + this._directories.length > 0)
 				this.isMore = true;
@@ -1460,7 +1460,7 @@ Fired when an item is doubleclicked.
 			if(!item.ext)
 				item.ext = item.isDirectory ? "<dir>" : item.url.match(/([^.]+)$/)[1];
 
-			item.isImage = ['jpeg','jpg','png','gif'].indexOf(item.ext) > -1;
+			item.isImage = /jpeg|jpg|png|gif/i.test(item.ext);
 
 			if(item.isSelected)
 				this.select();

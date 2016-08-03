@@ -327,7 +327,7 @@ Example:
 		</div>
 		<paper-dialog-scrollable id="scrollableDialog">
 			<paper-drawer-panel id="pocketDrawer" right-drawer>
-				<div id="drawPocket" drawer>
+				<paper-scroll-panel id="drawPocket" drawer>
 					<p hidden$="{{ !noFile }}">File info will appear here</p>
 					<div id="fileInfo" hidden$="{{ noFile }}">
 						<div hidden$="{{ !archiveMode }}">
@@ -354,7 +354,7 @@ Example:
 							</div>		
 						</div>					
 					</div>
-				</div>
+				</paper-scroll-panel>
 				<iron-pages selected="{{tableselected}}" id="scrollableFiles" on-scroll="loadMoreFiles" main>
 					<div>
 						<div id="uploaderContainer">	

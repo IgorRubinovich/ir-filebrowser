@@ -1186,6 +1186,19 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.dialog.close();
 		},
 
+		attached: function() {
+			if(this.__hasResizeListener)
+				return;
+			window.addEventListener('resize', this.resizeListener.bind(this));
+			this.__hasResizeListener = true;
+		},
+		
+		resizeListener : function() {
+			this.cancelDebouncer('resize');
+			this.debounce('resize', function() {
+				window.requestAnimationFrame(this.refitDialog.bind(this))
+			}, 200);
+		},
 
 		ready: function() {
 			var that = this;
@@ -1481,7 +1494,7 @@ Fired when an item is doubleclicked.
 		attached : function() {
 			this.fire('item-attached');
 		}
-	});
+	})
 
 	function encodeQuery(q)
 	{

@@ -1160,7 +1160,12 @@ Remove specific item from selection. Note: all selected items matching the url w
 			setTimeout(function() {
 				that.tableselected = "0";
 				that.set('isLoaded', true);
+
+				that.$.dialog.sizingTarget = that.$$("#scrollableDialog")
+
 				that.$.dialog.open();
+				
+				
 				if(that.rootDir && that.firstRoot)
 					that.ls(that.rootDir)
 				else
@@ -1372,7 +1377,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			isUploadingFiles : { type : Boolean },
 
 			/** Enables prompt mode: sets maxItems to 1, hides selection, replaces Close button with Cancel and Select. */
-			promptMode :			{ type : Boolean, value : false },
+			promptMode : { type : Boolean, value : false },
 
 			/** Open by default - precursor to inline mode. */
 			opened : { type : Boolean, value : false }

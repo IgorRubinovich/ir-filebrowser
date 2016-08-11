@@ -248,7 +248,10 @@ Example:
        @apply(--layout-flex);
 	   min-height : 0;
     }
-
+	#browseButton {
+		display : flex;
+		align-items : center;
+	}
   </style>
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
@@ -283,7 +286,7 @@ Example:
 	</div>
 
 	<paper-dialog no-cancel-on-esc-key="[[ fullView ]]" no-cancel-on-outside-click="[[ fullView ]]" on-keydown="blockBackspace" opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
-		<div id="topTabs">
+		<!--div id="topTabs"-->
 			<!-- paper-tabs selected="{{tableselected}}" on-click="refitDialog">
 				<paper-tab>FOLDERS</paper-tab>
 				<paper-tab>SEARCH</paper-tab>
@@ -333,8 +336,8 @@ Example:
 						</div>
 					</div>
 				</div>
-			</iron-pages>
-		</div>
+			<!-- /iron-pages -->
+		<!--/div-->
 		<paper-dialog-scrollable id="scrollableDialog">
 			<paper-drawer-panel id="pocketDrawer" right-drawer>
 				<div id="drawPocket" drawer>
@@ -417,7 +420,7 @@ Example:
 					<span hidden$="{{ mobile }}">Files left: </span><span hidden$="{{ mobile }}">{{ uploadedFiles }}</span>
 				</span>
 				<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
-					<div hidden$="[[ isUploadingFiles ]]">
+					<div "browseButton" hidden$="[[ isUploadingFiles ]]">
 						<paper-button raised>Browse...</paper-button> <span id="dropMessage" hidden$="{{ mobile }}">or drop files into this dialog</span>
 					</div>
 				</file-upload>

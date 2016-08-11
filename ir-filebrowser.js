@@ -1519,8 +1519,8 @@ Fired when an item is doubleclicked.
 	// this method to the rescue - resolving url into absolute
 	var _urlresolver = document.createElement('a');
 	var resolveUrl = function(url) {
-		a.href = url;
-		return a.href;
+		_urlresolver.href = url;
+		return _urlresolver.href;
 	}
 
 	

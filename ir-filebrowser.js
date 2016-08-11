@@ -1391,7 +1391,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		],
 	});
 
-
+	
 	Polymer(
 	{
 		is : 'ir-filebrowser-item',
@@ -1465,6 +1465,9 @@ Fired when an item is doubleclicked.
 			if(!item.url && item.name != '..') // should have been provided or constructed by this point
 				throw new Error("To initialize an ir-filebrowser-item at least one of either url or (rootUrl and name) must be set.");
 
+			if(item.url)
+				item.url = resolveUrl(item.url);
+				
 			if(!item.ext)
 				item.ext = item.isDirectory ? "<dir>" : item.url.match(/([^.]+)$/)[1];
 
@@ -1512,7 +1515,15 @@ Fired when an item is doubleclicked.
 	}
 
 
+	// new URL(url) inside iron-image sometimes for some reason fails to intialize relative urls.
+	// this method to the rescue - resolving url into absolute
+	var _urlresolver = document.createElement('a');
+	var resolveUrl = function(url) {
+		a.href = url;
+		return a.href;
+	}
 
+	
 	// simulate nodejs path for urls
 	var path = {
 		join : function() {

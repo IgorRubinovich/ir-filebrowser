@@ -1446,19 +1446,22 @@ Fired when an item is doubleclicked.
 			isSelectionItem : { type : Boolean, notify : true }
 		},
 		_itemChanged : function() {
-			var item = this.item;
+			var item = this.item, url;
 
 			if(this.url)
-				item.url = this.url;
+				url = this.url;
 
 			if(item.url && !item.name)
 				item.name = decodeURIComponent(item.url.match(/([^/]+)$/)[1]);
 			else if(!item.url && item.name && item.relPath) // if(!item.url)
 			{
-				item.url = item.rootUrl + item.relPath + encodeURIComponent(item.name);
+				url = path.join(item.rootUrl,encodeURIComponent(item.name)); // item.relPath,
 				console.log('decoded (name) %s -> (url) %s', item.name, item.url);
 			}
 
+			if(url)
+				item.url = url;
+			
 			if(!item.url && item.name != '..') // should have been provided or constructed by this point
 				throw new Error("To initialize an ir-filebrowser-item at least one of either url or (rootUrl and name) must be set.");
 

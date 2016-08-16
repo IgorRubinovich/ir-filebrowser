@@ -247,8 +247,8 @@
 			this._files = files;
 			this.upFiles = files;
 
-			this.set('directories', this._directories.slice(0, this.limit));
-			this.set('files', this._files.slice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
+			this.set('directories', this._directories.splice(0, this.limit));
+			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
 			this.currentTime = 0;
 			if(this._files.length + this._directories.length > 0)
 				this.isMore = true;
@@ -286,30 +286,23 @@
 		},
 
 		loadMoreFiles : function(e) {
-			var scrollerHeight = e.currentTarget.scrollHeight,
-				allFiles = this._files.length + this._directories.length;
+			this.debounce("loadMoreFiles", function () {
+				var target = e.target,
+					scrollerHeight = target.scrollHeight,
+					allFiles = this._files.length + this._directories.length;
 
-			var date = new Date();
-			var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
+				var date = new Date();
+				var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
 
-			if(allFiles < this.limit)
-				this.isMore = false;
+				if(allFiles < this.limit)
+					return; //this.isMore = false;
 
-			if(((scrollerHeight - e.currentTarget.scrollTop <= 600) || e.type == "tap") && allFiles > 0)
-			{
-				this.set('isLoaded', true);
-				var that = this;
-				setTimeout(function(){
-					that.set('isLoaded', false);
-				}, 400);
-				if(newtime - this.currentTime >= 400)
+				if(((scrollerHeight - target.scrollTop <= 600) || e.type == "tap") && allFiles > 0)
 				{
 					this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
 					this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
-
-					this.currentTime = newtime;
 				}
-			}
+			}, 300);
 		},
 
 		refitDialog : function() {

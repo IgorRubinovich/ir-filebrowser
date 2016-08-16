@@ -545,8 +545,6 @@
 				else
 					if(this.fileName && this.noFile)
 						filesList = [this.fileName];
-
-				filesList = filesList.join(',')
 					
 				var askUser = confirm("Are you sure you want to delete " + filesList.join(','));
 				if (askUser == true) {

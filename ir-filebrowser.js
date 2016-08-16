@@ -536,20 +536,22 @@
 
 		deleteFile : function() {
 			var filesToDelete = this._getSelectionElements(),
-				filesList = "";
+				filesList = [];
 
 			if(filesToDelete.length > 0 || this.fileName) {
 				if(filesToDelete.length > 0)
 					for(var i = 0; i < filesToDelete.length; i++)
-						filesList += filesToDelete[i].item.name + ',';
+						filesList.push(encodeURIComponent(filesToDelete[i].item.name));
 				else
 					if(this.fileName && this.noFile)
-						filesList = this.fileName;
+						filesList = [this.fileName];
 
-				var askUser = confirm("Are you sure you want to delete " + filesList.replace(/,$/, "?"));
+				filesList = filesList.join(',')
+					
+				var askUser = confirm("Are you sure you want to delete " + filesList.join(','));
 				if (askUser == true) {
 					this.set('noFile', true);
-					this.$.deletefileloader.body = {name: filesList.replace(/,$/, '').split(','), fpath: this.relPath};
+					this.$.deletefileloader.body = {name: filesList, fpath: this.relPath};
 					this.$.deletefileloader.contentType = "application/x-www-form-urlencoded";
 					this.$.deletefileloader.url = this._deletefileUrl;
 					this.$.deletefileloader.generateRequest();

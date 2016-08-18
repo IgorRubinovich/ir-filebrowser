@@ -561,7 +561,7 @@
 
 		cannotDelete : function() {
 			if(this.deleteFileError)
-				alert("Could not delete directory, make sure it's empty");
+				alert("Could not delete, entry does not exist or directory not empty.");
 		},
 
 		filterClear : function() {

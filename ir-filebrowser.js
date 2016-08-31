@@ -22,6 +22,8 @@
 		*/
 		ls : function(relPath, abs)
 		{
+			debugger;
+
 			if(typeof relPath !== 'string')
 				relPath  = "";
 
@@ -38,16 +40,19 @@
 				if (newSplit.length && !newSplit[newSplit.length - 1])
 					newSplit.pop();
 
-				while (newSplit.length) // just like node's path.resolve(this.relPath, relPath)
-				{
-					p = newSplit.shift();
-					if (p == '..')
-						split.pop();
-					else if (p)
-						split.push(p);
-				};
-
-				this.relPath = split.join('/');
+				if(newSplit[0]!=""){// if relative from rootDir url like "/folder0/folder1"
+					while (newSplit.length) // just like node's path.resolve(this.relPath, relPath)
+					{
+						p = newSplit.shift();
+						if (p == '..')
+							split.pop();
+						else if (p)
+							split.push(p);
+					};
+					this.relPath = split.join('/');
+				}else{
+					this.relPath = newSplit.join('/');
+				}
 			}
 			else
 			{
@@ -414,7 +419,7 @@
 		},
 
 		goHome : function() {
-			if(this.dir)
+			if(this.dir){
 				if(this.dir.match(/\[year\]\[month\]/))
 				{
 					var date = new Date(),
@@ -426,10 +431,12 @@
 					
 					this.ls('/' + year + '/' + month, true);
 				}
-				else
+				else{
 					this.ls(this.dir, true);
-			else
-				this.ls('');	
+				}
+			}else{
+				this.ls('/'+this.rootDir);	
+			}
 		},
 
 		makeDir : function(relPath) {

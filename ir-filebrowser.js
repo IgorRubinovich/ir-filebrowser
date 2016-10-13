@@ -22,8 +22,6 @@
 		*/
 		ls : function(relPath, abs)
 		{
-			debugger;
-
 			if(typeof relPath !== 'string')
 				relPath  = "";
 
@@ -1309,7 +1307,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			updatefileUrl:		{ type : String, value : "", notify : true },
 			searchbydescUrl: 	{ type : String, value : "", notify : true },
 
-/* currently browsed path, relative to lsRootUrlPath */
+		/* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
 			loadedData	:		{ type : Object },
 			listProperty	:	{ type : String, notify : true },

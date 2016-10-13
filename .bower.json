@@ -1,0 +1,43 @@
+{
+  "name": "ir-filebrowser",
+  "authors": [
+    "Igor Rubinovich <igor.rubinovih@gmail.com>"
+  ],
+  "description": "explorer-style file browser web component",
+  "main": "iron-filebrowser",
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ir-reflect-to-native-behavior": "https://github.com/IgorRubinovich/ir-reflect-to-native-behavior.git",
+    "iron-ajax": "PolymerElements/iron-ajax#~1.4.3",
+    "iron-icons": "PolymerElements/iron-icons#~1.1.3",
+    "iron-image": "PolymerElements/iron-image#~1.2.3",
+    "iron-input": "PolymerElements/iron-input#~1.0.6",
+    "iron-pages": "polymerelements/iron-pages#~1.0.3",
+    "iron-selector": "PolymerElements/iron-selector#^1.5.2",
+    "paper-checkbox": "PolymerElements/paper-checkbox#~1.0.10",
+    "paper-dialog": "PolymerElements/paper-dialog#~1.0.1",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#~1.0.1",
+    "paper-input": "polymerelements/paper-input#~1.0.15",
+    "paper-ripple": "PolymerElements/paper-ripple#~1.0.2",
+    "paper-tabs": "polymerelements/paper-tabs#~1.3.3",
+    "file-upload": "git@github.com:IgorRubinovich/file-upload.git#master",
+    "Sortable": "git@github.com:RubaXa/Sortable.git"
+  },
+  "homepage": "https://github.com/IgorRubinovich/ir-filebrowser",
+  "_release": "241da52df9",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "241da52df9e85be700783dc4e39232aef5c3225c"
+  },
+  "_source": "https://github.com/IgorRubinovich/ir-filebrowser.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/IgorRubinovich/ir-filebrowser.git"
+}

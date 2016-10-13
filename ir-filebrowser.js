@@ -1119,7 +1119,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 					});
 
-				var selectedElements = that._getSelectionElements();
+				//var selectedElements = that._getSelectionElements();
+				this.clearSelection();
 
 				/*if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
 					that.clearSelection(); */

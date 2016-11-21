@@ -158,16 +158,6 @@ Example:
 		};
 	}
 
-	#selectionUploader {
-		max-height : 40px;
-	}
-
-	#selectionUploader paper-button {
-		padding: 0;
-		margin: 0;
-		box-shadow: none;
-	}
-	
 	#imgpreview {
 		float : right;
 		width : 50%;
@@ -202,7 +192,7 @@ Example:
 	}
 
 	#selectionNav {
-		display : flex;
+		padding-bottom : 22px;
 	}
 
 	@media (max-width: 600px) {
@@ -252,6 +242,11 @@ Example:
 		display : flex;
 		align-items : center;
 	}
+	#selectionUploader {
+		max-height : 46px;
+	}
+
+	
   </style>
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
@@ -261,24 +256,22 @@ Example:
 	<iron-media-query query="(max-width: 600px)" query-matches="{{ mobile }}"></iron-media-query>
 
 	<div hidden$="{{ archiveMode }}" style="max-width: 550px;">
-		<div id="selectionPreview" hidden$="{{ promptMode }}">
+		<div id="selectionPreview" class="layout horizontal" hidden$="{{ promptMode }}">
 			<div>
 				<sortable-js id="sortableContent" handle="ir-filebrowser-item" on-update="updatefbValue">
 					<content select="ir-filebrowser-item">
 					</content>
-				<sortable-js>
+				</sortable-js>
 			</div>
 
-			<div id="selectionNav">
+			<div id="selectionNav" class="layout horizontal end">
 				<template is="dom-if" if="{{value}}">
 					<paper-button id="clearSelection" raised on-click="clearSelection">Clear all</paper-button>
 				</template>
 				<paper-button id="browseButton" raised on-click="showDialog">My files</paper-button>
 				<div id="selectionUploader">
-					<file-upload id="selectionFileUploader" on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
-							<div hidden$="[[ isUploadingFiles ]]">
-								<paper-button raised>Browse...</paper-button>
-							</div>
+					<file-upload id="selectionFileUploader" on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+						<paper-button raised>Browse...</paper-button>
 					</file-upload>
 				</div>
 			</div>

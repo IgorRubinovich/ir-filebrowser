@@ -330,8 +330,8 @@
 						topTabsHeight = 300,
 						bottomButtonsHeight = 0;
 
-					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
-					this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 100) + "px";
+					this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 100) + "px";
 					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				});
 
@@ -1195,6 +1195,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 				return;
 			window.addEventListener('resize', this.resizeListener.bind(this));
 			this.__hasResizeListener = true;
+			this.$.dialog.notifyResize();
 		},
 		
 		resizeListener : function() {

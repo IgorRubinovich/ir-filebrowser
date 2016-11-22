@@ -42,7 +42,7 @@ Example:
 <dom-module id="ir-filebrowser">
   <style>
     :host {	
-    	
+    	min-height : 90vh;
     }
     @media (max-width: 600px) {
       h1.paper-font-display1 {
@@ -60,7 +60,7 @@ Example:
 	#scrollableDialog
 	{
 		min-width : 400px;
-		min-height: 400px;
+		min-height: 200px;
 	}
 	
    	#dialog {
@@ -89,7 +89,7 @@ Example:
 	
 	#uploaderContainer {
 		text-align : left;
-		min-heght : 400px;
+		/*min-heght : 400px;*/
 		width : 100%;
 	}
 
@@ -278,7 +278,14 @@ Example:
 		</div>
 	</div>
 
-	<paper-dialog no-cancel-on-esc-key="[[ fullView ]]" no-cancel-on-outside-click="[[ fullView ]]" on-keydown="blockBackspace" opened$="{{ opened }}" id="dialog"> <!--  on-iron-overlay-closed="closed" -->
+	<paper-dialog 
+		no-cancel-on-esc-key="[[ fullView ]]" 
+		no-cancel-on-outside-click="[[ fullView ]]" 
+		on-keydown="blockBackspace" 
+		opened$="{{ opened }}" 
+		id="dialog"
+		auto-fit-on-attach
+	> <!--  on-iron-overlay-closed="closed" -->
 		<!--div id="topTabs"-->
 			<!-- paper-tabs selected="{{tableselected}}" on-click="refitDialog">
 				<paper-tab>FOLDERS</paper-tab>
@@ -286,49 +293,49 @@ Example:
 			</paper-tabs -->
 
 			<!--iron-pages selected="{{tableselected}}"-->
-				<div class="layout vertical left">
-					<div id="topNav" class="layout horizontal center">
-							<div id="homeButton" style="padding-right: 10px;">
-								<paper-icon-button class="topNavButtons" icon="home" on-tap="goHome"></paper-icon-button>
-							</div>
-							<h3 id="relPath">
-								<template is="dom-repeat" items="{{ splitRelPath }}">
-									<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 
-								</template>
-							</h3>
-							<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
-							</paper-input>
-							<paper-icon-button class="topNavButtons" icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
-							</paper-icon-button>
-						<div class="layout horizontal center" style="margin-left:30px">
-							<paper-input id="searchInput" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
-							</paper-input>
-							<paper-icon-button class="topNavButtons" icon="clear" on-tap="searchClear">
-							</paper-icon-button>
-						</div>		
+		<div class="layout vertical left">
+			<div id="topNav" class="layout horizontal center">
+					<div id="homeButton" style="padding-right: 10px;">
+						<paper-icon-button class="topNavButtons" icon="home" on-tap="goHome"></paper-icon-button>
 					</div>
-					<div>
-						<paper-icon-button icon="menu" on-click="triggerMenu" hidden$="{{ !mobile }}"></paper-icon-button>
-						<paper-checkbox checked="{{ showInfo }}" hidden$="{{ !mobile }}">show file info</paper-checkbox>
-					</div>
-					<div id="filesNav" class="layout horizontal center" hidden$="{{ mobile }}">
-						<paper-item>
-							<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
-						</paper-item>
-						<paper-item>
-							<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
-						</paper-item>
-						<paper-item>
-							<paper-checkbox checked="{{ postFields.resize }}">resize</paper-checkbox>
-						</paper-item>
-						<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
-						<div>
-							<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
-							<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename</paper-button>
-							<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete</paper-button>
-						</div>
-					</div>
+					<h3 id="relPath">
+						<template is="dom-repeat" items="{{ splitRelPath }}">
+							<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 
+						</template>
+					</h3>
+					<paper-input placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
+					</paper-input>
+					<paper-icon-button class="topNavButtons" icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
+					</paper-icon-button>
+				<div class="layout horizontal center" style="margin-left:30px">
+					<paper-input id="searchInput" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
+					</paper-input>
+					<paper-icon-button class="topNavButtons" icon="clear" on-tap="searchClear">
+					</paper-icon-button>
+				</div>		
+			</div>
+			<div>
+				<paper-icon-button icon="menu" on-click="triggerMenu" hidden$="{{ !mobile }}"></paper-icon-button>
+				<paper-checkbox checked="{{ showInfo }}" hidden$="{{ !mobile }}">show file info</paper-checkbox>
+			</div>
+			<div id="filesNav" class="layout horizontal center" hidden$="{{ mobile }}">
+				<paper-item>
+					<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
+				</paper-item>
+				<paper-item>
+					<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
+				</paper-item>
+				<paper-item>
+					<paper-checkbox checked="{{ postFields.resize }}">resize</paper-checkbox>
+				</paper-item>
+				<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
+				<div>
+					<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
+					<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename</paper-button>
+					<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete</paper-button>
 				</div>
+			</div>
+		</div>
 			<!-- /iron-pages -->
 		<!--/div-->
 		<paper-dialog-scrollable id="scrollableDialog">
@@ -533,11 +540,15 @@ Example:
 		overflow : hidden;
 		text-align : center;
 		padding : 0;
+		max-height : 20vh;
+		max-width : 20vh;
 	}
 
 	iron-image {
 		width : 180px;
 		height : 140px;
+		max-width : 15vh;
+		max-height : 15vh;
 		background: white;
 		background-size : 32px;
 	}
@@ -556,6 +567,7 @@ Example:
 		text-align : center;
 		display : block;
 		height : 150px;
+		max-height : 15vh;
 		color : #aaa;
 		background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAElBMVEX////v7+/v7+/v7+/v7+/v7+9mq1VzAAAABnRSTlMAPFTN4++SiZA2AAAAGUlEQVR4AWOAAUZWBIsZzmKiAouBhRnGAgARGwBPNJN0/gAAAABJRU5ErkJggg==);
 		background-repeat : no-repeat;
@@ -568,7 +580,7 @@ Example:
 	    border-width: 1px;
 	    border-style: groove;
 	}
-	@media (max-width: 600px) {
+	/*@media (max-width: 600px) {
 	  :host
 	  {
 	  	width: 90px;
@@ -582,7 +594,7 @@ Example:
       {
       	height: 60px;
       }
-    }
+    }*/
 	span {
 		white-space : nowrap;
 	}

@@ -386,7 +386,7 @@
 
 				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
 				this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
-				this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
+				this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight) + "px";
 			})
 
 			this.$.dialog.style.position = "fixed";

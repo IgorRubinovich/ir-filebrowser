@@ -1380,7 +1380,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 			promptMode : { type : Boolean, value : false },
 
 			/** Open by default - precursor to inline mode. */
-			opened : { type : Boolean, value : false }
+			opened : { type : Boolean, value : false },
+			
+			closeSingleButtonText : { type : String, value : "Close", notify : true }
 		},
 
 		observers: [

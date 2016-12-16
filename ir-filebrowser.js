@@ -138,8 +138,8 @@
 				fstat.relPath = this.relPath;
 
 				// look for items with same url as in selection and select them in the filebrowser dialog
-				this.getContentChildren()
-					.filter(function(el) { return el.is == 'ir-filebrowser-item' && (el.item.url == fstat.url) })
+				this._getSelectionElements()
+					.filter(function(el) { return el.item.url == fstat.url || el.item.url == path.join(document.location.origin, fstat.url) })
 					.forEach(function(el) { fstat.isSelected = true });
 				Polymer.dom.flush();
 
@@ -260,12 +260,8 @@
 
 			if(!this._itemsListenerAttached)
 			{
-				//this.addEventListener('item-attached', this.refitDialog, true);
 				this._itemsListenerAttached = true;
 			}
-
-			//else
-			//	this.removeEventListener('item-attached', this.refitDialog, true);
 
 			if(!/^\//.test(this.relPath))
 				this.set("relPath", "/" + this.relPath)
@@ -309,40 +305,32 @@
 		},
 
 		refitDialog : function() {
+			this.$.dialog.fitInto = window;		
 			
+			this.$.dialog.sizingTarget = this.$.dialog;
+			
+			this.$.dialog.minWidth = "90vw";
+			this.$.dialog.refit();
+
 			if(this.fullView) {
+				this.$.dialog.fitInto = Polymer.dom(this).parentNode;
 
 				this.$.dialog.refit();
-
-				this.$.dialog.constrain();
-
-				this.async(function() {
-					//this.$.dialog.fitInto = Polymer.dom(this).parentNode;
-
-					this.$.dialog.style.height = "auto";
-					this.$.dialog.style.zIndex = "0";
-					this.$.dialog.style.position = "absolute";
-
-					Polymer.updateStyles();
-					Polymer.dom.flush();
-
-					var currentHeight = document.documentElement.clientHeight,
-						topTabsHeight = 300,
-						bottomButtonsHeight = 0;
-
-					this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 100) + "px";
-					this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 100) + "px";
-					this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
-				});
+				
+				this.$.dialog.style.position = "static";
+				this.$.dialog.style.boxShadow = "none";
+				this.$.dialog.style.margin = 0;
+				this.$.dialog.style.maxWidth = '100%';
 
 				return;
 			}
 			if(this.archiveMode)
 			{
 				this.$.dialog.refit();
-
+				
+				return;
+				
 				this.async(function () {
-					this.$.dialog.fitInto = Polymer.dom(this).parentNode;
 
 					this.$.dialog.style.position = "";
 					this.$.dialog.style.bottom = this.$.dialog.style.top = this.$.dialog.style.left = this.$.dialog.style.right = "0";
@@ -356,16 +344,10 @@
 				return;
 			}
 
-			// else
-			this.$.dialog.style.position = "fixed";
-
-			this.$.dialog.refit();
-
-			this.$.dialog.style.position = "fixed";
+			//this.$.scrollableFiles.style.minHeight = "70vh";
 
 
-
-			this.$.dialog.style.position = "fixed";
+			return;
 
 			this.async(function() {
 
@@ -377,6 +359,8 @@
 
 				this.$.dialog.center();
 
+
+				
 				Polymer.updateStyles();
 				Polymer.dom.flush();
 
@@ -384,36 +368,9 @@
 					topTabsHeight = 300,
 					bottomButtonsHeight = 0;
 
-				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
-				this.$.scrollableDialog.style.minHeight = this.$.scrollableDialog.style.maxHeight = (currentHeight - topTabsHeight - bottomButtonsHeight - 58) + "px";
-				this.$.uploaderContainer.style.height = (currentHeight - topTabsHeight - bottomButtonsHeight) + "px";
 			})
 
 			this.$.dialog.style.position = "fixed";
-			
-			/*
-			var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-			if (!this._maxWidth || (this._maxWidth < currentWidth))
-				this._maxWidth = currentWidth;
-
-			this.$.dialog.refit();
-
-			this.async(function () {
-				var currentWidth = Number(getComputedStyle(this.$.dialog).width.replace(/px/, ''));
-				this.$.dialog.left="0!important";
-				this.$.dialog.right="0!important";
-				this.$.dialog.top="0!important";
-				this.$.dialog.bottom="0!important";
-
-				//this.$.dialog.constrain();
-				//this.$.dialog.style.width = this._maxWidth + "px";
-				this.$.dialog.style.width = "auto!important";
-				//this.$.dialog.center();
-
-				Polymer.dom.flush();
-
-				this.$.scrollableDialog.scrollTarget.style.height = this.$.scrollableDialog.scrollTarget.style.maxHeight = this.$.uploaderContainer.style.height = getComputedStyle(this.$.scrollableDialog).height;
-			}) */
 		},
 
 		goHome : function() {
@@ -613,7 +570,7 @@ Adds object to selection.
 
 
 			if(typeof fstat == 'string')
-				fstat == { url : fstat };
+				fstat = { url : fstat };
 
 			// prevent duplicates
 			if(selectedElements.filter(function(el) { return el.item.url == fstat.url }).length)
@@ -625,6 +582,8 @@ Adds object to selection.
 			newEl = document.createElement("ir-filebrowser-item");
 			newEl.item = fstat;
 			newEl.isSelectionItem = true;
+			newEl.textSetCover = this.textSetCover;
+			
 			newEl.addEventListener('item-click', // open dialog to relPath if available
 				function (e) {
 					if(e.detail.item.relPath)
@@ -633,30 +592,19 @@ Adds object to selection.
 				});
 			newEl.addEventListener('update-selection',
 				function(e) {
-					var buttons = that.$.sortableContent.querySelectorAll('paper-radio-button');
-					for(var i = 0; i < buttons.length; i++)
-					{
-						buttons[i].checked = false;
-						buttons[i].style.visibility = "visible";
-					}
-						
 
 					that.$.sortableContent.insertBefore(e.detail, that.$.sortableContent.children[0]);
-					e.detail.querySelector('paper-radio-button').checked = true;
-					e.detail.querySelector('paper-radio-button').style.visibility = "hidden";
-					that.updatefbValue();
+
+					that._updateValue();
+
+					return;
 				});
 			newEl.addEventListener('remove-item', 
 				function(e) {
 					that.removeSelection(e.detail.item);
-					that.updatefbValue();
-				})
+					that._updateValue();
+				});
 			Polymer.dom(this).appendChild(newEl);
-
-			setTimeout(function() {
-				if(that.$.sortableContent.children[0].querySelector('paper-radio-button'))
-					that.$.sortableContent.children[0].querySelector('paper-radio-button').style.visibility = "hidden";
-			}, 100);
 
 			this._updateValue();
 
@@ -783,7 +731,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 		},
 
 /**
-Close dialog and forget the callback.
+Close dialog and forget the prompt callback.
 */
 		promptCancel : function() {
 			this.hideDialog();
@@ -819,8 +767,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		/** Get ir-filebrowser-item content children */
 		_getSelectionElements : function() {
-			return this.getContentChildren()
-					.filter(function(el) { return el.is == 'ir-filebrowser-item'});
+			return [].slice.call(this.$.sortableContent.children).filter(function(el) { return el.is == 'ir-filebrowser-item'})
+			
+			//return this.getContentChildren()
+			//		.filter(function(el) { return el.is == 'ir-filebrowser-item'});
 		},
 
 		/** Remove all items from selection */
@@ -892,8 +842,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 			else
 				if (!e.detail.isSelected) {
-					if(!this.addSelection(e.detail.item))
-						return;
+					//if(!this.addSelection(e.detail.item))
+					//	return;
+
+					this.addSelection(e.detail.item)
 
 					this.fileName = e.detail.item.name;
 					e.detail.select();
@@ -934,8 +886,15 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.fileName = null;
 					this.set('noFile', true);
 				}
+				
 
-			if (this.autoPreview && !this.promptMode)
+			if(this._activeItem && this._activeItem != e.detail) 
+				this._activeItem.isActive = false;
+
+			e.detail.isActive = e.detail.isSelected && !e.detail.item.isDirectory;
+			this._activeItem = e.detail.isActive && e.detail || null;
+
+			if(this.autoPreview && !this.promptMode)
 				this.hideDialog();
 
 			this._updateValue();
@@ -982,37 +941,28 @@ Remove specific item from selection. Note: all selected items matching the url w
 			var that = this;
 
 			this.async(function() {
-				that.value = this._getSelectionElements().map(function(s) { return s.item.url }).join(',');
+				var selectionItems = [].slice.call(this.$.sortableContent.children);				
+
+				this.value = selectionItems.map(function(el, i) { 
+					el.selectionOrder = i;
+					el.isSingleSelection = false;
+					el.isSelected = false;
+					return el.item.url;
+				}).join(',');
+				
+				if(selectionItems.length == 1)
+					selectionItems[0].isSingleSelection = true;
+
+				this.notifyPath('value');
+
 				if(this.hideAfterUpdate)
 				{
 					this.hideAfterUpdate = false;
 					this.promptSelect();
 				}
 			});
+			
 		},
-
-		updatefbValue : function() {
-			var items = this.$.selectionPreview.querySelectorAll('ir-filebrowser-item'),
-				value = [];
-
-			var buttons = this.$.selectionPreview.querySelectorAll('paper-radio-button');
-
-			for(var j = 0; j < buttons.length; j++)
-			{
-				buttons[j].checked = false;
-				buttons[j].style.visibility = "visible";
-			}
-				
-
-			for(var i = 0; i < items.length; i++) {
-				value[i] = items[i].item.url;
-			};	
-
-			items[0].querySelector('paper-radio-button').checked = true;
-			items[0].querySelector('paper-radio-button').style.visibility = "hidden";
-
-			this.value = value.join(',');
-		},	
 
 		dblclickFile : function (e) {
 			// the following is problematic because single click handler unselects the file, look into it.
@@ -1025,8 +975,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 		dblclickDirectory : function (e) {
 			this.set('isLoaded', true);
 			this.ls(e.detail.item.name);
-			if(this.maxItems !== 1)
-				this.clearSelection();
+			//if(this.maxItems !== 1)
+			//	this.clearSelection();
 		},
 		unselect : function (e) {
 			//this.preview = true;
@@ -1153,17 +1103,23 @@ Remove specific item from selection. Note: all selected items matching the url w
 				}
 		},
 
+		browseLocalFiles : function(relPath) {
+			this.$.selectionFileUploader._fileClick();
+		},
 		showDialog : function(relPath) {
 			// Polymer.dom.flush();
+			
+			this._lastSelection = this._getSelectionElements().map(function(el) { return el.item.url });
+			
 			var that = this;
+
+			that.$.dialog.open();
+			
 			setTimeout(function() {
-				that.tableselected = "0";
 				that.set('isLoaded', true);
 
-				that.$.dialog.sizingTarget = that.$$("#scrollableDialog")
+				//that.$.dialog.sizingTarget = that.$$("#scrollableDialog")
 
-				that.$.dialog.open();
-				
 				
 				if(that.rootDir && that.firstRoot)
 					that.ls(that.rootDir)
@@ -1185,17 +1141,30 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}, 300);
 
 		},
-
+		
+		cancelSelectionChanges : function() {
+			this.clearSelection()
+			Polymer.dom.flush();
+			this._lastSelection.forEach(function(url) { this.addSelection(url) }.bind(this));
+			this.hideDialog();
+		},
+		
 		hideDialog : function (e) {
 			this.$.dialog.close();
 		},
 
 		attached: function() {
+			this.$.scrollableFiles.scrollTarget.addEventListener('scroll', this.loadMoreFiles.bind(this));
+		
 			if(this.__hasResizeListener)
 				return;
-			window.addEventListener('resize', this.resizeListener.bind(this));
+			if(!this.hasAttribute('full-view'))
+				window.addEventListener('resize', this.resizeListener.bind(this));
+			
 			this.__hasResizeListener = true;
 			this.$.dialog.notifyResize();
+			
+			//this.$.pocketDrawer.assignParentResizeable(this.$.mainContainer)
 		},
 		
 		resizeListener : function() {
@@ -1250,7 +1219,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 
 			if(!this.mobile)
-				this.$.pocketDrawer.drawerWidth = "35%";
+				this.$.pocketDrawer.drawerWidth = "33%";
+			
+			//this.$.pocketDrawer.drawerHeight = "80%";
 
 			this._urlsChanged();
 			if(!this.archiveMode)
@@ -1290,6 +1261,17 @@ Remove specific item from selection. Note: all selected items matching the url w
 				if(that[f])
 					that["_" + f] = path.join(that.host, that[f]);
 			});
+		},
+		
+		_showInfoChanged : function() 
+		{
+			if(!this.mobile)
+				return;
+			
+			if(this.showInfo)
+				this.$.pocketDrawer.openDrawer();
+			else
+				this.$.pocketDrawer.closeDrawer();
 		},
 
 		properties : {
@@ -1373,6 +1355,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 								width : "",
 								height : ""}},
 			fileCaptions :		{ type : Array, value : {} },
+			showInfo :			{ type : Boolean, value : true, observer : "_showInfoChanged" },
 
 			isUploadingFiles : { type : Boolean },
 
@@ -1382,7 +1365,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 			/** Open by default - precursor to inline mode. */
 			opened : { type : Boolean, value : false },
 			
-			closeSingleButtonText : { type : String, value : "Close", notify : true }
+			textCloseSingleButton : { type : String, value : "OK", notify : true },
+			textCancelSingleButton : { type : String, value : "Cancel", notify : true },
+			textSetCover : { type : String, value : "make cover", notify : true }
 		},
 
 		observers: [
@@ -1398,6 +1383,29 @@ Remove specific item from selection. Note: all selected items matching the url w
 	{
 		is : 'ir-filebrowser-item',
 
+		properties : {
+			/** File Stat object represented by this ir-filebrowser-item */
+			item : { type : Object, observer : "_itemChanged", notify : true },
+			/** Index of this item in container in its containing ir-filebrowser */
+			index : { type : Number },
+			/** True if item is selected, false otherwise */
+			isSelected : { type : Boolean, readOnly : true },
+			/** Url of the selected file */
+			url : { type : String,  },
+			/** 
+				True when item is in the selection view (usually embedded in a form). If true add a radiobutton to choose main (first) item in selection of ir-filebrowser. 
+				Note this is different from a selected (active) item inside the ir-filebrowser dialog.
+			*/
+			isSelectionItem : { type : Boolean, value : false, notify : true },
+			radioButton : { type : Object, notify : true },
+			selectionOrder : { type : Number, value : -1, notify : true },
+			isRadioHidden : { type : Boolean, computed : '_radioHidden(selectionOrder,isSelectionItem,isAttached)', notify : true },
+			isSingleSelection : { type : Boolean, value : true, notify : true },
+
+			isAttached : { type : Boolean, value : false, notify : true },
+			isActive : { type : Boolean, value : false, notify : true },
+		},
+
 /*
 Fired when an item is clicked.
 @event item-click
@@ -1406,7 +1414,16 @@ Fired when an item is clicked.
 			if(ev.target.tagName == "IRON-ICON")
 				this.fire('remove-item', this);
 			else
-				this.fire("item-click", this);
+			{
+				if(this._doubleClick && new Date().getTime() - this._doubleClick < 300)
+					return this.fire("item-dblclick", this)
+
+				this._doubleClick = new Date().getTime()
+				
+				// this.set("isActive", this.isSelectionItem && !this.isActive);
+
+				this.fire("item-click", this);			
+			}
 		},
 /*
 Fired when an item is doubleclicked.
@@ -1421,31 +1438,22 @@ Fired when an item is doubleclicked.
 		select : function() {
 			this.$.container.classList.add('selected');
 			this.$.container.elevation = "0";
-			this.$.container.style.backgroundColor = "#E1E5FB";
+			/*this.$.container.style.backgroundColor = "";
 			this.$.container.style.color = "#3f51b5";
-			this.$.container.style.fontWeight = "bolder";
+			this.$.container.style.fontWeight = "bolder";*/
 			this._setIsSelected(true);
 		},
 		/** Unselect this ir-filebrowser-item */
 		unselect : function() {
 			this.$.container.classList.remove('selected');
 			this.$.container.elevation = "2";
-			this.$.container.style.backgroundColor = "";
+			/*this.$.container.style.backgroundColor = "";
 			this.$.container.style.color = "";
-			this.$.container.style.fontWeight = "";
+			this.$.container.style.fontWeight = "";*/
 			this._setIsSelected(false);
 		},
-		properties : {
-			/** File Stat object represented by this ir-filebrowser-item */
-			item : { type : Object, observer : "_itemChanged", notify : true },
-			/** Index of this item in container in its containing ir-filebrowser */
-			index : { type : Number },
-			/** True if item is selected, false otherwise */
-			isSelected : { type : Boolean, readOnly : true },
-			/** Url of the selected file */
-			url : { type : String,  },
-			/** If true add radio-button to choose main item */
-			isSelectionItem : { type : Boolean, notify : true }
+		_radioHidden : function() {
+			return !this.isSelectionItem || this.selectionOrder < 1;
 		},
 		_itemChanged : function() {
 			var item = this.item, url;
@@ -1475,6 +1483,8 @@ Fired when an item is doubleclicked.
 
 			item.isImage = /jpeg|jpg|png|gif/i.test(item.ext);
 
+			item.isOther = !(item.isImage || item.isDirectory);
+
 			if(item.isSelected)
 				this.select();
 			else
@@ -1490,6 +1500,7 @@ Fired when an item is doubleclicked.
 		fireUpdate : function(e) {
 			if(e.currentTarget.checked)
 				this.fire('update-selection', this);
+			this.$.radioButton.checked = false;
 		},
 		ready : function() {
 			if(this.url)
@@ -1504,8 +1515,14 @@ Fired when an item is doubleclicked.
 			}
 		},
 
+		detached : function() {
+			this.set("isAttached", false);
+			console.log('detached!')
+		},
 		attached : function() {
+			this.radioButton = this.$.radioButton;
 			this.fire('item-attached');
+			this.set("isAttached", true);
 		}
 	})
 
@@ -1529,7 +1546,8 @@ Fired when an item is doubleclicked.
 	// simulate nodejs path for urls
 	var path = {
 		join : function() {
-			var protocol,
+			var 
+				protocol,
 				lead = '',
 				trail = '';
 

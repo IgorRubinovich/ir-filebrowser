@@ -662,7 +662,7 @@ Close dialog, call the callback with `this.value` and forget the callback.
 
 				for(i = 0; i < selectedFiles.length; i++)
 				{
-					t = "<img src='" + selectedFiles[i] + "'>";
+					t = "<img src='" + selectedFiles[i] + "'> ";
 					// multi image gallery, no caption
 					if(this.gallery)
 						if(!this.fileCaptions[selectedFiles[i]])

@@ -11,6 +11,51 @@
  */
 
 (function () {
+			// simulate nodejs path for urls
+		var path = {
+			join : function() {
+				var 
+					protocol,
+					lead = '',
+					trail = '';
+
+				protocol = arguments[0].match(/^[^:]+:(\d)*\/\//);
+
+				if(protocol)
+				{
+					protocol = protocol[0];
+					arguments[0] = arguments[0].replace(/^[^:]+:\/\//, '');
+				}
+				else
+				{
+					protocol = '';
+					lead = arguments[0].match(/^\//) ? '/' : '';
+				}
+
+				trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
+
+				var join, split;
+
+				split = [].filter.call(arguments, function(p) {
+					return p;
+				});
+
+				// if there was no protocol now is the time to check if first non-empty argument is an absolute path
+				if(!lead && !protocol)
+					lead = split[0].match(/^\//) ? '/' : '';
+
+				split = split.map(function(p) {
+					return p.split('/');
+				});
+
+				join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
+
+
+				return protocol + lead + join + trail; // note that `protocol` includes :// in the regex
+			}
+		}
+	
+	
 	Polymer({
 		is : 'ir-filebrowser',
 
@@ -67,7 +112,7 @@
 			if(this.relPath)
 				this.relPath += '/';
 
-			var reqUrl = this._lsUrl.replace(/\[path\]/, this.relPath).replace(/\/\//, "/");
+			var reqUrl = this.path.join(this._lsUrl.replace(/\[path\]/, this.relPath)) // the [^:] makes sure the protocol double slash is preserved for absolute urls
 
 			if(this._lsUrl == reqUrl)
 				reqUrl += this.relPath; //this.host + reqUrl; error!
@@ -123,7 +168,7 @@
 			this.files = [];
 			this.directories = [];
 
-			rootUrl = path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
+			rootUrl = this.path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
 			statsData = this.get(this.lsStatsPath, this.loadedData).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
 
 			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
@@ -134,12 +179,12 @@
 
 				fstat.rootUrl = rootUrl;
 				// fstat.lsRootUrlPath = this.lsRootUrlPath;
-				fstat.url = path.join(rootUrl.replace(/ /g, '%20'), encodeURIComponent(fstat.name).replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21").replace(' ', "%20"));
+				fstat.url = this.path.join(rootUrl.replace(/ /g, '%20'), encodeURIComponent(fstat.name).replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/!/, "%21").replace(' ', "%20"));
 				fstat.relPath = this.relPath;
 
 				// look for items with same url as in selection and select them in the filebrowser dialog
 				this._getSelectionElements()
-					.filter(function(el) { return el.item.url == fstat.url || el.item.url == path.join(document.location.origin, fstat.url) })
+					.filter(function(el) { return el.id && (el.item.url == fstat.url || el.item.url == this.path.join(document.location.origin, fstat.url)) })
 					.forEach(function(el) { fstat.isSelected = true });
 				Polymer.dom.flush();
 
@@ -277,7 +322,7 @@
 
 
 			Polymer.dom.flush();
-			this.set('isLoaded', false);
+			this.set('isLoading', false);
 
 			that.lsAfterUpload();
 
@@ -767,7 +812,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		/** Get ir-filebrowser-item content children */
 		_getSelectionElements : function() {
-			return [].slice.call(this.$.sortableContent.children).filter(function(el) { return el.is == 'ir-filebrowser-item'})
+			return [].slice.call(this.$.sortableContent.children).filter(function(el) { return el.is == 'ir-filebrowser-item' })
 			
 			//return this.getContentChildren()
 			//		.filter(function(el) { return el.is == 'ir-filebrowser-item'});
@@ -874,10 +919,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.set('fDate', date.toLocaleString("en-Us", options));
 					this.set('noFile', false);
 
-					var nameReq = path.join(e.detail.item.relPath + this.fileName);
+					var nameReq = this.path.join(e.detail.item.relPath + this.fileName);
 
-					
-					this.$.getDescription.url = this._getdescriptionUrl.replace(/\[path\]/, nameReq.replace(/-/g, "%2E")).replace(/\/(?=\/)/g, "");
+					this.$.getDescription.url = this.path.join(this._getdescriptionUrl.replace(/\[path\]/, nameReq.replace(/-/g, "%2E")));
 					this.$.getDescription.generateRequest();
 				}
 				else {
@@ -901,36 +945,40 @@ Remove specific item from selection. Note: all selected items matching the url w
 			Polymer.dom.flush();
 		},
 
-		showDescription : function() {
-			if(!this.fileDescription){
-				this.hasInfo = false;
-				this.set("fName", this.fileName);
-				this.set("meta.title", "");
-				this.set("meta.caption", "");
-				this.set("meta.description", "");
-				this.set("meta.alt", "");
-				this.set("meta.height", "");
-				this.set("meta.width", "");
-				this.set("fileId", "");
-				this.fileCaptions[this.fUrl] = "";
-			}
-			else {
-				this.hasInfo = true;
-				this.set("fName", this.fileDescription.fileName);
-				this.set("meta.title", this.fileDescription.title);
-				this.set("meta.caption", this.fileDescription.caption);
-				this.set("meta.description", this.fileDescription.content);
-				this.set("meta.alt", this.fileDescription.alt);
-				this.set("meta.height", this.fileDescription.height);
-				this.set("meta.width", this.fileDescription.width);
-				this.set("fileId", this.fileDescription.id);
-				this.fire('captionChanged', { caption : this.meta.caption });
-				this.fileCaptions[this.fUrl] = this.meta.caption;
-			}
+		showDescriptionError : function() {
+			this.showDescription();
+		},
+		
+		showDescription : function(ev) {
+			var fd = (ev instanceof Event ? this.fileDescription : ev) || {};
+
+			this.hasInfo = true;
+			this.set("fName", fd.fileName || '');
+			this.set("meta.title", fd.title || '');
+			this.set("meta.caption", fd.caption || '');
+			this.set("meta.description", fd.content || '');
+			this.set("meta.alt", fd.alt || '');
+			this.set("meta.height", fd.height || '');
+			this.set("meta.width", fd.width || '');
+			this.set("fileId", fd.id || '');
+			this.fire('captionChanged', { caption : this.meta.caption });
+			this.fileCaptions[this.fUrl] = this.meta.caption;
 		},
 
+		afterUpdateDescription : function(ev)
+		{
+			if(!ev.target.body.id)
+				this.$.loader.generateRequest(); // the minimum we can do when file is in directory but not known in db
+		},
+		
 		updateDescription : function() {
-			this.$.updateFile.body = { id : this.fileId, title : this.meta.title, caption : this.meta.caption, content : this.meta.description, alt : this.meta.alt };
+			this.$.updateFile.body = { title : this.meta.title, caption : this.meta.caption, content : this.meta.description, alt : this.meta.alt };
+			
+			if(this.fileId)
+				this.$.updateFile.body.id = this.fileId;
+			else
+				this.$.updateFile.body.fileName = this.meta.fileName || this.path.join(this.relPath, this._activeItem.item.url.split(/\//).pop());
+
 			this.$.updateFile.contentType = "application/x-www-form-urlencoded";
 			this.$.updateFile.url = this._updatefileUrl;
 			this.$.updateFile.generateRequest();
@@ -973,7 +1021,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 		},
 		dblclickDirectory : function (e) {
-			this.set('isLoaded', true);
+			this.set('isLoading', true);
 			this.ls(e.detail.item.name);
 			//if(this.maxItems !== 1)
 			//	this.clearSelection();
@@ -1115,8 +1163,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			that.$.dialog.open();
 			
-			setTimeout(function() {
-				that.set('isLoaded', true);
+			this.async(function() {
+				that.set('isLoading', true);
 
 				//that.$.dialog.sizingTarget = that.$$("#scrollableDialog")
 
@@ -1165,6 +1213,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.$.dialog.notifyResize();
 			
 			//this.$.pocketDrawer.assignParentResizeable(this.$.mainContainer)
+		},
+		
+		ironAjaxError : function(ev) {
+			if(ev.target.is != 'iron-ajax')
+				return;
+			
+			console.warn(ev);
+			this.fire("toast", ev)
 		},
 		
 		resizeListener : function() {
@@ -1251,16 +1307,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		_urlsChanged : function() {
-			var that = this;
-
-			this._lsUrl = path.join(this.host, this.lsUrl);
+			this._lsUrl = this.path.join(this.host, this.lsUrl);
 
 			"makedirUrl,findfileUrl,renameUrl,deletefileUrl,postUrl,getdescriptionUrl,updatefileUrl,searchbydescUrl"
 			.split(',')
 			.forEach(function(f) {
-				if(that[f])
-					that["_" + f] = path.join(that.host, that[f]);
-			});
+				if(this[f])
+					this["_" + f] = this.path.join(this.host, this[f]);
+			}.bind(this));
 		},
 		
 		_showInfoChanged : function() 
@@ -1330,7 +1384,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			limit : 			{ type : Number, value : 20 },
 			isMore : 			{ type : Boolean, value : false },
 			loadedFiles : 		{ type : Array, value : [] },
-			isLoaded : 			{ type : Boolean, value : true },
+			isLoading : 			{ type : Boolean, value : true },
 			uploadedFiles : 	{ type : Number, value : 0 },
 			loadedDirectories : { type : Array, value : [] },
 			isFirstTimeOpened : { type : Boolean, value : false },
@@ -1374,8 +1428,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)'
 		],
 		behaviors: [
-			ir.ReflectToNativeBehavior
+			Polymer.IronFormElementBehavior,
+			typeof ir != 'undefined' && ir.ReflectToNativeBehavior
 		],
+		path : path
 	});
 
 	
@@ -1465,7 +1521,7 @@ Fired when an item is doubleclicked.
 				item.name = decodeURIComponent(item.url.match(/([^/]+)$/)[1]);
 			else if(!item.url && item.name && item.relPath) // if(!item.url)
 			{
-				url = path.join(item.rootUrl,encodeURIComponent(item.name)); // item.relPath,
+				url = this.path.join(item.rootUrl,encodeURIComponent(item.name)); // item.relPath,
 				console.log('decoded (name) %s -> (url) %s', item.name, item.url);
 			}
 
@@ -1523,7 +1579,8 @@ Fired when an item is doubleclicked.
 			this.radioButton = this.$.radioButton;
 			this.fire('item-attached');
 			this.set("isAttached", true);
-		}
+		},
+		path : path
 	})
 
 	function encodeQuery(q)
@@ -1543,49 +1600,7 @@ Fired when an item is doubleclicked.
 	}
 
 	
-	// simulate nodejs path for urls
-	var path = {
-		join : function() {
-			var 
-				protocol,
-				lead = '',
-				trail = '';
 
-			protocol = arguments[0].match(/^[^:]+:(\d)*\/\//);
-
-			if(protocol)
-			{
-				protocol = protocol[0];
-				arguments[0] = arguments[0].replace(/^[^:]+:\/\//, '');
-			}
-			else
-			{
-				protocol = '';
-				lead = arguments[0].match(/^\//) ? '/' : '';
-			}
-
-			trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
-
-			var join, split;
-
-			split = [].filter.call(arguments, function(p) {
-				return p;
-			});
-
-			// if there was no protocol now is the time to check if first non-empty argument is an absolute path
-			if(!lead && !protocol)
-				lead = split[0].match(/^\//) ? '/' : '';
-
-			split = split.map(function(p) {
-				return p.split('/');
-			});
-
-			join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
-
-
-			return protocol + lead + join + trail; // note that `protocol` includes :// in the regex
-		}
-	};
 
 })();
 

@@ -22,7 +22,6 @@ Example:
 <link rel="import" href="../paper-ripple/paper-ripple.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
 <link rel="import" href="../paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../ir-reflect-to-native-behavior/ir-reflect-to-native-behavior.html">
 <link rel="import" href="../paper-tabs/paper-tabs.html">
 <link rel="import" href="../paper-menu/paper-menu.html">
 <link rel="import" href="../iron-dropdown/iron-dropdown.html">
@@ -35,6 +34,7 @@ Example:
 <link rel="import" href="../paper-radio-button/paper-radio-button.html">
 <link rel="import" href="../paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../Sortable/Sortable.html">
+<link rel="import" href="../ir-reflect-to-native-behavior/ir-reflect-to-native-behavior.html">
 
 
 
@@ -285,7 +285,7 @@ Example:
 				<paper-button id="clearSelection" hidden="{{ !value }}" raised on-tap="clearSelection">Clear all</paper-button>
 				<paper-button id="browseButton" raised on-tap="showDialog">My files</paper-button>
 				<paper-button id="browseLocalFiles" raised on-tap="browseLocalFiles">Browse...</paper-button>
-				<file-upload id="selectionFileUploader" on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+				<file-upload id="selectionFileUploader" with-credentials on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 				</file-upload>
 			</div>
 		</div>
@@ -425,7 +425,7 @@ Example:
 			<div id="bottomButtons" hidden$="{{ archiveMode }}">
 				<div id="fileUploaderContainer">
 					<span hidden$=[[ isUploadingFiles ]] hidden$="[[ mobile ]]">
-						<paper-spinner class="loaded" hidden$="[[ !isLoded ]]" active$="[[ isLoaded ]]"></paper-spinner>
+						<paper-spinner class="loaded" hidden$="[[ !isLoading ]]" active$="[[ isLoaded ]]"></paper-spinner>
 					</span>
 					<span hidden$="{{ mobile }}">
 						<paper-spinner class="loaded" active$="[[ isUploadingFiles ]]"></paper-spinner>
@@ -463,7 +463,8 @@ Example:
 		on-response="displayLoadedFiles"
 		last-error="{{ lastError }}"
 		verbose=true
-		>
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
@@ -474,7 +475,8 @@ Example:
 		on-response="updateVal"
 		last-error="{{ lastError }}"
 		verbose=true
-		>
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
@@ -486,7 +488,8 @@ Example:
 		on-response="showfoundFiles"
 		last-error="{{ lastError }}"
 		verbose=true
-		>
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
@@ -498,7 +501,8 @@ Example:
 		on-response="renameSelectionElement"
 		last-error="{{ lastError }}"
 		verbose=true
-		>
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
@@ -511,7 +515,8 @@ Example:
 		on-error="cannotDelete"
 		last-error="{{ deleteFileError }}"
 		verbose=true
-		>
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
@@ -521,15 +526,22 @@ Example:
 		debounce-duration="300"
 		last-response="{{ fileDescription }}"
 		on-response="showDescription"
-		verbose="true">
+		on-error="showDescriptionError"
+		verbose="true"
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
 		id="updateFile"
 		method="POST"
 		handle-as="json"
+		on-response="afterUpdateDescription"
+		on-error="ironAjaxError"
 		debounce-duration="300"
-		verbose="true">
+		verbose="true"
+		with-credentials
+	>
 	</iron-ajax>
 
 	<iron-ajax
@@ -540,7 +552,9 @@ Example:
 		last-response="{{ desiredFiles }}"
 		on-response="listDesire"
 		on-error="nothingFound"
-		verbose="true">
+		verbose="true"
+		with-credentials
+	>
 	</iron-ajax>	
 
   </template>
@@ -728,7 +742,8 @@ Example:
 		
 </template>
 
+<script src="ir-filebrowser.js"></script>
+
 </dom-module>
 
 
-<script src="ir-filebrowser.js"></script>

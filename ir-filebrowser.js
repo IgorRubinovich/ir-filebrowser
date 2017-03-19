@@ -595,6 +595,16 @@
 			e.preventDefault();
 		},
 
+/**
+Select items defined in the array. Previous selection is lost.
+@param {Array} selection array of fstat objects or objects with url field, or strings representing urls.
+*/
+		setSelection : function(selection) {
+			this.clearSelection();
+			selection.forEach(f => { 
+				this.addSelection(f); 
+			});
+		},
 
 /**
 Adds object to selection.
@@ -606,7 +616,10 @@ Adds object to selection.
 
 			// maxItems == 1 is special case: if there's a selected item it is unselected and new item is selected instead
 			if(this.maxItems == 1 && (selectedElements.length == 1))
+			{
 				this.clearSelection();
+				selectedElements = this._getSelectionElements();
+			}
 			else if(this.maxItems != -1 && (selectedElements.length >= this.maxItems))
 			{
 				this.fire('item-overFlow');
@@ -796,7 +809,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._getSelectionElements()
 				.forEach(function(el, i) {
 					if(el.item.url == url)
-						Polymer.dom(that).removeChild(el);
+						Polymer.dom(Polymer.dom(el).parentNode).removeChild(el);
 				});
 
 			// unselect in dialog
@@ -1425,7 +1438,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		observers: [
-			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)'
+			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)',
+			'setSelection(selected)'
 		],
 		behaviors: [
 			Polymer.IronFormElementBehavior,

@@ -462,10 +462,6 @@
 			}
 		},
 
-		blockBackspace : function(e) {
-			if(e.keyCode == 8 && e.target.tagName !== "INPUT")
-				e.preventDefault();
-		},
 
 		findFile : function() {
 			if (this.inputValue !== null){
@@ -601,7 +597,7 @@ Select items defined in the array. Previous selection is lost.
 */
 		setSelection : function(selection) {
 			this.clearSelection();
-			selection.forEach(f => { 
+			selection.forEach(function(f) { 
 				this.addSelection(f); 
 			});
 		},
@@ -1201,6 +1197,14 @@ Remove specific item from selection. Note: all selected items matching the url w
 				};
 			}, 300);
 
+		},
+		
+		topLevelKeys : function(e) {
+			if(!this.fullView && e.which == 27)
+				this.cancelSelectionChanges();
+			else
+			if(e.keyCode == 8 && e.target.tagName !== "INPUT")
+				e.preventDefault();
 		},
 		
 		cancelSelectionChanges : function() {

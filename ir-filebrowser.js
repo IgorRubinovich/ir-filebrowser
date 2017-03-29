@@ -599,7 +599,7 @@ Select items defined in the array. Previous selection is lost.
 			this.clearSelection();
 			selection.forEach(function(f) { 
 				this.addSelection(f); 
-			});
+			}.bind(this));
 		},
 
 /**
@@ -658,6 +658,8 @@ Adds object to selection.
 					that.removeSelection(e.detail.item);
 					that._updateValue();
 				});
+
+
 			Polymer.dom(this).appendChild(newEl);
 
 			this._updateValue();
@@ -1017,6 +1019,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.hideAfterUpdate = false;
 					this.promptSelect();
 				}
+				
+				this.fire('change');
 			});
 			
 		},
@@ -1478,6 +1482,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			isAttached : { type : Boolean, value : false, notify : true },
 			isActive : { type : Boolean, value : false, notify : true },
+		
+			noCheckbox : { type : Boolean, value : false }
 		},
 
 /*
@@ -1511,7 +1517,7 @@ Fired when an item is doubleclicked.
 		/** Select this ir-filebrowser-item */
 		select : function() {
 			this.$.container.classList.add('selected');
-			this.$.container.elevation = "0";
+			//this.$.container.elevation = "0";
 			/*this.$.container.style.backgroundColor = "";
 			this.$.container.style.color = "#3f51b5";
 			this.$.container.style.fontWeight = "bolder";*/
@@ -1520,11 +1526,14 @@ Fired when an item is doubleclicked.
 		/** Unselect this ir-filebrowser-item */
 		unselect : function() {
 			this.$.container.classList.remove('selected');
-			this.$.container.elevation = "2";
+			//this.$.container.elevation = "2";
 			/*this.$.container.style.backgroundColor = "";
 			this.$.container.style.color = "";
 			this.$.container.style.fontWeight = "";*/
 			this._setIsSelected(false);
+		},
+		_checkboxHidden : function() {
+			return this.isSelectionItem || !this.isSelected || !this.item || this.item.isDirectory;
 		},
 		_radioHidden : function() {
 			return !this.isSelectionItem || this.selectionOrder < 1;

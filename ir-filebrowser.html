@@ -690,6 +690,16 @@ Example:
 		border : 1px blue solid;
 	}
 	
+	#selctedCheckBox {
+		position : absolute;
+		right : 0px;
+		top : 6px;
+		background : white;
+		margin : 1px;
+		border-radius : 3px;
+		color :  --primary-background-color;
+		background : --primary-text-color;
+	}
 	
 </style>
 
@@ -697,7 +707,7 @@ Example:
 
 <template> <!-- ir-filebrowser-item -->
 	<div id="wrapper">
-		<paper-material id="container" isActive$="[[ isActive ]]" elevation="3" on-click="click" x-on-dblclick="dblclick">
+		<paper-material id="container" isActive$="[[ isActive ]]" elevation="0" on-click="click" x-on-dblclick="dblclick">
 			<div class="layout vertical center">
 				<paper-ripple></paper-ripple>
 
@@ -707,6 +717,7 @@ Example:
 					</template>
 					<iron-icon title="{{_item.url}}" hidden="[[ !_item.isDirectory ]]" id="dirthumb" icon="folder-open" preload fade sizing="contain""></iron-icon>
 					<span class="ext" hidden="[[ !_item.isOther ]]">{{ _item.ext }}</span>
+					<iron-icon id="selctedCheckBox" icon="check-box" hidden="[[ _checkboxHidden(isSelectionItem,isSelected,item) ]]"></paper-checkbox>
 				</div>
 
 				<div class="title layout horizontal justified center" hidden="{{ isSelectionItem }}">

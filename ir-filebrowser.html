@@ -629,7 +629,7 @@ Example:
 	}
 	
 	.title {
-		box-model : border-box;
+		/*box-model : border-box;*/
 		padding : 0px 3px 3px;
 		width : 100%;
 		height : calc(2em + 5px);
@@ -651,6 +651,10 @@ Example:
 	
 	[hidden] {
 		display : none;
+	}
+	
+	#container {
+		box-sizing : border-box;
 	}
 	
 	#container .active {
@@ -697,8 +701,8 @@ Example:
 		background : white;
 		margin : 1px;
 		border-radius : 3px;
-		color :  --primary-background-color;
-		background : --primary-text-color;
+		color : var(--dark-primary-color);
+		background : var(--primary-background-color);
 	}
 	
 </style>

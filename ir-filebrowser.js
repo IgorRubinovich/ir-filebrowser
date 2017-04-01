@@ -1114,37 +1114,38 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
 		lsAfterUpload : function() {
+			this.debounce('lsAfterUpload', function() {
+				if(this._filesBeforeUpload && this.isUploadEnds)
+				{
+					var diff = [],
+						that = this,
+						toSelect = [];
+					Array.prototype.forEach.call(Array.prototype.reverse.call(this.$.fileItemsList.children),
+						function(fi) {
+							if(fi.is != 'ir-filebrowser-item')
+								return;
 
-			if(this._filesBeforeUpload && this.isUploadEnds)
-			{
-				var diff = [],
-					that = this,
-					toSelect = [];
-				Array.prototype.forEach.call(Array.prototype.reverse.call(this.$.fileItemsList.children),
-					function(fi) {
-						if(fi.is != 'ir-filebrowser-item')
-							return;
+							if(!that._filesBeforeUpload[fi.item.name] && that.uploadedList[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
+								toSelect.push(fi);
 
-						if(!that._filesBeforeUpload[fi.item.name] && that.uploadedList[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
-							toSelect.push(fi);
+						});
 
-					});
+					//var selectedElements = that._getSelectionElements();
+					// this.clearSelection();
 
-				//var selectedElements = that._getSelectionElements();
-				this.clearSelection();
+					/*if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
+						that.clearSelection(); */
 
-				/*if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
-					that.clearSelection(); */
+					//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
+					that.selectUploadedItems(toSelect);
 
-				//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
-				that.selectUploadedItems(toSelect);
+					that._filesBeforeUpload = null;
 
-				that._filesBeforeUpload = null;
-
-				this.fire('toast', 'upload is complete');
-				this.isUploadEnds = false;
-				this.uploadedList = {};
-			}
+					this.fire('toast', 'upload is complete');
+					this.isUploadEnds = false;
+					this.uploadedList = {};
+				}
+			}, 300)
 		},
 
 		selectUploadedItems : function(items) {

@@ -328,25 +328,29 @@
 
 			//this.files = res;
 		},
+		
+		loadMoreFilesLs : function(e) {
+			var target = e.target,
+				scrollerHeight = target.scrollHeight,
+				allFiles = this._files.length + this._directories.length;
+
+			var date = new Date();
+			var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
+
+			if(allFiles < this.limit)
+				return; //this.isMore = false;
+
+			if(((scrollerHeight - target.scrollTop <= 600) || e.type == "tap") && allFiles > 0)
+			{
+				this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
+				this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
+			}
+		},
 
 		loadMoreFiles : function(e) {
 			this.debounce("loadMoreFiles", function () {
-				var target = e.target,
-					scrollerHeight = target.scrollHeight,
-					allFiles = this._files.length + this._directories.length;
-
-				var date = new Date();
-				var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
-
-				if(allFiles < this.limit)
-					return; //this.isMore = false;
-
-				if(((scrollerHeight - target.scrollTop <= 600) || e.type == "tap") && allFiles > 0)
-				{
-					this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
-					this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
-				}
-			}, 300);
+				this.loadMoreFilesLs(e);
+			}, 200);
 		},
 
 		refitDialog : function() {
@@ -505,7 +509,7 @@
 
 			if(this.searchValue.length > 3)
 				setTimeout(function() {
-					that.$.searchByDesc.url = that._searchbydescUrl.replace(/\[path\]/, that.searchValue);
+					that.$.searchByDesc.url = that.searchbydescUrl.replace(/\[path\]/, that.searchValue);
 					that.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
 					that.$.searchByDesc.generateRequest();
 				}, 200);
@@ -1225,7 +1229,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		attached: function() {
 			this.$.scrollableFiles.scrollTarget.addEventListener('scroll', this.loadMoreFiles.bind(this));
-		
+			this.loadMoreFiles();
 			if(this.__hasResizeListener)
 				return;
 			if(!this.hasAttribute('full-view'))

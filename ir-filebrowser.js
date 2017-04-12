@@ -330,6 +330,9 @@
 		},
 		
 		loadMoreFilesLs : function(e) {
+			if(!e.target)
+				return;
+
 			var target = e.target,
 				scrollerHeight = target.scrollHeight,
 				allFiles = this._files.length + this._directories.length;

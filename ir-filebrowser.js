@@ -330,7 +330,7 @@
 		},
 		
 		loadMoreFilesLs : function(e) {
-			if(!e.target)
+			if(!e || !e.target)
 				return;
 
 			var target = e.target,

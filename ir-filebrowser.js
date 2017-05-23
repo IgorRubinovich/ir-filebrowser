@@ -59,6 +59,14 @@
 	Polymer({
 		is : 'ir-filebrowser',
 
+		/**
+		  * cd to last successful (hopefully) directory
+		*/
+		revertLs : function()
+		{
+			if(this.oldRelPath == '/') this.oldRelPath = '';
+			this.ls(this.oldRelPath, true);
+		},
 
 		/**
 		  * Loads list of files at location relative to the this.relPath
@@ -67,6 +75,8 @@
 		*/
 		ls : function(relPath, abs)
 		{
+			this.oldRelPath = this.relPath;
+			
 			if(typeof relPath !== 'string')
 				relPath  = "";
 
@@ -118,7 +128,11 @@
 				reqUrl += this.relPath; //this.host + reqUrl; error!
 
 			this.$.loader.url = reqUrl;
-			this.$.loader.generateRequest();
+			console.log("will ls:" + reqUrl)
+			this.debounce('ls', function() {
+				console.log("actual ls:" + reqUrl)
+				this.$.loader.generateRequest();
+			}, 100);
 
 			this.postFields.path = this.relPath;
 		},
@@ -201,7 +215,7 @@
 			}
 
 			if(this.rootDir)
-				localRoot = "/" + this.rootDir + "/";
+				localRoot = this.path.join("/", this.rootDir, "/");
 			else
 				localRoot = "";
 
@@ -270,17 +284,15 @@
 					this.$.makedirloader.generateRequest();
 
 					this.isFirstTimeOpened = false;
-					this.ls(this.dir);
+					this.ls(this.path.join(this.rootDir, this.dir));
 					return;	
 				}
 				
 			};
 
 			if(this.checkAvailability)
-			{
 				this.checkAvailability = false;
-				return;
-			}
+				//return;
 
 			if(!(/^\/?$/.test(this.relPath)) && (this.relPath != localRoot)) // create an '..' directory entry
 				directories.unshift({
@@ -311,7 +323,7 @@
 			if(!/^\//.test(this.relPath))
 				this.set("relPath", "/" + this.relPath)
 
-			this.splitRelPath = this.relPath.split('/');
+			this.splitRelPath = this.relPath.replace(new RegExp('^' + this.rootDir), '').split('/');
 			this.splitRelPath.pop();
 			if(!(/^\/?$/.test(this.splitRelPath[0])))
 			{
@@ -436,13 +448,13 @@
 					if(month < 10)
 						month = "0" + month;
 					
-					this.ls('/' + year + '/' + month, true);
+					this.ls(path.join('/', year, month), true);
 				}
 				else{
-					this.ls(this.dir, true);
+					this.ls(this.path.join(this.rootDir, this.dir).replace(/\/$/, ''), true);
 				}
 			}else{
-				this.ls('/'+this.rootDir);	
+				this.ls(path.join('/', this.rootDir));
 			}
 		},
 
@@ -590,6 +602,10 @@
 		jumpUp : function(e){
 			this.ls(e.model.item, true);
 			this.set("filterValue", "");
+		},
+		
+		_islast : function(arr, i) {
+			return i == arr.length - 1
 		},
 
 		clickDirectory : function(e) {
@@ -1404,7 +1420,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			wrapperPromptCaption:{ type : String, notify : true, value : '<figure>[content]<figcaption>[caption]</figcaption></figure>' },
 			wrapperPromptNoCaption:{ type : String, notify : true, value : '[content]' },
 			dir : 				{ type : String, notify : true },
-			rootDir : 			{ type : String, notify : true },
+			rootDir : 			{ type : String, notify : true, observer : "ls" },
 			firstRoot : 		{ type : Boolean, value : false },
 			checkAvailability : { type : Boolean, value : false },
 			collectedFiles : 	{ type : Object, value : {} },
@@ -1461,7 +1477,11 @@ Remove specific item from selection. Note: all selected items matching the url w
 			Polymer.IronFormElementBehavior,
 			typeof ir != 'undefined' && ir.ReflectToNativeBehavior
 		],
-		path : path
+		path : path,
+		
+		_rootdirchanged : function(n, o) {
+			console.log(n, o)
+		}
 	});
 
 	

@@ -314,7 +314,7 @@ Example:
 						</div>
 						<div id="relPath" class="flex-3 layout horizontal start-justified">
 							<template is="dom-repeat" items="{{ splitRelPath }}">
-								<a href="javascript:void(0)" on-click="jumpUp" path$="[[ item.path ]]"><span>[[ item.name ]]</span>/</a> 
+								<a href="javascript:void(0)" on-click="jumpUp" title$="[[ item.path ]]"><span>[[ item.name ]]</span>/</a> 
 							</template>
 						</div>
 						<paper-input class="flex-8" placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">

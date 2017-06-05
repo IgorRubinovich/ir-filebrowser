@@ -11,7 +11,7 @@
  */
 
 (function () {
-			// simulate nodejs path for urls
+		// simulate nodejs path for urls
 		var path = {
 			matchProtocol : function(p) {
 				return p.match(/^([^:]+:(\d)*)?\/\//) || "";
@@ -537,7 +537,7 @@
 		},
 
 		jumpUp : function(e){
-			this.ls((e.target).getAttribute("path"), true);
+			this.ls(e.model.item.path, true);
 			this.set("filterValue", "");
 		},
 		

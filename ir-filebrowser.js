@@ -13,47 +13,41 @@
 (function () {
 			// simulate nodejs path for urls
 		var path = {
-			join : function() {
-				var 
-					protocol,
-					lead = '',
-					trail = '';
+			matchProtocol : function(p) {
+				return p.match(/^([^:]+:(\d)*)?\/\//) || "";
+			},
+			
+			normalize : function normalize(p) {
+				var protocol = path.matchProtocol(p) || "";
+				return protocol + (protocol ? p.replace(protocol, "") : p).replace(/\/+/g, "/");
+			},
+			join : function join() {
+				var protocol,
+					args = [].slice.call(arguments),
+					protocol;
 
-				protocol = arguments[0].match(/^[^:]+:(\d)*\/\//);
+				while(args.length && !args[0])
+					args.shift();
+
+				while(args.length && !args[args.length - 1])
+					args.pop();
+				
+				if(!args[0])
+					return "";
+				
+				protocol = path.matchProtocol(args[0]);
 
 				if(protocol)
 				{
 					protocol = protocol[0];
-					arguments[0] = arguments[0].replace(/^[^:]+:\/\//, '');
-				}
-				else
-				{
-					protocol = '';
-					lead = arguments[0].match(/^\//) ? '/' : '';
+					args[0] = "";
+					while(args.length && !args[0])
+						args.shift();
 				}
 
-				trail = arguments[arguments.length-1].match(/\/$/) ? '/' : '';
-
-				var join, split;
-
-				split = [].filter.call(arguments, function(p) {
-					return p;
-				});
-
-				// if there was no protocol now is the time to check if first non-empty argument is an absolute path
-				if(!lead && !protocol)
-					lead = split[0].match(/^\//) ? '/' : '';
-
-				split = split.map(function(p) {
-					return p.split('/');
-				});
-
-				join = [].concat.apply([], split).filter(function(p) { return p; }).join('/');
-
-
-				return protocol + lead + join + trail; // note that `protocol` includes :// in the regex
+				return protocol + path.normalize(args.join('/'));
 			}
-		}
+		};
 	
 	
 	Polymer({
@@ -83,7 +77,7 @@
 			if(relPath)
 				this.set("filterValue", "");
 
-			if(abs !== true) {
+			if(!abs) {
 				var p, split, newSplit;
 				split = this.relPath.split('/');
 				newSplit = relPath.split('/');
@@ -103,9 +97,9 @@
 							split.push(p);
 					};
 					this.relPath = split.join('/');
-				}else{
-					this.relPath = newSplit.join('/');
 				}
+				else
+					this.relPath = newSplit.join('/');
 			}
 			else
 			{
@@ -119,16 +113,20 @@
 				this.relPath = relPath;
 			}
 
-			if(this.relPath)
+			/*if(this.relPath)
 				this.relPath += '/';
-
-			var reqUrl = this.path.join(this._lsUrl.replace(/\[path\]/, this.relPath)) // the [^:] makes sure the protocol double slash is preserved for absolute urls
+			*/
+			
+			this.relPath = path.normalize(formatTemplateVars(this.relPath));
+			
+			var reqUrl = this.path.join(formatTemplateVar(this._lsUrl, "path", this.relPath)) // the [^:] makes sure the protocol double slash is preserved for absolute urls
 
 			if(this._lsUrl == reqUrl)
 				reqUrl += this.relPath; //this.host + reqUrl; error!
 
 			this.$.loader.url = reqUrl;
 			console.log("will ls:" + reqUrl)
+			this.cancelDebouncer('ls');
 			this.debounce('ls', function() {
 				console.log("actual ls:" + reqUrl)
 				this.$.loader.generateRequest();
@@ -136,6 +134,7 @@
 
 			this.postFields.path = this.relPath;
 		},
+
 
 /**
   * Displays files loaded as a result of calling ls or user typing into the filter box
@@ -148,6 +147,7 @@
 				ext,
 				name,
 				fstat,
+				split,
 				sorted,
 				localRoot,
 				rootUrl,
@@ -159,7 +159,7 @@
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
 
-			if(!this.loadedData)
+			/*if(!this.loadedData)
 			{
 				if(this.firstRoot)
 				{
@@ -175,7 +175,7 @@
 				}
 				
 				return;
-			}			
+			}*/			
 
 			this.firstRoot = false;
 
@@ -187,6 +187,9 @@
 
 			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
 
+			this.skip = 0;
+			
+			
 			for(var i=0; i < sorted.length; i++)
 			{
 				fstat = sorted[i];
@@ -219,76 +222,6 @@
 			else
 				localRoot = "";
 
-			if(this.isFirstTimeOpened)
-			{
-				if(this.dir.match(/\[year\]\[month\]/))
-				{
-					var date = new Date(),
-					year = date.getFullYear(),
-					month = date.getMonth() + 1;
-
-					if(month < 10)
-						month = "0" + month;					
-
-					if(this.relPath == localRoot)
-					{
-						for(var i = 0; i < directories.length; i++)
-							if(year == directories[i].name)
-							{
-								this.ls(String(year));
-								return;
-							}
-
-						this.$.makedirloader.body = {name : year, fpath : this.relPath};
-						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-						this.$.makedirloader.url = this._makedirUrl;
-						this.$.makedirloader.generateRequest();
-
-						this.ls(String(year));
-						return;
-
-					}
-					else
-					{
-						for(var i = 0; i < directories.length; i++)
-							if(month == directories[i].name)
-							{
-								this.isFirstTimeOpened = false;
-								this.ls(String(month));
-								return;
-							}
-
-						this.$.makedirloader.body = {name : month, fpath : this.relPath};
-						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-						this.$.makedirloader.url = this._makedirUrl;
-						this.$.makedirloader.generateRequest();
-
-						this.isFirstTimeOpened = false;
-						this.ls(String(month));
-						return;
-					}
-				}
-				else
-				{
-					for(var i = 0; i < directories.length; i++)
-						if(this.dir == directories[i].name)
-						{
-							this.isFirstTimeOpened = false;
-							this.ls(this.dir);
-							return;
-						}
-
-					this.$.makedirloader.body = {name : this.dir, fpath : this.relPath};
-					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-					this.$.makedirloader.url = this._makedirUrl;
-					this.$.makedirloader.generateRequest();
-
-					this.isFirstTimeOpened = false;
-					this.ls(this.path.join(this.rootDir, this.dir));
-					return;	
-				}
-				
-			};
 
 			if(this.checkAvailability)
 				this.checkAvailability = false;
@@ -305,10 +238,15 @@
 
 			this._directories = directories;
 			this._files = files;
-			this.upFiles = files;
+			//this.upFiles = files;
 
 			this.set('directories', this._directories.splice(0, this.limit));
-			this.set('files', this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit)));
+			
+			// set up pager
+			this._lsPager = this._filePager(files);
+			this.set('files', this._lsPager.next().value);
+			
+			/**
 			this.currentTime = 0;
 			if(this._files.length + this._directories.length > 0)
 				this.isMore = true;
@@ -318,25 +256,22 @@
 			if(!this._itemsListenerAttached)
 			{
 				this._itemsListenerAttached = true;
-			}
+			}*/
 
 			if(!/^\//.test(this.relPath))
 				this.set("relPath", "/" + this.relPath)
 
-			this.splitRelPath = this.relPath.replace(new RegExp('^' + this.rootDir), '').split('/');
-			this.splitRelPath.pop();
-			if(!(/^\/?$/.test(this.splitRelPath[0])))
-			{
-				this.set("splitRelPath.0",  '/');
-			}
-			console.log(this.splitRelPath);
-			//this.notifyPath("splitRelPath.splices");
-
-
+			split = this.relPath.split("/").filter(function(d) { return d });
+			
+			this.splitRelPath = split.map(function(d, i) { return { name : d, path : "/" + split.slice(0, i + 1).join("/") + "/" } });
+			this.splitRelPath.unshift({ name : "/", path : "\/" });
+			if(this.splitRelPath[1]) this.splitRelPath[1].path = this.splitRelPath[1].path.replace(/^\//, "")
+		
+			this.notifyPath("splitRelPath")
 			Polymer.dom.flush();
 			this.set('isLoading', false);
 
-			that.lsAfterUpload();
+			that.lsIfAfterUpload();
 
 			//this.files = res;
 		},
@@ -346,24 +281,19 @@
 				return;
 
 			var target = e.target,
-				scrollerHeight = target.scrollHeight,
-				allFiles = this._files.length + this._directories.length;
+				scrollerHeight = target.scrollHeight;
 
-			var date = new Date();
-			var newtime = date.getMinutes()*60000 +  date.getSeconds()*1000 + date.getMilliseconds();
-
-			if(allFiles < this.limit)
-				return; //this.isMore = false;
-
-			if(((scrollerHeight - target.scrollTop <= 600) || e.type == "tap") && allFiles > 0)
-			{
-				this.push.apply(this, ['directories'].concat(this._directories.splice(0, this.limit)));
-				this.push.apply(this, ['files'].concat(this._files.splice(0, (this.directories.length < this.limit ? -1 : 1 ) * (this.directories.length - this.limit))));
-			}
+			if(scrollerHeight - target.scrollTop <= 600)
+				this.set('files', this._lsPager.next().value);
+		},
+		
+		loadMoreFilesDesc : function(e) {
+			
 		},
 
 		loadMoreFiles : function(e) {
-			this.debounce("loadMoreFiles", function () {
+			this.cancelDebouncer("loadMoreFiles");		
+			this.debounce("loadMoreFiles", function () {			
 				this.loadMoreFilesLs(e);
 			}, 200);
 		},
@@ -522,28 +452,35 @@
 		searchFiles : function(e) {
 			var that = this;
 
-			if(this.searchValue.length > 3)
-				setTimeout(function() {
-					that.$.searchByDesc.url = that.searchbydescUrl.replace(/\[path\]/, that.searchValue);
-					that.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
-					that.$.searchByDesc.generateRequest();
-				}, 200);
+			this.cancelDebouncer("typing-search");
+			this.debounce("typing-search", function() {
+				var q = this.searchValue.trim();
+				if(!q)
+					this.ls();
+			
+				if(q.length < 3)
+					return;
 
-			if(e.code == "Backspace" && this.searchValue == "")
-				this.ls();
+				that.$.searchByDesc.url = that.searchbydescUrl.replace(/\[path\]/, q);
+				that.$.searchByDesc.contentType = "application/x-www-form-urlencoded";
+				that.$.searchByDesc.generateRequest();
+			}, 300)
 		},
 
 		listDesire : function() {
+			this.set('files', []);
+			this.set('directories', []);
 
-			this.splice('files', 0, this.files.length);
-			this.splice('directories', 0, this.directories.length);
+			if(typeof this.desiredFiles != 'object')
+				return
+			
+			this.$.scrollableFiles.scrollTop = 0;
 
-			if(this.desiredFiles)
-				for(var i = 0; i < this.desiredFiles.length; i++)
-				{
-					this.push('files', this.desiredFiles[i]);
-				}
+			for(var i = 0; i < this.desiredFiles.length; i++)
+				this.push('files', this.desiredFiles[i]);
 
+			this._lsPager = this._filePager(this.desiredFiles);
+			this.set('files', this._lsPager.next().value)
 		},
 
 		nothingFound : function() {
@@ -600,14 +537,10 @@
 		},
 
 		jumpUp : function(e){
-			this.ls(e.model.item, true);
+			this.ls((e.target).getAttribute("path"), true);
 			this.set("filterValue", "");
 		},
 		
-		_islast : function(arr, i) {
-			return i == arr.length - 1
-		},
-
 		clickDirectory : function(e) {
 			e.stopImmediatePropagation();
 			e.stopPropagation();
@@ -953,9 +886,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.set('fDate', date.toLocaleString("en-Us", options));
 					this.set('noFile', false);
 
-					var nameReq = this.path.join(e.detail.item.relPath + this.fileName);
+					var nameReq = this.path.join(e.detail.item.relPath, this.fileName).replace(/-/g, "%2E");
 
-					this.$.getDescription.url = this.path.join(this._getdescriptionUrl.replace(/\[path\]/, nameReq.replace(/-/g, "%2E")));
+					this.$.getDescription.url = this.path.join(formatTemplateVar(this._getdescriptionUrl, "path", nameReq));
 					this.$.getDescription.generateRequest();
 				}
 				else {
@@ -1136,8 +1069,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
-		lsAfterUpload : function() {
-			this.debounce('lsAfterUpload', function() {
+		lsIfAfterUpload : function() {
+			this.cancelDebouncer('lsIfAfterUpload');
+			this.debounce('lsIfAfterUpload', function() {
 				if(this._filesBeforeUpload && this.isUploadEnds)
 				{
 					var diff = [],
@@ -1248,7 +1182,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		attached: function() {
 			this.$.scrollableFiles.scrollTarget.addEventListener('scroll', this.loadMoreFiles.bind(this));
-			this.loadMoreFiles();
+			// this.loadMoreFiles();
+			
 			if(this.__hasResizeListener)
 				return;
 			if(!this.hasAttribute('full-view'))
@@ -1281,19 +1216,20 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(this.dir)
 				this.isFirstTimeOpened = true;
 
-			if(this.dir && !this.rootDir)
+			this.relPath = this.path.join(this.rootDir, this.dir);
+			/*if(this.dir && !this.rootDir)
 			{
-				this.checkAvailability = true;
-				this.ls();
-				this.isFirstTimeOpened = true;
-			}
+				//this.checkAvailability = true;
+				this.ls(this.dir, true);
+				//this.isFirstTimeOpened = true;
+			}*/
 
-			if(this.rootDir)
+			/*if(this.rootDir)
 				{
 					this.firstRoot = true;
 					this.checkAvailability = true;
 					this.ls(this.rootDir);
-				}
+				}*/
 
 			if(this.fullView)
 			{
@@ -1349,6 +1285,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 					});
 				});
 			});
+			
+			this._filePager = filePager(this.limit || 20)
 		},
 
 		_urlsChanged : function() {
@@ -1395,13 +1333,16 @@ Remove specific item from selection. Note: all selected items matching the url w
 			loadedData	:		{ type : Object },
 			listProperty	:	{ type : String, notify : true },
 			rootUrlProperty	:	{ type : String, notify : true },
-
+			
 			selected	:		{ type : Array, notify : true },
 			selectedItems	:	{ type : Array, value : [], notify : true },
 
 			/** Maximum number items that may be selected. Default -1 means unlimited. */
 			maxItems :			{ type : Number, value : -1, notify : true },
 
+			/** Upload files "synchronously" one by one, thus preserving order and reducing load on the server at the cost of speed */
+			sync :				{ type : Boolean },
+			
 			autoPreview :		{ type : Boolean },
 
 			cloneToNative :		{ type : Boolean,	value : true },
@@ -1655,8 +1596,123 @@ Fired when an item is doubleclicked.
 	}
 
 	
+		
+	function formatTemplateVar(str, varName, varVal) {
+		return str.replace("[" + varName + "]", varVal);
+	}
+	
+	// replaces [varName]-s in a path template, currently [year] and [month]
+	function formatTemplateVars(str) {
+		var d = new Date(), 
+			vals = {};
+		
+		// prepare available substitutions
+		vals.year = d.getFullYear();
+		vals.month = d.getMonth() + 1;
+		vals.month = vals.month < 10 ? "0" + vals.month : vals.month;
+		
+		Object.keys(vals).forEach(function(k) { str = formatTemplateVar(str, k, vals[k]) }); 
+		return str;
+	}
 
+	// an iterator-like pager
+	function filePager(itemsPerPage, processList) {
+		return function(dataArr) {
+			var page, lastValue, next, done;
+			
+			processList = processList || function(x) { return x }
+			page = 0;
+			lastValue = {};
 
+			next = function()
+			{
+				return lastValue = lastValue.done ? lastValue : { 
+					next : next,
+					value : dataArr.slice(0, itemsPerPage * (++page)).map(processList),
+					done : lastValue.done || (page * itemsPerPage >= dataArr.length)
+				}
+			}
+			return {
+				next : next,
+				done : false
+			}
+		}
+	}
+	
 })();
 
 
+/*
+	removed from displayLoadedFiles
+			if(false && this.isFirstTimeOpened) // removed 1.6.17
+			{
+				if(this.dir.match(/\[year\]\[month\]/))
+				{
+					var date = new Date(),
+					year = date.getFullYear(),
+					month = date.getMonth() + 1;
+
+					if(month < 10)
+						month = "0" + month;					
+
+					if(this.relPath == localRoot)
+					{
+						for(var i = 0; i < directories.length; i++)
+							if(year == directories[i].name)
+							{
+								this.ls(String(year));
+								return;
+							}
+
+						this.$.makedirloader.body = {name : year, fpath : this.relPath};
+						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+						this.$.makedirloader.url = this._makedirUrl;
+						this.$.makedirloader.generateRequest();
+
+						this.ls(String(year));
+						return;
+
+					}
+					else
+					{
+						for(var i = 0; i < directories.length; i++)
+							if(month == directories[i].name)
+							{
+								this.isFirstTimeOpened = false;
+								this.ls(String(month));
+								return;
+							}
+
+						this.$.makedirloader.body = {name : month, fpath : this.relPath};
+						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+						this.$.makedirloader.url = this._makedirUrl;
+						this.$.makedirloader.generateRequest();
+
+						this.isFirstTimeOpened = false;
+						this.ls(String(month));
+						return;
+					}
+				}
+				else
+				{
+					for(var i = 0; i < directories.length; i++)
+						if(this.dir == directories[i].name)
+						{
+							this.isFirstTimeOpened = false;
+							this.ls(this.dir);
+							return;
+						}
+
+					this.$.makedirloader.body = {name : this.dir, fpath : this.relPath};
+					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
+					this.$.makedirloader.url = this._makedirUrl;
+					this.$.makedirloader.generateRequest();
+
+					this.isFirstTimeOpened = false;
+					this.ls(this.path.join(this.rootDir, this.dir));
+					return;	
+				}
+				
+			};
+
+*/

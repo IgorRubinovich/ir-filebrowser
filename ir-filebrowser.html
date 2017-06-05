@@ -314,7 +314,7 @@ Example:
 						</div>
 						<div id="relPath" class="flex-3 layout horizontal start-justified">
 							<template is="dom-repeat" items="{{ splitRelPath }}">
-								<a href="javascript:void(0)" on-click="jumpUp"><span>{{ item }}</span>/</a> 
+								<a href="javascript:void(0)" on-click="jumpUp" path$="[[ item.path ]]"><span>[[ item.name ]]</span>/</a> 
 							</template>
 						</div>
 						<paper-input class="flex-8" placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
@@ -339,7 +339,7 @@ Example:
 					<paper-item>
 						<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
 					</paper-item>
-					<paper-item>
+					<paper-item hidden>
 						<paper-checkbox checked="{{ postFields.resize }}">resize</paper-checkbox>
 					</paper-item>
 					<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
@@ -433,7 +433,7 @@ Example:
 					<span hidden$="[[ !isUploadingFiles ]]">
 						<span hidden$="{{ mobile }}">Files left: </span><span hidden$="{{ mobile }}">{{ uploadedFiles }}</span>
 					</span>
-					<file-upload id="fileUploader" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+					<file-upload id="fileUploader" sync="[[ sync ]]" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 						<div "browseButton" hidden$="[[ isUploadingFiles ]]">
 							<paper-button raised>Browse...</paper-button> <span id="dropMessage" hidden$="{{ mobile }}">or drop files into this dialog</span>
 						</div>

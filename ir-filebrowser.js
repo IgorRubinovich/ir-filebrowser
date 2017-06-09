@@ -159,25 +159,8 @@
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
 
-			/*if(!this.loadedData)
-			{
-				if(this.firstRoot)
-				{
-					this.$.makedirloader.body = {name : this.rootDir, fpath : ''};
-					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-					this.$.makedirloader.url = this._makedirUrl;
-					this.$.makedirloader.generateRequest();
-
-					this.firstRoot = false;
-
-					this.$.loader.url = this._lsUrl.replace(/\[path\]/, this.rootDir).replace(/\/\//, "/");
-					this.$.loader.generateRequest();					
-				}
-				
-				return;
-			}*/			
-
-			this.firstRoot = false;
+			this._didLs = true;
+			
 
 			this.files = [];
 			this.directories = [];
@@ -1135,28 +1118,32 @@ Remove specific item from selection. Note: all selected items matching the url w
 			that.$.dialog.open();
 			
 			this.async(function() {
-				that.set('isLoading', true);
+				this.set('isLoading', true);
 
 				//that.$.dialog.sizingTarget = that.$$("#scrollableDialog")
 
 				
-				if(that.rootDir && that.firstRoot)
-					that.ls(that.rootDir)
+				if(typeof relPath == 'string')
+					this.ls(relPath)
+				else if(this.relPath)
+					this.ls();
 				else
-					that.ls(relPath);
+					this.ls(this.path.join(this.rootDir || '', this.dir || ''))
+				
 				if(that.backgroundUpload)
-					that.selectUploadedItems(that.backgroundItems);
-				that.async(function() {
-					that.refitDialog()
+					this.selectUploadedItems(this.backgroundItems);
+				
+				this.async(function() {
+					this.refitDialog()
 				});
 
-				if(that._scrollAfterSelect){
-					setTimeout(function() {
-						that.$.scrollableFiles.scrollTop=this._scrollAfterSelect;
+				if(this._scrollAfterSelect)
+					this.async(function() {
+						this.$.scrollableFiles.scrollTop = this._scrollAfterSelect;
 
-						that._scrollAfterSelect = null;
-					}.bind(this), 200);
-				};
+						this._scrollAfterSelect = null;
+					}, 200);
+				
 			}, 300);
 
 		},
@@ -1217,19 +1204,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.isFirstTimeOpened = true;
 
 			this.relPath = this.path.join(this.rootDir, this.dir);
-			/*if(this.dir && !this.rootDir)
-			{
-				//this.checkAvailability = true;
-				this.ls(this.dir, true);
-				//this.isFirstTimeOpened = true;
-			}*/
-
-			/*if(this.rootDir)
-				{
-					this.firstRoot = true;
-					this.checkAvailability = true;
-					this.ls(this.rootDir);
-				}*/
 
 			if(this.fullView)
 			{
@@ -1288,7 +1262,15 @@ Remove specific item from selection. Note: all selected items matching the url w
 			
 			this._filePager = filePager(this.limit || 20)
 		},
+		
+		
+		_dirsChanged : function() {
+			if(this._didLs)
+				return;
 
+			this.relPath = this.path.join(this.rootDir, this.dir);
+		},
+		
 		_urlsChanged : function() {
 			this._lsUrl = this.path.join(this.host, this.lsUrl);
 
@@ -1361,8 +1343,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			wrapperPromptCaption:{ type : String, notify : true, value : '<figure>[content]<figcaption>[caption]</figcaption></figure>' },
 			wrapperPromptNoCaption:{ type : String, notify : true, value : '[content]' },
 			dir : 				{ type : String, notify : true },
-			rootDir : 			{ type : String, notify : true, observer : "ls" },
-			firstRoot : 		{ type : Boolean, value : false },
+			rootDir : 			{ type : String, notify : true }, //, observer : "ls" },
 			checkAvailability : { type : Boolean, value : false },
 			collectedFiles : 	{ type : Object, value : {} },
 			toSelection : 		{ type : Boolean, value : false }, 
@@ -1412,7 +1393,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		observers: [
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)',
-			'setSelection(selected)'
+			'setSelection(selected)','_dirsChanged(dir,rootDir)'
 		],
 		behaviors: [
 			Polymer.IronFormElementBehavior,
@@ -1640,79 +1621,3 @@ Fired when an item is doubleclicked.
 	}
 	
 })();
-
-
-/*
-	removed from displayLoadedFiles
-			if(false && this.isFirstTimeOpened) // removed 1.6.17
-			{
-				if(this.dir.match(/\[year\]\[month\]/))
-				{
-					var date = new Date(),
-					year = date.getFullYear(),
-					month = date.getMonth() + 1;
-
-					if(month < 10)
-						month = "0" + month;					
-
-					if(this.relPath == localRoot)
-					{
-						for(var i = 0; i < directories.length; i++)
-							if(year == directories[i].name)
-							{
-								this.ls(String(year));
-								return;
-							}
-
-						this.$.makedirloader.body = {name : year, fpath : this.relPath};
-						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-						this.$.makedirloader.url = this._makedirUrl;
-						this.$.makedirloader.generateRequest();
-
-						this.ls(String(year));
-						return;
-
-					}
-					else
-					{
-						for(var i = 0; i < directories.length; i++)
-							if(month == directories[i].name)
-							{
-								this.isFirstTimeOpened = false;
-								this.ls(String(month));
-								return;
-							}
-
-						this.$.makedirloader.body = {name : month, fpath : this.relPath};
-						this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-						this.$.makedirloader.url = this._makedirUrl;
-						this.$.makedirloader.generateRequest();
-
-						this.isFirstTimeOpened = false;
-						this.ls(String(month));
-						return;
-					}
-				}
-				else
-				{
-					for(var i = 0; i < directories.length; i++)
-						if(this.dir == directories[i].name)
-						{
-							this.isFirstTimeOpened = false;
-							this.ls(this.dir);
-							return;
-						}
-
-					this.$.makedirloader.body = {name : this.dir, fpath : this.relPath};
-					this.$.makedirloader.contentType = "application/x-www-form-urlencoded";
-					this.$.makedirloader.url = this._makedirUrl;
-					this.$.makedirloader.generateRequest();
-
-					this.isFirstTimeOpened = false;
-					this.ls(this.path.join(this.rootDir, this.dir));
-					return;	
-				}
-				
-			};
-
-*/

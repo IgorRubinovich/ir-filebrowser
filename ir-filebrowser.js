@@ -535,10 +535,14 @@ Select items defined in the array. Previous selection is lost.
 @param {Array} selection array of fstat objects or objects with url field, or strings representing urls.
 */
 		setSelection : function(selection) {
-			this.clearSelection();
-			selection.forEach(function(f) { 
-				this.addSelection(f); 
-			}.bind(this));
+			// console.log("setting selection to", selection);
+			this.debounce("setSelection", function() {
+				this.clearSelection();
+				Polymer.dom.flush();
+				selection.forEach(function(f) { 
+					this.addSelection(f); 
+				}.bind(this));
+			}, 100)
 		},
 
 /**
@@ -1316,7 +1320,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			listProperty	:	{ type : String, notify : true },
 			rootUrlProperty	:	{ type : String, notify : true },
 			
-			selected	:		{ type : Array, notify : true },
+			selected	:		{ type : Array, notify : true, observer : "setSelection" },
 			selectedItems	:	{ type : Array, value : [], notify : true },
 
 			/** Maximum number items that may be selected. Default -1 means unlimited. */
@@ -1393,7 +1397,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		observers: [
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)',
-			'setSelection(selected)','_dirsChanged(dir,rootDir)'
+			'_dirsChanged(dir,rootDir)'
 		],
 		behaviors: [
 			Polymer.IronFormElementBehavior,
@@ -1419,7 +1423,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			/** True if item is selected, false otherwise */
 			isSelected : { type : Boolean, readOnly : true },
 			/** Url of the selected file */
-			url : { type : String,  },
+			url : { type : String },
 			/** 
 				True when item is in the selection view (usually embedded in a form). If true add a radiobutton to choose main (first) item in selection of ir-filebrowser. 
 				Note this is different from a selected (active) item inside the ir-filebrowser dialog.

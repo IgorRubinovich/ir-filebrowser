@@ -58,6 +58,9 @@
 		*/
 		revertLs : function()
 		{
+			if(this.oldRelPath == this.relPath)
+				return;
+			
 			if(this.oldRelPath == '/') this.oldRelPath = '';
 			this.ls(this.oldRelPath, true);
 		},
@@ -1395,9 +1398,13 @@ Remove specific item from selection. Note: all selected items matching the url w
 			textSetCover : { type : String, value : "make cover", notify : true }
 		},
 
+		xhrError : function() {
+			console.log(this.lastError);
+		},
+		
 		observers: [
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)',
-			'_dirsChanged(dir,rootDir)'
+			'_dirsChanged(dir,rootDir)',"xhrError(lastError)"
 		],
 		behaviors: [
 			Polymer.IronFormElementBehavior,

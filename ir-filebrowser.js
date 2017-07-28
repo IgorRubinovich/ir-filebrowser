@@ -61,8 +61,13 @@
 			if(this.oldRelPath == this.relPath)
 				return;
 			
-			if(this.oldRelPath == '/') this.oldRelPath = '';
-			this.ls(this.oldRelPath, true);
+			this.olderRelPath = this.oldRelPath;
+			
+			if(this.oldRelPath == '/') 
+				this.oldRelPath = '';
+			
+			if(this.olderRelPath != this.relPath && this.oldRelPath != this.relPath)
+				this.ls(this.oldRelPath, true);
 		},
 
 		/**
@@ -1067,7 +1072,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					var diff = [],
 						that = this,
 						toSelect = [];
-					Array.prototype.forEach.call(Array.prototype.reverse.call(this.$.fileItemsList.children),
+					Array.prototype.forEach.call(Array.prototype.reverse.call(Array.prototype.slice.call(this.$.fileItemsList.children))),
 						function(fi) {
 							if(fi.is != 'ir-filebrowser-item')
 								return;

@@ -1072,7 +1072,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 					var diff = [],
 						that = this,
 						toSelect = [];
-					Array.prototype.forEach.call(Array.prototype.reverse.call(Array.prototype.slice.call(this.$.fileItemsList.children))),
+					Array.prototype.forEach.call(Array.prototype.reverse.call(Array.prototype.slice.call(this.$.fileItemsList.children)),
 						function(fi) {
 							if(fi.is != 'ir-filebrowser-item')
 								return;

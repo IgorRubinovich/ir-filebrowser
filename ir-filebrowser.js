@@ -87,7 +87,7 @@
 
 			if(!abs) {
 				var p, split, newSplit;
-				split = this.relPath.split('/');
+				split = (this.relPath || "").split('/');
 				newSplit = relPath.split('/');
 
 				if (split.length && !split[split.length - 1]) // chop last if empty
@@ -135,15 +135,17 @@
 			this.$.loader.url = reqUrl;
 			console.log("will ls:" + reqUrl)
 			this.cancelDebouncer('ls');
-			this.debounce('ls', function() {
-				console.log("actual ls:" + reqUrl)
-				this.$.loader.generateRequest();
-			}, 100);
+			
+			if(this.opened)
+				this.debounce('ls', function() {
+					console.log("actual ls:" + reqUrl)
+					this.$.loader.generateRequest();
+				}, 100);
 
 			this.postFields.path = this.relPath;
 		},
 
-
+		
 /**
   * Displays files loaded as a result of calling ls or user typing into the filter box
   *
@@ -164,6 +166,8 @@
 				that = this,
 				directories = [];
 
+
+				
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
 
@@ -179,8 +183,7 @@
 			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
 
 			this.skip = 0;
-			
-			
+
 			for(var i=0; i < sorted.length; i++)
 			{
 				fstat = sorted[i];
@@ -217,7 +220,7 @@
 			if(this.checkAvailability)
 				this.checkAvailability = false;
 				//return;
-
+			
 			if(!(/^\/?$/.test(this.relPath)) && (this.relPath != localRoot)) // create an '..' directory entry
 				directories.unshift({
 					name: '..',
@@ -261,8 +264,6 @@
 			this.notifyPath("splitRelPath")
 			Polymer.dom.flush();
 			this.set('isLoading', false);
-
-			that.lsIfAfterUpload();
 
 			//this.files = res;
 		},
@@ -485,18 +486,17 @@
 		},
 
 		deleteFile : function() {
-			var filesToDelete = this._getSelectionElements(),
+			var filesToDelete = Array.prototype.slice.call(this.$.fileItemsList.children).filter(i => i.isSelected),
 				filesList = [];
 
 			if(filesToDelete.length > 0 || this.fileName) {
 				if(filesToDelete.length > 0)
-					for(var i = 0; i < filesToDelete.length; i++)
-						filesList.push(encodeURIComponent(filesToDelete[i].item.name));
+					filesList = filesToDelete.map(function(f) { return encodeURIComponent(f.item.name) });
 				else
 					if(this.fileName && this.noFile)
 						filesList = [this.fileName];
 					
-				var askUser = confirm("Are you sure you want to delete " + filesList.join(','));
+				var askUser = confirm("Are you sure you want to delete " + filesList.join(', '));
 				if (askUser == true) {
 					this.set('noFile', true);
 					this.$.deletefileloader.body = {name: filesList, fpath: this.relPath};
@@ -1004,35 +1004,41 @@ Remove specific item from selection. Note: all selected items matching the url w
 			}
 		},
 
-		filesChanged : function() {
+		filesChanged : function(ev) {
 			if(!this.firstUpload)
 			{
 				this.set('isUploadingFiles', false);
-				if(this.$.fileUploader.files.length > 0)
-					this.firstUpload = true;
+				if(!this.$.fileUploader.files.length)
+					return;
+					
+				Array.prototype.slice.call(this.$.fileItemsList.children).filter(i => i.isSelected)
+					.map(f => f.item.name)
+					.forEach(function(fn) { this.uploadedList[fn] = 1 }.bind(this));
+					
+				this.firstUpload = true;
 			}
-
-			if(this.firstUpload)
+			
+			this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
+			this.set('uploadedFiles', this.$.fileUploader.files.length);
+			
+			//console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
+			if(!this.$.fileUploader.files.length)
 			{
-				this.set('isUploadingFiles', !!this.$.fileUploader.files.length);
-				this.set('uploadedFiles', this.$.fileUploader.files.length);
-				console.log('files changed:', this.$.fileUploader.files.length, this.isUploadingFiles);
-				if(!this.$.fileUploader.files.length && !this.isUploadEnds)
-				{
-					var that = this;
-					this.ls();
-					this._filesBeforeUpload = {};
-					this.files.forEach(function(f) {
-						that._filesBeforeUpload[f.name] = 1;
-					});
-					this.isUploadEnds = true;
-				}
+				this.ls();
+				this._filesBeforeUpload = {};
+				this.files.forEach(function(f) {
+					this._filesBeforeUpload[f.name] = 1;
+				}.bind(this));
+				
+				this.firstUpload = false;
+				
+				this.lsIfAfterUpload();
 			}
 		},
 
 		makeList : function(e) {
 			var fileName = JSON.parse(e.detail.xhr.response)[0].split('/').pop();
-				this.uploadedList[fileName] = 1;
+			this.uploadedList[fileName] = 1;
 		},
 
 		collectFiles : function(e) {
@@ -1067,34 +1073,26 @@ Remove specific item from selection. Note: all selected items matching the url w
 		lsIfAfterUpload : function() {
 			this.cancelDebouncer('lsIfAfterUpload');
 			this.debounce('lsIfAfterUpload', function() {
-				if(this._filesBeforeUpload && this.isUploadEnds)
+				if(this.uploadedList)
 				{
 					var diff = [],
 						that = this,
 						toSelect = [];
-					Array.prototype.forEach.call(Array.prototype.reverse.call(Array.prototype.slice.call(this.$.fileItemsList.children)),
+					Array.prototype.slice.call(this.$.fileItemsList.children).reverse().forEach(
 						function(fi) {
 							if(fi.is != 'ir-filebrowser-item')
 								return;
 
-							if(!that._filesBeforeUpload[fi.item.name] && that.uploadedList[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
+							if(that.uploadedList[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
 								toSelect.push(fi);
 
 						});
 
-					//var selectedElements = that._getSelectionElements();
-					// this.clearSelection();
-
-					/*if(that.maxItems > 0 && (selectedElements.length + toSelect.length > that.maxItems))
-						that.clearSelection(); */
-
-					//toSelect.forEach(function(fi) { that.clickFile({ detail : fi}) });
 					that.selectUploadedItems(toSelect);
 
 					that._filesBeforeUpload = null;
 
 					this.fire('toast', 'upload is complete');
-					this.isUploadEnds = false;
 					this.uploadedList = {};
 				}
 			}, 300)
@@ -1191,6 +1189,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.__hasResizeListener = true;
 			this.$.dialog.notifyResize();
 			
+			this.ls()
 			//this.$.pocketDrawer.assignParentResizeable(this.$.mainContainer)
 		},
 		
@@ -1290,8 +1289,10 @@ Remove specific item from selection. Note: all selected items matching the url w
 			.split(',')
 			.forEach(function(f) {
 				if(this[f])
-					this["_" + f] = this.path.join(this.host, this[f]);
+					this.set(["_" + f], this.path.join(this.host, this[f]));
 			}.bind(this));
+			
+			this.ls();
 		},
 		
 		_showInfoChanged : function() 
@@ -1322,7 +1323,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			updatefileUrl:		{ type : String, value : "", notify : true },
 			searchbydescUrl: 	{ type : String, value : "", notify : true },
 
-		/* currently browsed path, relative to lsRootUrlPath */
+			/* currently browsed path, relative to lsRootUrlPath */
 			relPath : 			{ type : String, value : "/" },
 			loadedData	:		{ type : Object },
 			listProperty	:	{ type : String, notify : true },
@@ -1348,7 +1349,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			backgroundUpload : 	{ type : Boolean, value : false },
 			backgroundItems : 	{ type : Object },
-			isUploadEnds : 		{ type : Boolean, value : false },
 			firstUpload : 		{ type : Boolean, value : false },
 			uploadedList : 		{ type : Object, value : {} },
 			wrapperPromptResult:{ type : String, notify : true, value : '[content]' },

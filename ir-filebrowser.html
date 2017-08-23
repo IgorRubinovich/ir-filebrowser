@@ -285,7 +285,7 @@ Example:
 				<paper-button id="clearSelection" hidden="{{ !value }}" raised on-tap="clearSelection">Clear all</paper-button>
 				<paper-button id="browseButton" raised on-tap="showDialog">My files</paper-button>
 				<paper-button id="browseLocalFiles" raised on-tap="browseLocalFiles">Browse...</paper-button>
-				<file-upload id="selectionFileUploader" with-credentials on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+				<file-upload id="selectionFileUploader" with-credentials on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]" no-auto-from-browse>
 				</file-upload>
 			</div>
 		</div>
@@ -295,7 +295,7 @@ Example:
 			no-cancel-on-esc-key="[[ fullView ]]" 
 			no-cancel-on-outside-click="[[ fullView ]]" 
 			on-keydown="topLevelKeys" 
-			opened$="{{ opened }}" 
+			opened="{{ opened }}" 
 			id="dialog"
 			auto-fit-on-attach
 		> <!--  on-iron-overlay-closed="closed" -->
@@ -433,7 +433,7 @@ Example:
 					<span hidden$="[[ !isUploadingFiles ]]">
 						<span hidden$="{{ mobile }}">Files left: </span><span hidden$="{{ mobile }}">{{ uploadedFiles }}</span>
 					</span>
-					<file-upload id="fileUploader" sync="[[ sync ]]" on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
+					<file-upload id="fileUploader" sync="[[ sync ]]" no-auto-from-browse on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
 						<div "browseButton" hidden$="[[ isUploadingFiles ]]">
 							<paper-button raised>Browse...</paper-button> <span id="dropMessage" hidden$="{{ mobile }}">or drop files into this dialog</span>
 						</div>

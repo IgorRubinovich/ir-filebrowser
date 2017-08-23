@@ -486,7 +486,7 @@
 		},
 
 		deleteFile : function() {
-			var filesToDelete = Array.prototype.slice.call(this.$.fileItemsList.children).filter(i => i.isSelected),
+			var filesToDelete = Array.prototype.slice.call(this.$.fileItemsList.children).filter(function(i) { return i.isSelected }),
 				filesList = [];
 
 			if(filesToDelete.length > 0 || this.fileName) {
@@ -1011,8 +1011,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 				if(!this.$.fileUploader.files.length)
 					return;
 					
-				Array.prototype.slice.call(this.$.fileItemsList.children).filter(i => i.isSelected)
-					.map(f => f.item.name)
+				Array.prototype.slice.call(this.$.fileItemsList.children).filter(function(i) { return i.isSelected })
+					.map(function(f) { return f.item.name })
 					.forEach(function(fn) { this.uploadedList[fn] = 1 }.bind(this));
 					
 				this.firstUpload = true;

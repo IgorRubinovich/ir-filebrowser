@@ -50,14 +50,24 @@ Example:
       h1.paper-font-display1 {
         font-size: 24px;
       }
+	  .buttons {
+      	padding: 0;
+		font-size : .8em;
+      }
     }
-	
-	#selectionPreview, #sortableContent, #selectionNav
+	#selectionNav { 
+		overflow : hidden;
+		padding-bottom : 3px;
+		margin-left : -4px;
+		max-height : 40px;
+	}
+	#sortableContent, #selectionNav
 	{
       @apply(--layout-flex);
       @apply(--layout-horizontal);
       @apply(--layout-end);
       @apply(--layout);
+      @apply(--layout-wrap);
 	}
 	
 	#selectionNav {
@@ -80,19 +90,18 @@ Example:
 	}
 	
 	:host:not([full-view]) #dialog #uploaderContainer {
-		height : 60vh
 	}
 	
 	:host[full-view] #dialog {
 		position : static; 
 	}
 	:host:not([full-view]) #dialog { 
-		top : 12px;
 		right : 18px;
-		bottom : 18px;
 		left : 12px;
 		margin : 0;
 		position : fixed;
+		top : 12px;
+		bottom : 12px;
 	}
 
 	:host[full-view] #dialog {
@@ -152,7 +161,7 @@ Example:
 		justify-content : space-between;
 	}
 
-	#bottomButtons file-upload {
+	#bottomButtons, #bottomButtons file-upload {
 		overflow : hidden;
 	}
 	
@@ -162,12 +171,10 @@ Example:
 		margin-top : 5px;
 		max-height : 60px;
 	}
-	
 	#fileUploaderContainer {
-		margin-bottom : 5px;
-		max-height : 60px;
 		overflow : hidden;
 		display : flex;
+		width : 300vw;
 		--upload-border-style : {
 			display : flex;
 			flex-direction : row;
@@ -175,7 +182,25 @@ Example:
 			margin : 0;
 		};
 	}
-
+	
+	@media (max-width : 600px)
+	{
+		#fileUploaderWrapper {
+			margin-left : -12px;
+			margin-top : 12px;
+		}
+		#bottomButtons {
+			margin-top : 30px;
+		}
+	}
+	#fileUploader {
+		margin-left : -18px;
+	}
+	.fileUploaderContainerSpinner {
+		margin-left : 18px;
+		margin-right : 3px;
+	}
+	
 	#imgpreview {
 		float : right;
 		width : 50%;
@@ -208,36 +233,6 @@ Example:
 	#searchInput {
 		width : 300px;
 	}
-
-	/*
-	@media (max-width: 600px) {
-      
-	  #dialog {
-        min-width: 98vw;
-      }
-	  #scrollableFiles {
-		padding : 0;
-      }
-      #dialog {
-      	margin: 0;
-      }
-      #topNav {
-      }
-      #searchInput {
-      	width : 250px;
-      }
-      #galleryCheckbox {
-      	padding: 0;
-      }
-      #homeButton{
-      }
-      .topNavButtons {
-      }
-      .buttons {
-      	padding: 0;
-      }
-
-    }*/
 	
 	#dropMessage {
 	    white-space: nowrap;
@@ -257,12 +252,26 @@ Example:
 	#toolbar {
 		margin : 0;
 	}
+	#mainContainer[mobile] {
+		position : relative;
+		height : 50vh;
+	}
+	
 	#mainContainer {
 		position : relative;
-		min-height : 60vh;
+		height : 70vh;
 	}
-	#dialog {
-		overflow : hidden;
+	label {
+		padding-bottom : 6px;
+	}
+	#selectionFileUploader {
+		margin-top : -12px;
+	}
+	#selectionPreviewThumbs {
+		padding-bottom : 7px;
+	}
+	#toast { 
+		width : 80%;
 	}
   </style>
   <template>
@@ -273,20 +282,42 @@ Example:
 	<iron-media-query query="(max-width: 600px)" query-matches="{{ mobile }}"></iron-media-query>
 
 	<div hidden="{{ archiveMode }}" style="max-width: 550px;">
-		<div id="selectionPreview" class="layout horizontal start-justified" hidden$="{{ promptMode }}">
-			<div>
+		<div id="selectionPreview" hidden$="{{ promptMode }}">
+			<div id="selectionPreviewThumbs" class="layout horizontal start-justified wrap" >
 				<sortable-js id="sortableContent" handle="ir-filebrowser-item" on-update="_updateValue">
 					<content select="ir-filebrowser-item">
 					</content>
 				</sortable-js>
 			</div>
 
-			<div id="selectionNav">
-				<paper-button id="clearSelection" hidden="{{ !value }}" raised on-tap="clearSelection">Clear all</paper-button>
-				<paper-button id="browseButton" raised on-tap="showDialog">My files</paper-button>
-				<paper-button id="browseLocalFiles" raised on-tap="browseLocalFiles">Browse...</paper-button>
-				<file-upload id="selectionFileUploader" with-credentials on-success="collectFiles" fields="{{ postFields }}" target="{{ _postUrl }}" multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]" no-auto-from-browse>
-				</file-upload>
+			<div id="selectionNav" class="horizontal layout wrap">
+				<paper-button id="clearSelection" hidden="{{ !value }}" raised on-tap="clearSelection">[[ textClearAll ]]</paper-button>
+				<paper-button id="browseButton" raised on-tap="showDialog">[[ textMyFiles ]]</paper-button>
+				<paper-button id="browseLocalFiles" raised hidden="[[ isUploadingFiles ]]" on-tap="browseLocalFiles">[[ textBrowse ]]...</paper-button>
+				<div hidden="[[ !isUploadingFiles ]]">
+					<paper-spinner active></paper-spinner>
+				</div>
+				<div id="selectionNav" class="horizontal layout end">
+					<div hidden="[[ !isUploadingFiles ]]" class="fileUploaderContainerSpinner">
+						Files left: {{ uploadedFiles }}
+					</div>
+					<file-upload 
+						id="selectionFileUploader" 
+						with-credentials 
+						
+						hidden="[[ isUploadingFiles ]]" 
+						
+						on-files-changed="filesChanged" 
+						on-success="makeUploadedList" 
+						on-error="processUploadError" 
+						
+						fields="{{ postFields }}" 
+						target="{{ _postUrl }}" 
+						multi 
+						progress-timeout="0" 
+						no-auto-from-browse>
+					</file-upload>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -308,54 +339,53 @@ Example:
 				<!--iron-pages selected="{{tableselected}}"-->
 			<div id="toolbar" class="layout vertical center-justified left">
 				<div id="topNav">
-					<div class="layout horizontal start-justified center wrap">
-						<div id="homeButton" class="flex-1" style="padding-right: 10px;">
+					<div class="layout horizontal start-justified end wrap">
+						<div id="homeButton" class="flex-1 horizontal layout center" style="padding-right: 10px;">
 							<paper-icon-button class="topNavButtons" icon="home" on-tap="goHome"></paper-icon-button>
+							<div id="relPath" class="flex-3 layout horizontal start-justified">
+								<template is="dom-repeat" items="{{ splitRelPath }}">
+									<a href="javascript:void(0)" on-click="jumpUp" title$="[[ item.path ]]"><span>[[ item.name ]]</span>/</a> 
+								</template>
+							</div>
 						</div>
-						<div id="relPath" class="flex-3 layout horizontal start-justified">
-							<template is="dom-repeat" items="{{ splitRelPath }}">
-								<a href="javascript:void(0)" on-click="jumpUp" title$="[[ item.path ]]"><span>[[ item.name ]]</span>/</a> 
-							</template>
-						</div>
-						<paper-input class="flex-8" placeholder="Filter..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
+						<paper-input class="flex-8" placeholder="[[ textFilter ]]..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
 						</paper-input>
 						<paper-icon-button class="flex" class="topNavButtons" icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
 						</paper-icon-button>
-						<paper-input class="flex-10" id="searchInput" placeholder="Search by description..." value="{{searchValue}}" on-keyup="searchFiles">
+						<paper-input class="flex-10" id="searchInput" placeholder="[[ textSearchByDescription ]]..." value="{{searchValue}}" on-keyup="searchFiles">
 						</paper-input>
 						<paper-icon-button class="topNavButtons" icon="clear" on-tap="searchClear">
 						</paper-icon-button>
 					</div>
 					<div class="layout horizontal center">
-
-						<paper-checkbox checked="{{ showInfo }}" hidden$="{{ !mobile }}">show file info</paper-checkbox>
+						<paper-checkbox checked="{{ showInfo }}" hidden$="{{ !mobile }}">[[ textShowFileInfo ]]</paper-checkbox>
 						<paper-icon-button icon="menu" on-click="triggerMenu" hidden$="{{ !mobile }}"></paper-icon-button>
 					</div>
 				</div>
 				<div id="filesNav" class="layout horizontal center" hidden$="{{ mobile }}">
 					<paper-item>
-						<paper-checkbox checked="{{ showDirectories }}">show directories</paper-checkbox>
+						<paper-checkbox checked="{{ showDirectories }}">[[ textShowDirectories ]]</paper-checkbox>
 					</paper-item>
 					<paper-item>
-						<paper-checkbox checked="{{ showFiles }}">show files</paper-checkbox>
+						<paper-checkbox checked="{{ showFiles }}">[[ textShowFiles ]]</paper-checkbox>
 					</paper-item>
 					<paper-item hidden>
 						<paper-checkbox checked="{{ postFields.resize }}">resize</paper-checkbox>
 					</paper-item>
 					<!--<paper-button raised on-click="refitDialog">refitDialog</paper-button>-->
 					<div>
-						<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">add dir</paper-button>
-						<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">rename</paper-button>
-						<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">delete</paper-button>
+						<paper-button hidden$="{{ !_makedirUrl }}" raised on-click="makeDir">[[ textAddDir ]]</paper-button>
+						<paper-button hidden$="{{ !_renameUrl }}" raised$="{{ !renameFiles }}" on-click="renameFile">[[ textRename ]]</paper-button>
+						<paper-button hidden$="{{ !_deletefileUrl }}" raised on-click="deleteFile">[[ textDelete ]]</paper-button>
 					</div>
 				</div>
 			</div>
 				<!-- /iron-pages -->
 			<!--/div-->
-			<div id="mainContainer">
+			<div id="mainContainer" mobile$="[[ mobile ]]">
 				<paper-drawer-panel id="pocketDrawer" right-drawer>
 					<div id="drawPocket" drawer>
-						<p hidden$="{{ !noFile }}">File info will appear here</p>
+						<p hidden$="{{ !noFile }}">[[ textFileInfoHere ]]</p>
 						<div id="fileInfo" hidden$="{{ noFile }}">
 							<div hidden$="{{ !archiveMode }}">
 								<a href="{{ linkForDownload }}" download><iron-icon icon="file-download">
@@ -367,17 +397,17 @@ Example:
 							<div id="imgpreview" hidden$="{{ noImage }}">
 								<iron-image title="{{ fUrl }}" preload fade sizing="contain" src="{{ fUrl }}"></iron-image>
 							</div>
-							<label>Size</label><div>{{ fSize }}</div>
-							<label>Date</label><div>{{ fDate }}</div>
-							<span hidden$="{{ noImage }}"><label>Image Dimensions</label><div><span>{{ meta.width }}</span> x <span>{{ meta.height }}</span></div></span>
+							<label>[[ textSize ]]</label><div>{{ fSize }}</div>
+							<label>[[ textDate ]]</label><div>{{ fDate }}</div>
+							<span hidden$="{{ noImage }}"><label>[[ textImageDimensions ]]</label><div><span>{{ meta.width }}</span> x <span>{{ meta.height }}</span></div></span>
 							<div class="clearfloat"></div>
 							<div hidden$="{{ archiveMode }}">
 								<div hidden$="{{ hasInfo }}">No information</div>
 								<div hidden$="{{ !hasInfo }}">
-									<paper-input label="Title" value="{{ meta.title }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-									<paper-input on-keyup="metaChanged" label="Caption" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-									<paper-input label="Description" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
-									<paper-input label="Alt" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+									<paper-input label="[[ textTitle ]]" value="{{ meta.title }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+									<paper-input on-keyup="metaChanged" label="[[ textCaption ]]" value="{{ meta.caption }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+									<paper-input label="[[ textDescription ]]" value="{{ meta.description }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
+									<paper-input label="[[ textAlt ]]" value="{{ meta.alt }}" on-change="updateDescription" disabled="{{ archiveMode }}"></paper-input>
 								</div>		
 							</div>					
 						</div>
@@ -422,36 +452,50 @@ Example:
 							</div-->
 						<!--/iron-pages-->
 
-			<div id="bottomButtons" hidden$="{{ archiveMode }}">
-				<div id="fileUploaderContainer">
-					<span hidden$=[[ isUploadingFiles ]] hidden$="[[ mobile ]]">
-						<paper-spinner class="loaded" hidden$="[[ !isLoading ]]" active$="[[ isLoaded ]]"></paper-spinner>
-					</span>
-					<span hidden$="{{ mobile }}">
-						<paper-spinner class="loaded" active$="[[ isUploadingFiles ]]"></paper-spinner>
-					</span>
-					<span hidden$="[[ !isUploadingFiles ]]">
-						<span hidden$="{{ mobile }}">Files left: </span><span hidden$="{{ mobile }}">{{ uploadedFiles }}</span>
-					</span>
-					<file-upload id="fileUploader" sync="[[ sync ]]" no-auto-from-browse on-files-changed="filesChanged" fields="{{ postFields }}" on-success="makeList" target="{{ _postUrl }}" noink multi progress-timeout="0" hidden$="[[ isUploadingFiles ]]">
-						<div "browseButton" hidden$="[[ isUploadingFiles ]]">
-							<paper-button raised>Browse...</paper-button> <span id="dropMessage" hidden$="{{ mobile }}">or drop files into this dialog</span>
-						</div>
-					</file-upload>
-				</div>
-				<div class="buttons">
-					<div hidden$="{{ fullViewMode }}">
-					<span class="layout horizontal" hidden$="{{ !promptMode }}">
-						<paper-item id="galleryCheckbox">
-							<paper-checkbox title="if You want to combine pictures in the gallery click on this checkbox" checked="{{ gallery }}"><span hidden$="{{ mobile }}">Gallery</span></paper-checkbox>
-						</paper-item>
-						<paper-button raised on-click="hideDialog">Cancel</paper-button>
-						<paper-button raised on-click="promptSelect">Select</paper-button>
-					</span>
-					<paper-button hidden$="{{ promptMode }}" raised style="padding-left : 5px; padding-right : 5px;" on-click="cancelSelectionChanges">[[ textCancelSingleButton ]]</paper-button>
-					<paper-button hidden$="{{ promptMode }}" raised style="padding-left : 5px; padding-right : 5px;" on-click="hideDialog">[[ textCloseSingleButton ]]</paper-button>
+			<div id="bottomButtons" hidden$="{{ archiveMode }}" class="layout horizontal">
+				<div id="fileUploaderContainer" class="flex-1 layout horizontal center">
+					<div hidden="[[ !isUploadingFiles ]]">
+						<paper-spinner active></paper-spinner>
+					</div>
+					<div hidden$="[[ !isUploadingFiles ]]" class="fileUploaderContainerSpinner">
+						Files left: {{ uploadedFiles }}
+					</div>
+					<div hidden="[[ isUploadingFiles ]]" id="fileUploaderWrapper" ios$="[[ isiOS ]">
+						<file-upload 
+							id="fileUploader" 
+							on-success="makeUploadedList" 
+							on-error="processUploadError" 
+							sync="[[ sync ]]" 
+							no-auto-from-browse 
+							on-files-changed="filesChanged" 
+							fields="{{ postFields }}" 
+							target="{{ _postUrl }}" 
+							noink 
+							multi 
+							progress-timeout="0" 
+							hidden$="[[ isUploadingFiles ]]">
+							
+							<paper-button raised>[[ textBrowse ]]...</paper-button>
+							<span id="dropMessage" hidden$="{{ mobile }}">[[ textOrDrop ]]</span>
+							<!--div id="browseButton">
+								<paper-button raised>Browse...</paper-button> 
+							</div-->
+						</file-upload>
 					</div>
 				</div>
+				<div>
+					<div hidden$="{{ fullViewMode }}" class="buttons layout horizontal">
+						<div class="layout horizontal" hidden$="{{ !promptMode }}">
+							<paper-item id="galleryCheckbox">
+								<paper-checkbox title="if You want to combine pictures in the gallery click on this checkbox" checked="{{ gallery }}"><span hidden$="{{ mobile }}">Gallery</span></paper-checkbox>
+							</paper-item>
+							<paper-button raised on-click="hideDialog">Cancel</paper-button>
+							<paper-button raised on-click="promptSelect">Select</paper-button>
+						</div>
+						<paper-button hidden$="{{ promptMode }}" raised on-click="cancelSelectionChanges">[[ textCancelSingleButton ]]</paper-button>
+						<paper-button hidden$="{{ promptMode }}" raised on-click="hideDialog">[[ textCloseSingleButton ]]</paper-button>
+						</div>
+					</div>
 			</div>
 		</paper-dialog>
 	<iron-ajax
@@ -557,6 +601,7 @@ Example:
 		with-credentials
 	>
 	</iron-ajax>	
+	<paper-toast id="toast" duration="-1"></paper-toast>
 
   </template>
 </dom-module>
@@ -754,6 +799,7 @@ Example:
 			</div>
 		</div>
 	</div>
+	
 
 		
 </template>

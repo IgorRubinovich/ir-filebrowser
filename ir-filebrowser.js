@@ -417,6 +417,22 @@
 				that.$.searchByDesc.generateRequest();
 			}, 300)
 		},
+		
+		listDesire : function() {
+			this.set('files', []);
+			this.set('directories', []);
+
+			if(typeof this.desiredFiles != 'object')
+				return
+			
+			this.$.scrollableFiles.scrollTop = 0;
+
+			for(var i = 0; i < this.desiredFiles.length; i++)
+				this.push('files', this.desiredFiles[i]);
+
+			this._lsPager = this._filePager(this.desiredFiles);
+			this.set('files', this._lsPager.next().value)
+		},
 
 		nothingFound : function() {
 			this.splice('filesList', 0);

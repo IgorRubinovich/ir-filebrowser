@@ -767,11 +767,23 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 		triggerMenu : function(e)
 		{
+			this.set("hideFilesNav", !this.hideFilesNav);
+			return;
+			
 			if(this.$.filesNav.hasAttribute('hidden'))
+			{
 				this.$.filesNav.removeAttribute('hidden');
+				this.$.scrollableFiles.setAttribute('hidden', true);
+			}
 			else
+			{
 				this.$.filesNav.setAttribute('hidden', true);
+				this.$.scrollableFiles.removeAttribute('hidden');
+			}
 		},
+		
+		_hideFilesNav : function(mobile,hideFilesNav) { return mobile && hideFilesNav; },
+		_hideDrawerPanel : function(mobile,hideFilesNav) { return mobile && !hideFilesNav; },
 
 		/** Toggles clicked file */
 		clickFile : function (e) {
@@ -804,8 +816,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 					this.fileName = e.detail.item.name;
 					e.detail.select();
 
-					if(this.mobile && this.showInfo)
-						this.$.pocketDrawer.openDrawer();
+					//if(this.mobile && this.showInfo)
+					//	this.$.pocketDrawer.openDrawer();
 
 					var fileSize = e.detail.item.size/1000 + "Kb";
 
@@ -1265,15 +1277,15 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.ls();
 		},
 		
-		_showInfoChanged : function() 
+		_showInfo : function() 
 		{
 			if(!this.mobile)
 				return;
 			
-			if(this.showInfo)
-				this.$.pocketDrawer.openDrawer();
-			else
+			if(this.$.pocketDrawer.selected == 'drawer')
 				this.$.pocketDrawer.closeDrawer();
+			else
+				this.$.pocketDrawer.openDrawer();
 		},
 
 		properties : {
@@ -1357,7 +1369,6 @@ Remove specific item from selection. Note: all selected items matching the url w
 								width : "",
 								height : ""}},
 			fileCaptions :		{ type : Array, value : function() { return {} } },
-			showInfo :			{ type : Boolean, value : true, observer : "_showInfoChanged" },
 
 			isUploadingFiles : { type : Boolean, value : false },
 
@@ -1369,6 +1380,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			
 			textCloseSingleButton : { type : String, value : "OK" },
 			textCancelSingleButton : { type : String, value : "Cancel" },
+			
+			textMustSelectFile : { type : String, value : "Please select a file to view its details" },
 
 			textBrowse : { type : String, value : "Browse..." },
 			textOrDrop : { type : String, value : "Or drop fils into this dialog" },
@@ -1397,7 +1410,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			
 			textErrorUploading : { type : String, value : "Error [status] while uploading [files]" }, 
 			
-			isiOS : { type : Boolean, value : /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream } // thanks https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
+			isiOS : { type : Boolean, value : /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream }, // thanks https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
+			hideFilesNav : { type : Boolean, value : true }
 		},
 
 		xhrError : function() {

@@ -171,10 +171,11 @@
 			this._didLs = true;
 			
 
-			this.files = [];
+			//this.files = [];
 			this.directories = [];
 
 			rootUrl = this.path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
+			this._rootUrl = rootUrl;
 			statsData = this.get(this.lsStatsPath, this.loadedData).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
 
 			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
@@ -201,12 +202,6 @@
 				else
 					files.push(fstat);
 			};
-
-			if(this.toSelection)
-			{
-				this.completeSelection(this, files);
-				this.toSelection = false;
-			}
 
 			if(this.rootDir)
 				localRoot = this.path.join("/", this.rootDir, "/");
@@ -235,7 +230,7 @@
 			
 			// set up pager
 			this._lsPager = this._filePager(files);
-			this.set('files', this._lsPager.next().value);
+			this._gentlySetFiles(this._lsPager.next().value);
 
 			if(!/^\//.test(this.relPath))
 				this.set("relPath", "/" + this.relPath)
@@ -255,6 +250,12 @@
 			//this.files = res;
 		},
 		
+		_loadMoreFilesLs : function(min) {
+			var next = this._lsPager.next(min);
+			this._gentlySetFiles(next.value);
+			return next.done;
+		},
+		
 		loadMoreFilesLs : function(e) {
 			if(!e || !e.target)
 				return;
@@ -263,7 +264,7 @@
 				scrollerHeight = target.scrollHeight;
 
 			if(scrollerHeight - target.scrollTop <= 600)
-				this.set('files', this._lsPager.next().value);
+				this._loadMoreFilesLs();
 		},
 		
 		loadMoreFilesDesc : function(e) {
@@ -419,7 +420,7 @@
 		},
 		
 		listDesire : function() {
-			this.set('files', []);
+			this._gentlySetFiles('files', []);
 			this.set('directories', []);
 
 			if(typeof this.desiredFiles != 'object')
@@ -427,9 +428,9 @@
 			
 			this.$.scrollableFiles.scrollTop = 0;
 
-			for(var i = 0; i < this.desiredFiles.length; i++)
+			/*for(var i = 0; i < this.desiredFiles.length; i++)
 				this.push('files', this.desiredFiles[i]);
-
+			*/
 			this._lsPager = this._filePager(this.desiredFiles);
 			this.set('files', this._lsPager.next().value)
 		},
@@ -526,7 +527,7 @@ Adds object to selection.
 				this.clearSelection();
 				selectedElements = this._getSelectionElements();
 			}
-			else if(this.maxItems != -1 && (selectedElements.length >= this.maxItems))
+			else if(this.maxItems != -1 && (selectedElements.length > this.maxItems))
 			{
 				this.fire('item-overFlow');
 				return true;
@@ -536,6 +537,17 @@ Adds object to selection.
 			if(typeof fstat == 'string')
 				fstat = { url : fstat };
 
+			if(this.opened)
+				// select in dialog
+				this.forAllFileItemsInDialog(function(el, ctrl) {
+					console.log("selected: %s item url: %s looking for: %s", el.item.isSelected, el.item.url, fstat.url);
+					if (el.item.url == fstat.url)
+					{
+						el.select();
+						ctrl.stop();
+					}
+				});
+			
 			// prevent duplicates
 			if(selectedElements.filter(function(el) { return el.item.url == fstat.url }).length)
 			{
@@ -709,16 +721,23 @@ Remove specific item from selection. Note: all selected items matching the url w
 				});
 
 			// unselect in dialog
-			Polymer.dom(this.$.fileItemsList).childNodes
-				.forEach(function(el) {
-					if (el.is == 'ir-filebrowser-item' && el.item.url == url)
-						el.unselect();
+			this.forAllFileItemsInDialog(function(el) {
+				if (el.item.url == url)
+					el.unselect();
 			});
-
 
 			this._updateValue();
 		},
-
+		
+		forAllFileItemsInDialog : function(f) {
+			var i, all = Polymer.dom(this.$.fileItemsList).childNodes,
+				stop = false,
+				ctrl = { stop : function() { stop = true } }
+			for(i = 0; (el = all[i]) && !stop; i++) 
+				if (el.is == 'ir-filebrowser-item')
+					f.call(this, el, ctrl);
+		},
+		
 		/** Get ir-filebrowser-item content children */
 		_getSelectionElements : function() {
 			return [].slice.call(this.$.sortableContent.children).filter(function(el) { return el.is == 'ir-filebrowser-item' })
@@ -981,41 +1000,39 @@ Remove specific item from selection. Note: all selected items matching the url w
 				this.set('isUploadingFiles', false);
 				if(!fileUploader.files.length)
 					return;
-					
+
 				Array.prototype.slice.call(this.$.fileItemsList.children).filter(function(i) { return i.isSelected })
 					.map(function(f) { return f.item.name })
-					.forEach(function(fn) { this.uploadedList[fn] = 1 }.bind(this));
-				
+					.forEach(function(fn) { this.uploadedList[fn] = Object.keys(this.uploadedList).length }.bind(this));
+
 				this._failedUploads = [];
 				this.firstUpload = true;
+
+				this.uploadedList = [];
+
+				this._selectionBeforeUpload = this.getCurrentSelection();
+				
+				this.set("searchValue", "");
 			}
 
 			// update upload flags
 			done = !fileUploader.files.length || !fileUploader.files.filter(function(f) { return !f.complete && !f.error }).length;
 
 			this.set('isUploadingFiles', !done);
-			this.set('uploadedFiles', done ? 0 : fileUploader.files.length);
+			this.set('uploadedFiles', done ? "" : (this.uploadedList.length + 1) + "/" + (this.uploadedList.length + fileUploader.files.length)); // this is purely for humans info
 			
 			// last iteration, no more files to upload; run ls, reselect previously both selected and freshly uploaded files
 			if(done)
 			{
-				
-				this._filesBeforeUpload = {};
-
 				this.ls();
-
-				/*this.files.forEach(function(f) {
-					this.uploadedList[f.name] = 1;
-				}.bind(this));*/
-				
-				this.firstUpload = false;				
+				this.firstUpload = false;
 			}
 		},
 
 		makeUploadedList : function(e) {
 			// this.$.fileUploader.files = this.$.fileUploader.files.indexOf(e.detail.file);
 			var fileName = JSON.parse(e.detail.xhr.response)[0].split('/').pop();
-			this.uploadedList[fileName] = 1;
+			this.uploadedList.push(fileName);
 		},
 
 		processUploadError : function(e) {
@@ -1025,73 +1042,33 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this.xhrError(e);
 		},
 		
-		collectFiles : function(e) {
-			var file = JSON.parse(e.detail.xhr.response)[0].split('/'),
-				fileName = file.pop(),
-				filePath = file.join('/'),
-				that = this;
-
-			this.uploadedList[fileName] = 1;
-			
-			that.toSelection = true;
-		},
-
-		completeSelection : function(context, files) {
-			files.forEach(function(item) {
-				if(context.uploadedFiles[item.name])
-					setTimeout(function() {
-						context.addSelection(item);
-					}, 100);
-			});
-
-			this.collectedFiles = {};
-		},
-
 		// selects just uploaded file(s); called on successful upload, then on every displayLoadedFiles, but practically works only after upload
 		lsIfAfterUpload : function() {
+			if(!this.get("uploadedList.length"))
+				return 
 			this.cancelDebouncer('lsIfAfterUpload');
 			this.debounce('lsIfAfterUpload', function() {
-				if(!Object.keys(this.uploadedList || {}))
-					return 
 
-				if(this.opened)
-				{
-					var diff = [],
-						toSelect = [];
+				var newSelection = this._selectionBeforeUpload.concat(this.uploadedList.map(function(path) { return resolveUrl(this.path.join(this._rootUrl, path)) }.bind(this)).reverse())
+				
+				if(this.maxItems > 0)
+					newSelection = newSelection.slice(newSelection.length - this.maxItems, newSelection.length)
+				
+				this.setCurrentSelection(newSelection);
+				this._selectionBeforeUpload = [];
+				this.uploadedList = [];
+				this.fire('toast', this.textUploadComplete);
 
-					Array.prototype.slice.call(this.$.fileItemsList.children).reverse().forEach(
-						function(fi) {
-							if(fi.is != 'ir-filebrowser-item')
-								return;
-
-							if(this.uploadedList[fi.item.name]) // in no particular order. the good thing is that we won't select more than we can.
-								toSelect.push(fi);
-
-						}.bind(this));
-
-					this.selectUploadedItems(toSelect);
-
-					this._filesBeforeUpload = null;
-
-					this.fire('toast', 'upload is complete');
-				}
-				else
-					this.files
-						.filter(	function(f) 	{ return this.uploadedList[f.name] 			}.bind(this))
-						.map(		function(f) 	{ return this.path.join(f.rootUrl, f.name) 	}.bind(this))
-						.forEach(	function(url) 	{ return this.addSelection(url) 			}.bind(this));
-
-				this.uploadedList = {};
 			}, 300)
 		},
 
 		selectUploadedItems : function(items) {
+			var remaining = Object.assign([], items);
+			
 			if(this.$.dialog.opened)
-				{
-					items.forEach(function(fi) {
-						this.clickFile({ detail : fi});
-					}.bind(this));
-				}
+				items.forEach(function(fi) {
+					this.clickFile({ detail : fi});
+				}.bind(this))
 			else
 				items.forEach(function(fi) { this.addSelection(fi); });
 		},
@@ -1099,11 +1076,32 @@ Remove specific item from selection. Note: all selected items matching the url w
 		browseLocalFiles : function(relPath) {
 			this.$.selectionFileUploader._fileClick();
 		},
+		
+		setCurrentSelection : function(arr) { // arr of objects with .url
+			if(this.maxItems >= 0)
+				arr = arr.slice(0, this.maxItems);
+			
+			if(this.files.length < arr.length)
+				this._loadMoreFilesLs(arr.length);
+
+			this.clearSelection();
+			
+			this.debounce("setCurrentSelection", function() {
+				arr.forEach(function(url) { this.addSelection(url); }.bind(this));
+			}, 100);
+			
+			this._updateValue();
+		},
+		
+		getCurrentSelection : function() {
+			return this._getSelectionElements().map(function(el) { return el.item.url });
+		},
+		
 		showDialog : function(relPath) {
 			// Polymer.dom.flush();
 			
-			this._lastSelection = this._getSelectionElements().map(function(el) { return el.item.url });
-			
+			this._lastSelection = this.getCurrentSelection();
+
 			var that = this;
 
 			that.$.dialog.open();
@@ -1147,7 +1145,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		cancelSelectionChanges : function() {
 			this.clearSelection()
 			Polymer.dom.flush();
-			this._lastSelection.forEach(function(url) { this.addSelection(url) }.bind(this));
+			this.setCurrentSelection(this._lastSelection);
 			this.hideDialog();
 		},
 		
@@ -1338,14 +1336,12 @@ Remove specific item from selection. Note: all selected items matching the url w
 			dir : 				{ type : String, notify : true },
 			rootDir : 			{ type : String, notify : true }, //, observer : "ls" },
 			checkAvailability : { type : Boolean, value : false },
-			collectedFiles : 	{ type : Object, value : function() { return {} } },
-			toSelection : 		{ type : Boolean, value : false }, 
 			currentTime : 		{ type : Number, value : 0 },
 			limit : 			{ type : Number, value : 20 },
 			isMore : 			{ type : Boolean, value : false },
 			loadedFiles : 		{ type : Array, value : function() { return [] } },
 			isLoading : 			{ type : Boolean, value : true },
-			uploadedFiles : 	{ type : Number, value : 0 },
+			uploadedFiles : 	{ type : String, value : "" },
 			loadedDirectories : { type : Array, value : function() { return [] } },
 			isFirstTimeOpened : { type : Boolean, value : false },
 			gallery : 			{ type : Boolean, value : false },
@@ -1379,8 +1375,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 			opened : { type : Boolean, value : false },
 			
 			textCloseSingleButton : { type : String, value : "OK" },
+			textClosePromptButton : { type : String, value : "OK" },
 			textCancelSingleButton : { type : String, value : "Cancel" },
-			
+			textUploadComplete : { type : String, value : "upload is complete" },
 			textMustSelectFile : { type : String, value : "Please select a file to view its details" },
 
 			textBrowse : { type : String, value : "Browse..." },
@@ -1409,6 +1406,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			textClearAll : { type : String, value : "Clear all" },
 			
 			textErrorUploading : { type : String, value : "Error [status] while uploading [files]" }, 
+			textUploadedFiles : { type : String, value : "Uploaded files" }, 
 			
 			isiOS : { type : Boolean, value : /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream }, // thanks https://stackoverflow.com/questions/9038625/detect-if-device-is-ios
 			hideFilesNav : { type : Boolean, value : true }
@@ -1420,9 +1418,26 @@ Remove specific item from selection. Note: all selected items matching the url w
 				console.log(this.lastError);
 		},
 		
+		_filesChanged : function() { 
+			this.cancelDebouncer('filesChanged');
+			this.debounce('filesChanged', function() {
+				this.setCurrentSelection(this.getCurrentSelection());
+			}, 100);
+		},
+		
+		_gentlySetFiles : function(files) {
+			var i;
+			
+			if(this.files instanceof Array)
+				for(i = 0; i < files.length && i < this.files.length && resolveUrl(files[i].url) == this.files[i].url; i++)
+					files[i] = this.files[i]; // less shock for ui
+
+			this.set('files', files);
+		},
+		
 		observers: [
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)',
-			'_dirsChanged(dir,rootDir)',"xhrError(lastError)"
+			'_dirsChanged(dir,rootDir)',"xhrError(lastError)","_filesChanged(files)"
 		],
 
 		behaviors: [
@@ -1629,11 +1644,12 @@ Fired when an item is doubleclicked.
 			page = 0;
 			lastValue = {};
 
-			next = function()
+			next = function(minItems)
 			{
+				page = minItems ? Math.min(Math.floor(minItems/itemsPerPage)) + 1 : page + 1;
 				return lastValue = lastValue.done ? lastValue : { 
 					next : next,
-					value : dataArr.slice(0, itemsPerPage * (++page)).map(processList),
+					value : dataArr.slice(0, itemsPerPage * page).map(processList),
 					done : lastValue.done || (page * itemsPerPage >= dataArr.length)
 				}
 			}

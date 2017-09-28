@@ -163,7 +163,8 @@
 				that = this,
 				directories = [];
 
-
+			if(!this.loadedData)
+				return;
 				
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
@@ -176,7 +177,7 @@
 
 			rootUrl = this.path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
 			this._rootUrl = rootUrl;
-			statsData = this.get(this.lsStatsPath, this.loadedData).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
+			statsData = (this.get(this.lsStatsPath, this.loadedData) || []).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
 
 			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
 
@@ -503,14 +504,11 @@ Select items defined in the array. Previous selection is lost.
 @param {Array} selection array of fstat objects or objects with url field, or strings representing urls.
 */
 		setSelection : function(selection) {
-			// console.log("setting selection to", selection);
-			this.debounce("setSelection", function() {
-				this.clearSelection();
-				Polymer.dom.flush();
-				selection.forEach(function(f) { 
-					this.addSelection(f); 
-				}.bind(this));
-			}, 100)
+			Polymer.dom.flush()
+			selection = selection || this.selection || [];
+			selection.forEach(function(f) { 
+				this.addSelection(f); 
+			}.bind(this));
 		},
 
 /**
@@ -525,7 +523,7 @@ Adds object to selection.
 			if(this.maxItems == 1 && (selectedElements.length == 1))
 			{
 				this.clearSelection();
-				selectedElements = this._getSelectionElements();
+				selectedElements = [];
 			}
 			else if(this.maxItems != -1 && (selectedElements.length > this.maxItems))
 			{
@@ -598,6 +596,7 @@ Open dialog in prompt mode - i. e. Select and Cancel buttons are shown instead o
 				throw new Error('ir-filebrowser is not in prompt mode. Set the prompt-mode attribute to enable it.');
 
 			this.promptCallback = callback;
+			this.clearSelection()
 			this.showDialog();
 		},
 
@@ -1086,6 +1085,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 
 			this.clearSelection();
 			
+			this.cancelDebouncer("setCurrentSelection");
 			this.debounce("setCurrentSelection", function() {
 				arr.forEach(function(url) { this.addSelection(url); }.bind(this));
 			}, 100);

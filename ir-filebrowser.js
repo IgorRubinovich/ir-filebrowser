@@ -1589,7 +1589,6 @@ Fired when an item is doubleclicked.
 
 		detached : function() {
 			this.set("isAttached", false);
-			console.log('detached!')
 		},
 		attached : function() {
 			this.radioButton = this.$.radioButton;

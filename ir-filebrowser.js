@@ -58,6 +58,11 @@
 		*/
 		revertLs : function()
 		{
+			if(this._revertLsAttempts > 3 && this.lastError)
+				return; // giving up or else we cango on for a long while
+
+			this._revertLsAttempts = (this._revertLsAttempts || 0) + 1
+			
 			if(this.oldRelPath == this.relPath)
 				return;
 			
@@ -68,6 +73,7 @@
 			
 			if(this.olderRelPath != this.relPath && this.oldRelPath != this.relPath)
 				this.ls(this.oldRelPath, true);
+			
 		},
 
 		/**
@@ -129,7 +135,7 @@
 				reqUrl += this.relPath; //this.host + reqUrl; error!
 
 			this.$.loader.url = reqUrl;
-			console.log("will ls:" + reqUrl)
+			// console.log("will ls:" + reqUrl)
 			this.cancelDebouncer('ls');
 			
 			if(this.opened || this.firstUpload)
@@ -296,6 +302,7 @@
 				this.$.dialog.style.boxShadow = "none";
 				this.$.dialog.style.margin = 0;
 				this.$.dialog.style.maxWidth = '100%';
+				this.$.dialog.style.zIndex = "0";
 
 				return;
 			}
@@ -421,7 +428,7 @@
 		},
 		
 		listDesire : function() {
-			this._gentlySetFiles('files', []);
+			this._gentlySetFiles([]);
 			this.set('directories', []);
 
 			if(typeof this.desiredFiles != 'object')
@@ -1037,7 +1044,12 @@ Remove specific item from selection. Note: all selected items matching the url w
 		processUploadError : function(e) {
 			console.log(e);
 			this._failedUploads.push(e.detail.file.name);
-			this.$.toast.show({text: this.textErrorUploading.replace("[status]", e.detail.xhr.status).replace("[files]", this._failedUploads.join(', ')), duration: 3000})
+			
+			const status = e.detail.xhr.status;
+			const message = this.getAttribute(`text-error-${ status }`) || this.textErrorUploading;
+			
+			this.$.toast.show({text: message.replace("text-[status]", status).replace("[files]", this._failedUploads.join(', ')), duration: 3000})
+			
 			this.xhrError(e);
 		},
 		
@@ -1380,8 +1392,8 @@ Remove specific item from selection. Note: all selected items matching the url w
 			textUploadComplete : { type : String, value : "upload is complete" },
 			textMustSelectFile : { type : String, value : "Please select a file to view its details" },
 
-			textBrowse : { type : String, value : "Browse..." },
-			textOrDrop : { type : String, value : "Or drop fils into this dialog" },
+			textBrowse : { type : String, value : "Browse" },
+			textOrDrop : { type : String, value : "Or drop files into this dialog" },
 			textAddDir : { type : String, value : "Add dir" },
 			textRename : { type : String, value : "Rename" },
 			textDelete : { type : String, value : "Delete" },
@@ -1413,6 +1425,9 @@ Remove specific item from selection. Note: all selected items matching the url w
 		},
 
 		xhrError : function() {
+			const status = this.lastError && this.lastError.request.xhr.status;
+			if(status == 401)
+				this.fire('401 Unauthorized');
 			
 			if(this.lastError)
 				console.log(this.lastError);

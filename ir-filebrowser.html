@@ -111,7 +111,8 @@ Example:
 	}
 	
 	:host[full-view] #dialog {
-		position : static; 
+		position : static;
+		height : 100%;
 	}
 	:host:not([full-view]) #dialog { 
 		position : fixed;
@@ -220,7 +221,7 @@ Example:
 	}
 
 	.topNavButtons {
-		margin-top: 20px;
+		z-margin-top: 20px;
 	}
 	
 	.clearfloat
@@ -301,7 +302,17 @@ Example:
 	[wrap] {
 		@apply(--layout-wrap)
 	}
+	
+	.padded-row > * { padding-right : 6px; }
+	
+	
+	#closeDialogIconButton { 
+		position : absolute;
+		top : 3px;
+		right : 3px;
+	}
   </style>
+
   <template>
 	<!-- template is="dom-repeat" items="{{selected}}">
 		<ir-filebrowser-item on-item-click="showDialog" on-item-dblclick="unselectFile" index="{{ index }}" item="{{ item }}"></ir-filebrowser-item>
@@ -368,7 +379,7 @@ Example:
 			<div id="dialogContainer" class="layout vertical justified">
 				<div id="toolbar" class="flex-2 layout vertical center-justified left">
 					<div id="topNav">
-						<div class="layout horizontal start-justified end" wrap="[[ mobile ]]">
+						<div class="layout horizontal start-justified end padded-row" wrap="[[ mobile ]]">
 							<div id="homeButton" class="flex-1 horizontal layout center" style="padding-right: 10px;">
 								<paper-icon-button class="topNavButtons" icon="home" on-tap="goHome"></paper-icon-button>
 								<div id="relPath" class="flex-3 layout horizontal start-justified">
@@ -377,14 +388,20 @@ Example:
 									</template>
 								</div>
 							</div>
-							<paper-input class="flex-8" placeholder="[[ textFilter ]]..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
+							<paper-input class="flex-4" placeholder="[[ textFilter ]]..." value="{{filterValue}}" on-keyUp="displayLoadedFiles" hidden$="{{ mobile }}">
+								<iron-icon suffix class="flex" class="topNavButtons" icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
+								</iron-icon>
 							</paper-input>
-							<paper-icon-button class="flex" class="topNavButtons" icon="clear" on-tap="filterClear" hidden$="{{ mobile }}">
-							</paper-icon-button>
-							<paper-input class="flex-10" id="searchInput" placeholder="[[ textSearchByDescription ]]..." value="{{searchValue}}" on-keyup="searchFiles">
+							<paper-input class="flex-4" id="searchInput" placeholder="[[ textSearchByDescription ]]..." value="{{searchValue}}" on-keyup="searchFiles">
+								<iron-icon suffix class="topNavButtons" icon="clear" on-tap="searchClear">
+								</iron-icon>
 							</paper-input>
-							<paper-icon-button class="topNavButtons" icon="clear" on-tap="searchClear">
-							</paper-icon-button>
+							<div class="flex-3">
+								<div id="closeDialogIconButton" hidden="[[ fullViewMode ]]">
+									<paper-icon-button dialog-dismiss icon="close"></paper-icon-button>
+									<paper-icon-button hidden$="{{ promptMode }}" raised on-click="cancelSelectionChanges">[[ textCancelSingleButton ]]</paper-button>
+								</div>
+							</div>
 						</div>
 						<div class="layout horizontal justified" hidden="{{ !mobile }}">
 							<paper-icon-button icon="menu" on-click="triggerMenu""></paper-icon-button>

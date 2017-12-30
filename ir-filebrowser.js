@@ -1046,7 +1046,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			this._failedUploads.push(e.detail.file.name);
 			
 			const status = e.detail.xhr.status;
-			const message = this.getAttribute(`text-error-${ status }`) || this.textErrorUploading;
+			const message = this.getAttribute('text-error-' + status) || this.textErrorUploading;
 			
 			this.$.toast.show({text: message.replace("text-[status]", status).replace("[files]", this._failedUploads.join(', ')), duration: 3000})
 			

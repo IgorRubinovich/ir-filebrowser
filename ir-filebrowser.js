@@ -1092,7 +1092,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(this.maxItems >= 0)
 				arr = arr.slice(0, this.maxItems);
 			
-			if(this.files.length < arr.length)
+			if((this.get("files.length") || 0) < arr.length)
 				this._loadMoreFilesLs(arr.length);
 
 			this.clearSelection();
@@ -1452,7 +1452,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 		
 		observers: [
 			'_urlsChanged(host, lsUrl, postUrl, renameUrl, findfileUrl, makedirUrl, deletefileUrl, getdescriptionUrl, updatefileUrl, searchbydescUrl)',
-			'_dirsChanged(dir,rootDir)',"xhrError(lastError)","_filesChanged(files)"
+			'_dirsChanged(dir)', '_dirsChanged(rootDir)',"xhrError(lastError)","_filesChanged(files)"
 		],
 
 		behaviors: [

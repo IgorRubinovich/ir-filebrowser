@@ -511,6 +511,7 @@ Select items defined in the array. Previous selection is lost.
 @param {Array} selection array of fstat objects or objects with url field, or strings representing urls.
 */
 		setSelection : function(selection) {
+			this.clearSelection();
 			Polymer.dom.flush()
 			selection = selection || this.selection || [];
 			selection.forEach(function(f) { 

@@ -154,7 +154,7 @@
   *
   * @method displayLoadedFiles
 */
-		displayLoadedFiles : function () {
+		displayLoadedFiles : function (e) {
 			var t,
 				i,
 				ext,
@@ -169,8 +169,13 @@
 				that = this,
 				directories = [];
 
-			if(!this.loadedData)
+
+			if(!e || !e.detail)
 				return;
+			
+			var loadedData = e.detail.response;
+			// if(!this.loadedData)
+				// return;
 				
 			this.loadedFiles = [];
 			this.loadedDirectories = [];
@@ -181,9 +186,9 @@
 			//this.files = [];
 			this.directories = [];
 
-			rootUrl = this.path.join(this.host, this.get(this.lsRootUrlPath, this.loadedData));
+			rootUrl = this.path.join(this.host, this.get(this.lsRootUrlPath, loadedData));
 			this._rootUrl = rootUrl;
-			statsData = (this.get(this.lsStatsPath, this.loadedData) || []).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
+			statsData = (this.get(this.lsStatsPath, loadedData) || []).filter(function(stat) { return that.filterValue ? (new RegExp(that.filterValue, "i")).test(stat.name) : true; });
 
 			sorted = statsData.sort(function(x,y) { return (new Date(y.mtime)).getTime() - (new Date(x.mtime)).getTime() });
 
@@ -1032,7 +1037,7 @@ Remove specific item from selection. Note: all selected items matching the url w
 			if(done)
 			{
 				this.ls();
-				this.firstUpload = false;
+				this.firstUpload = true;
 			}
 		},
 

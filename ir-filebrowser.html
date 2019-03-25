@@ -541,10 +541,10 @@ Example:
 									<paper-checkbox title="if You want to combine pictures into a gallery click on this checkbox" checked="{{ gallery }}"><span hidden$="{{ mobile }}">Gallery</span></paper-checkbox>
 								</paper-item>
 								<paper-button raised on-click="hideDialog">[[ textCancelSingleButton ]]</paper-button>
-								<paper-button raised on-click="promptSelect">[[ textClosePromptButton ]]</paper-button>
+								<paper-button raised on-click="promptSelect" accept>[[ textClosePromptButton ]]</paper-button>
 							</div>
 							<paper-button hidden$="{{ promptMode }}" raised on-click="cancelSelectionChanges">[[ textCancelSingleButton ]]</paper-button>
-							<paper-button hidden$="{{ promptMode }}" raised on-click="hideDialog">[[ textCloseSingleButton ]]</paper-button>
+							<paper-button hidden$="{{ promptMode }}" raised on-click="hideDialog" accept>[[ textCloseSingleButton ]]</paper-button>
 							</div>
 						</div>
 				</div>
@@ -663,7 +663,7 @@ Example:
 	:host {
 		display : inline-block;
 	}
-	#wrapper
+	:host #wrapper
 	{
 		box-sizing: border-box;
 		overflow : hidden;
@@ -715,7 +715,7 @@ Example:
 		min-height : 3vh;
 		text-align : left;
 	}
-	span {
+	:host span {
 		display : block;
 
 		word-break: break-all;

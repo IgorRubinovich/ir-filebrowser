@@ -404,7 +404,7 @@ Example:
 							</div>
 						</div>
 						<div class="layout horizontal justified" hidden="{{ !mobile }}">
-							<paper-icon-button icon="menu" on-click="triggerMenu""></paper-icon-button>
+							<paper-icon-button icon="menu" on-click="triggerMenu"></paper-icon-button>
 							<paper-icon-button icon="info" hidden="[[ _hideDrawerPanel(mobile,hideFilesNav,opened) ]]" on-tap="_showInfo"></paper-icon-button>
 						</div>
 					</div>
@@ -818,7 +818,7 @@ Example:
 					<template is="dom-if" if="[[ _item.isImage ]]">
 						<iron-image title="{{_item.url}}" preload fade id="imgthumb" sizing="contain" src="{{_item.url}}"></iron-image>
 					</template>
-					<iron-icon title="{{_item.url}}" hidden="[[ !_item.isDirectory ]]" id="dirthumb" icon="folder-open" preload fade sizing="contain""></iron-icon>
+					<iron-icon title="{{_item.url}}" hidden="[[ !_item.isDirectory ]]" id="dirthumb" icon="folder-open" preload fade sizing="contain"></iron-icon>
 					<span class="ext" hidden="[[ !_item.isOther ]]">{{ _item.ext }}</span>
 					<iron-icon id="selctedCheckBox" icon="check-box" hidden="[[ _checkboxHidden(isSelectionItem,isSelected,item) ]]"></paper-checkbox>
 				</div>
